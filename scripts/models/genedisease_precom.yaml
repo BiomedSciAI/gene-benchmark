@@ -1,0 +1,14 @@
+descriptor:
+  class_name: GeneDiseaseDescriptions
+  class_args:
+    csv_file_path: "disease_descriptions_open_targets.csv"
+    naive_descriptor: True
+encoder:
+  class_name: get_gene_disease_multi_encoder
+  class_args:
+    csv_file_path: ""
+    encoder_model_name: "sentence-transformers/all-mpnet-base-v2"
+base_model:
+  class_name: LinearRegression
+model_name: mpnet
+post_processing: concat

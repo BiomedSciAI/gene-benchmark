@@ -1,0 +1,60 @@
+- CCD Protein
+- CCD Transcript
+- Chromosome
+- RNA tissue specificity
+- RNA tissue distribution
+- RNA single cell type specificity
+- RNA single cell type distribution
+- RNA cancer specificity
+- RNA cancer distribution
+- RNA brain regional specificity
+- RNA brain regional distribution
+- RNA blood cell specificity
+- RNA blood cell distribution
+- RNA blood lineage specificity
+- RNA blood lineage distribution
+- RNA cell line specificity
+- RNA cell line distribution
+- RNA mouse brain regional specificity
+- RNA mouse brain regional distribution
+- RNA pig brain regional specificity
+- RNA pig brain regional distribution
+- Secretome location
+- Secretome function
+- Blood expression cluster
+- Tissue expression cluster
+- Brain expression cluster
+- Cell line expression cluster
+- Single cell expression cluster
+- Pathology prognostics - Breast cancer
+- Pathology prognostics - Cervical cancer
+- Pathology prognostics - Colorectal cancer
+- Pathology prognostics - Endometrial cancer
+- Pathology prognostics - Glioma
+- Pathology prognostics - Head and neck cancer
+- Pathology prognostics - Liver cancer
+- Pathology prognostics - Lung cancer
+- Pathology prognostics - Melanoma
+- Pathology prognostics - Ovarian cancer
+- Pathology prognostics - Pancreatic cancer
+- Pathology prognostics - Prostate cancer
+- Pathology prognostics - Renal cancer
+- Pathology prognostics - Stomach cancer
+- Pathology prognostics - Testis cancer
+- Pathology prognostics - Thyroid cancer
+- Pathology prognostics - Urothelial cancer
+- Interactions
+- Blood concentration - Conc. blood IM [pg/L]
+- RNA blood cell specificity score
+- RNA blood lineage specificity score
+- RNA brain regional specificity score
+- RNA cell line specificity score
+- RNA single cell type specificity score
+- RNA tissue specificity score
+- RNA cancer specificity score
+- Protein class
+- RNA tissue cell type enrichment
+- Subcellular location
+- Biological process
+- Disease involvement
+- Molecular function
