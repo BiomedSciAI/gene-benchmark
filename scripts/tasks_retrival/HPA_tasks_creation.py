@@ -93,7 +93,7 @@ def save_task_to_dir(main_task_directory, task_name, entities, outcomes):
     "--columns-to-use-yaml",
     type=click.STRING,
     help="A path to a yaml file containing the column names to be used as tasks",
-    default="scripts/hpa_column_names_for_tasks.yaml",
+    default="scripts/tasks_retrival/hpa_column_names_for_tasks.yaml",
 )
 @click.option(
     "--main-task-directory",
@@ -113,6 +113,7 @@ def save_task_to_dir(main_task_directory, task_name, entities, outcomes):
     "--input-file",
     type=click.STRING,
     help="The path to the data file",
+    default=None
 )
 def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
     if allow_downloads:
