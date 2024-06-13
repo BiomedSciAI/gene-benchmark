@@ -36,7 +36,7 @@ jobs:
           python scripts/tasks_retrival/HLA_task_creation.py --allow-downloads True
           python scripts/tasks_retrival/HPA_tasks_creation.py --allow-downloads True
           python scripts/tasks_retrival/humantfs_task_creation.py --allow-downloads True
-          python scripts/tasks_retrival/Reactome_tasks_creation.py --allow-downloads True
+          python scripts/tasks_retrival/Reactome_tasks_creation.py --use-local-files False
 
     - name: Test with pytest
       run: |
