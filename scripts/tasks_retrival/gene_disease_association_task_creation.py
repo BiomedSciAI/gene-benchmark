@@ -129,6 +129,24 @@ def get_id_to_symbol_df(list_of_gene_metadata):
 
 
 def get_gda_data(input_file: str):
+    """
+    read data from open-targets' parquet data files, either directly or from a local file copy.
+    The files are arranged with a fixed base name and part-index going from 0 to 199.  This is a standard way to save such data in parts
+    and the total number of parts differes, so the code starts at 0 until it fails to read the file, and stops there.
+
+    Args:
+    ----
+        input_file (str): base path (url or file path) of the parquet directory
+
+    Raises:
+    ------
+        RuntimeError: if no files had could be loaded
+
+    Returns:
+    -------
+        pd.Dataframe: concatinated dataframe containing all the loaded data from all files
+
+    """
     res = []
     file_exist = True
     part_ind = 0
@@ -156,17 +174,16 @@ def extract_outcome_df(
     return outcomes.map(lambda x: x.strip() if isinstance(x, str) else x)
 
 
-def report_task(df, task_dir_name):
-    print(f"Task saved to {task_dir_name}/")
+def report_task(df, task_dir_name, max_counts=10):
+    print(f"Task saved to {task_dir_name}/\n")
 
-    MAX_COUNTS = 10
     col_name = df.columns[0]
-    print()  # for readability of the message
+
     val_counts = pd.DataFrame(df[col_name].value_counts(), columns=["count"])
-    print(val_counts.iloc[:MAX_COUNTS].to_string())
-    if len(val_counts) > MAX_COUNTS:
+    print(val_counts.iloc[:max_counts].to_string())
+    if len(val_counts) > max_counts:
         print(
-            f" and {len(val_counts)-MAX_COUNTS} more values with counts no larger than {val_counts.iloc[MAX_COUNTS+1]['count']}"
+            f" and {len(val_counts)-max_counts} more values with counts no larger than {val_counts.iloc[max_counts+1]['count']}"
         )
     print(f"    total = {len(df)}")
 
@@ -223,6 +240,7 @@ def main(
     )
 
     if verbose:
+        print(f"creating the {task_name} task")
         print("This may take several minutes")
     downloaded_dataframe = get_gda_data(input_file=input_path_or_url)
     gda_df = downloaded_dataframe.loc[
