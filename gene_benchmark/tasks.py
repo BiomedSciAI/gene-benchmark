@@ -106,7 +106,7 @@ def _convert_df_to_3d_array(df: pd.DataFrame):
         )
     return np.hstack(reshaped_embeddings)
 
-def _get_none_nan_instancies(encodings,outcomes):
+def _get_none_nan_instancies(encodings:pd.DataFrame,outcomes:pd.Series|pd.DataFrame):
     if isinstance(encodings,pd.Series):
         nan_ind = encodings.isna()
     else:
@@ -246,8 +246,12 @@ class EntitiesTask:
         """
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
-        encodings = self._post_processing_mat(encodings_df)
-        outcomes = self.task_definitions.outcomes
+        if self.overlap_genes:
+            outcomes = _get_none_nan_instancies(encodings_df,self.task_definitions.outcomes)
+            encodings = self._post_processing_mat(encodings_df.dropna())
+        else:
+            outcomes = self.task_definitions.outcomes
+            encodings = self._post_processing_mat(encodings_df)
 
         cs_val = cross_validate(
             self.base_prediction_model,
