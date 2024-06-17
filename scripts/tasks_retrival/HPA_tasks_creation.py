@@ -110,10 +110,7 @@ def save_task_to_dir(main_task_directory, task_name, entities, outcomes):
     default=False,
 )
 @click.option(
-    "--input-file",
-    type=click.STRING,
-    help="The path to the data file",
-    default=None
+    "--input-file", type=click.STRING, help="The path to the data file", default=None
 )
 def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
     if allow_downloads:

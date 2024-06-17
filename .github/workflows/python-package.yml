@@ -36,8 +36,8 @@ jobs:
 
     - name: Create tasks needed for testing
       run: |
-          python scripts/tasks_retrival/gene2gene_task_creation.py --allow-downloads True 
-          python scripts/tasks_retrival/Genecorpus_tasks_creation.py --allow-downloads True 
+          python scripts/tasks_retrival/gene2gene_task_creation.py --allow-downloads True
+          python scripts/tasks_retrival/Genecorpus_tasks_creation.py --allow-downloads True
           python scripts/tasks_retrival/HLA_task_creation.py --allow-downloads True
           python scripts/tasks_retrival/HPA_tasks_creation.py --allow-downloads True
           python scripts/tasks_retrival/humantfs_task_creation.py --allow-downloads True
