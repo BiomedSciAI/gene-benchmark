@@ -256,7 +256,7 @@ class EntitiesTask:
             )
             encodings = self._post_processing_mat(encodings_df.dropna())
         else:
-            df = self.task_definitions.outcomes
+            outcomes = self.task_definitions.outcomes
             encodings = self._post_processing_mat(encodings_df)
 
         cs_val = cross_validate(
