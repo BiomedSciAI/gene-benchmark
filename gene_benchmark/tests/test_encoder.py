@@ -236,11 +236,9 @@ class TestEncoder(unittest.TestCase):
         encoder = SentenceTransformerEncoder(mpnet_name)
         txt1 = "It was originally taken from a Latin text written by a Roman Scholar, Sceptic and Philosopher\
             by the name of Marcus Tullius Cicero, who influenced the Latin language greatly."
-        txt2 = (
-            "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
+        txt2 = "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
             Latin word. It is suggested that the reason that the text starts with Lorem is because there was a\
                 page break spanning the word"
-        )
         txt3 = "Do-lorem. If you a re looking for a translation of the text, it's meaningless. The original text\
             talks about the pain and love involved in the pursuit of pleasure or something like that."
         txt4 = "The reason we use Lorem Ipsum is simple. If we used real text, it would possibly distract from\
@@ -255,11 +253,9 @@ class TestEncoder(unittest.TestCase):
         encoder = SentenceTransformerEncoder(mpnet_name)
         txt1 = "It was originally taken from a Latin text written by a Roman Scholar, Sceptic and Philosopher\
             by the name of Marcus Tullius Cicero, who influenced the Latin language greatly."
-        txt2 = (
-            "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
+        txt2 = "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
             Latin word. It is suggested that the reason that the text starts with Lorem is because there was a\
                 page break spanning the word"
-        )
         txt3 = "Do-lorem. If you a re looking for a translation of the text, it's meaningless. The original text\
             talks about the pain and love involved in the pursuit of pleasure or something like that."
         txt4 = "The reason we use Lorem Ipsum is simple. If we used real text, it would possibly distract from\
@@ -277,11 +273,9 @@ class TestEncoder(unittest.TestCase):
         encoder = SentenceTransformerEncoder(mpnet_name)
         txt1 = "It was originally taken from a Latin text written by a Roman Scholar, Sceptic and Philosopher\
             by the name of Marcus Tullius Cicero, who influenced the Latin language greatly."
-        txt2 = (
-            "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
+        txt2 = "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
             Latin word. It is suggested that the reason that the text starts with Lorem is because there was a\
                 page break spanning the word"
-        )
         txt3 = "Do-lorem. If you a re looking for a translation of the text, it's meaningless. The original text\
             talks about the pain and love involved in the pursuit of pleasure or something like that."
         txt4 = "The reason we use Lorem Ipsum is simple. If we used real text, it would possibly distract from\
@@ -300,11 +294,9 @@ class TestEncoder(unittest.TestCase):
         encoder = SentenceTransformerEncoder(mpnet_name)
         txt1 = "It was originally taken from a Latin text written by a Roman Scholar, Sceptic and Philosopher\
             by the name of Marcus Tullius Cicero, who influenced the Latin language greatly."
-        txt2 = (
-            "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
+        txt2 = "The filler text we know today has been altered over the years (in fact Lorem isn't actually a\
             Latin word. It is suggested that the reason that the text starts with Lorem is because there was a\
                 page break spanning the word"
-        )
         txt3 = "Do-lorem. If you a re looking for a translation of the text, it's meaningless. The original text\
             talks about the pain and love involved in the pursuit of pleasure or something like that."
         txt4 = "The reason we use Lorem Ipsum is simple. If we used real text, it would possibly distract from\
