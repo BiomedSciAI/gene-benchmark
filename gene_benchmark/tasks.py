@@ -236,6 +236,19 @@ class EntitiesTask:
         if self.encoding_post_processing == "concat":
             return concat_list_df(encoding)
 
+    def _prepare_datamat_and_labels(self):
+        descriptions_df = self._create_encoding()
+        encodings_df = self.encoder.encode(descriptions_df)
+        if self.overlap_genes:
+            outcomes = _get_none_nan_instancies(
+                encodings_df, self.task_definitions.outcomes
+            )
+            encodings = self._post_processing_mat(encodings_df.dropna())
+        else:
+            outcomes = self.task_definitions.outcomes
+            encodings = self._post_processing_mat(encodings_df)
+        return outcomes, encodings
+
     def run(self, error_score=np.nan):
         """
         Runs the defined ina k-fold fashion and returns a dictionary with the scores
@@ -248,17 +261,7 @@ class EntitiesTask:
             dict: a dictionary containing the score results and metadata on the run.
 
         """
-        descriptions_df = self._create_encoding()
-        encodings_df = self.encoder.encode(descriptions_df)
-        if self.overlap_genes:
-            outcomes = _get_none_nan_instancies(
-                encodings_df, self.task_definitions.outcomes
-            )
-            encodings = self._post_processing_mat(encodings_df.dropna())
-        else:
-            outcomes = self.task_definitions.outcomes
-            encodings = self._post_processing_mat(encodings_df)
-
+        outcomes, encodings = self._prepare_datamat_and_labels()
         cs_val = cross_validate(
             self.base_prediction_model,
             encodings,
