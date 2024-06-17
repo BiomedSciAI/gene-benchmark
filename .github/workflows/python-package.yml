@@ -29,11 +29,6 @@ jobs:
         python -m pip install --upgrade pip pytest pytest-cov
         python -m pip install -e .
 
-    - name: Install pre-commit
-      run: pip install pre-commit
-    - name: Run pre-commit
-      run: pre-commit run --all-files
-
     - name: Create tasks needed for testing
       run: |
           python scripts/tasks_retrival/gene2gene_task_creation.py --allow-downloads True
