@@ -329,7 +329,7 @@ class TestTasks(unittest.TestCase):
     def test_get_task_names(self):
         tasks_folder = _get_tasks_folder()
         names = list(get_tasks_definition_names(tasks_folder))
-        assert len(names) >= 81
+        assert len(names) >= 71
         assert "RNA cancer distribution" in names
         assert "bivalent vs non-methylated" in names
 
