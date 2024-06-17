@@ -250,7 +250,7 @@ class EntitiesTask:
             outcomes = _get_none_nan_instancies(encodings_df,self.task_definitions.outcomes)
             encodings = self._post_processing_mat(encodings_df.dropna())
         else:
-            df = self.task_definitions.outcomes
+            outcomes = self.task_definitions.outcomes
             encodings = self._post_processing_mat(encodings_df)
 
         cs_val = cross_validate(
