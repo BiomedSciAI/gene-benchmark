@@ -169,6 +169,7 @@ class EntitiesTask:
         model_name=None,
         sub_task=None,
         multi_label_th=0,
+        overlap_entities=True,
     ) -> None:
         """
         Initiate a ClassificationGeneTask object.
@@ -217,6 +218,7 @@ class EntitiesTask:
         self.return_estimator = return_estimator
         self.encoding_post_processing = encoding_post_processing
         self.model_name = model_name
+        self.overlap_entities = overlap_entities
 
     def _create_encoding(self):
         if self.description_builder is None:
@@ -239,7 +241,7 @@ class EntitiesTask:
     def _prepare_datamat_and_labels(self):
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
-        if self.overlap_genes:
+        if self.overlap_entities:
             outcomes = _get_none_nan_instancies(
                 encodings_df, self.task_definitions.outcomes
             )
