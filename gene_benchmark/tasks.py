@@ -238,11 +238,7 @@ class EntitiesTask:
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
         encodings = self._post_processing_mat(encodings_df)
-
-        if is_binary_outcomes(self.task_definitions.outcomes):
-            outcomes = pd.get_dummies(self.task_definitions.outcomes).iloc[:, 0]
-        else:
-            outcomes = self.task_definitions.outcomes
+        outcomes = self.task_definitions.outcomes
 
         cs_val = cross_validate(
             self.base_prediction_model,
