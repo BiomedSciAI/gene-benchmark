@@ -95,7 +95,7 @@ def get_symbols(gene_targetId_list):
 
     Returns:
     -------
-        list: List of corresponding symbols
+         pd.DataFrame: dataframe with symbols corresponding to the input
 
     """
     mg = mygene.MyGeneInfo()
@@ -176,16 +176,7 @@ def extract_outcome_df(
 
 def report_task(df, task_dir_name, max_counts=10):
     print(f"Task saved to {task_dir_name}/\n")
-
-    col_name = df.columns[0]
-
-    val_counts = pd.DataFrame(df[col_name].value_counts(), columns=["count"])
-    print(val_counts.iloc[:max_counts].to_string())
-    if len(val_counts) > max_counts:
-        print(
-            f" and {len(val_counts)-max_counts} more values with counts no larger than {val_counts.iloc[max_counts+1]['count']}"
-        )
-    print(f"    total = {len(df)}")
+    print(f"total samples = {len(df)}")
 
 
 @click.command("cli", context_settings={"show_default": True})
