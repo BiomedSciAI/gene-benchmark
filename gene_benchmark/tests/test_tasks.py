@@ -185,9 +185,7 @@ class TestTasks(unittest.TestCase):
             tasks_folder=_get_test_tasks_folder(),
         )
         full_entity_task.run()
-        minimal_succsess_rate = (
-            43 - 43**0.5 * 2
-        ) / 69  # proportion of largest outcome
+        minimal_succsess_rate = (43 - 43**0.5 * 2) / 69  # proportion of largest outcome
         assert not full_entity_task._cv_report is None
         assert all(full_entity_task._cv_report["test_score"] >= minimal_succsess_rate)
 
