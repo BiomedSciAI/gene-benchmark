@@ -106,15 +106,18 @@ def _convert_df_to_3d_array(df: pd.DataFrame):
         )
     return np.hstack(reshaped_embeddings)
 
-def _get_none_nan_instancies(encodings:pd.DataFrame,outcomes:pd.Series|pd.DataFrame):
-    if isinstance(encodings,pd.Series):
+
+def _get_none_nan_instancies(
+    encodings: pd.DataFrame, outcomes: pd.Series | pd.DataFrame
+):
+    if isinstance(encodings, pd.Series):
         nan_ind = encodings.isna()
     else:
         nan_ind = encodings.isna().any()
-    if isinstance(encodings,pd.Series):
+    if isinstance(encodings, pd.Series):
         return outcomes[~nan_ind]
-    else: 
-        return outcomes.loc[~nan_ind,:]
+    else:
+        return outcomes.loc[~nan_ind, :]
 
 
 @dataclass
@@ -141,6 +144,7 @@ def concat_list_df(list_df):
     if list_df.shape[1] > 1:
         list_df = list_df.apply(np.concatenate, axis=1)
     return np.stack(list_df)
+
 
 class EntitiesTask:
     """
@@ -231,7 +235,7 @@ class EntitiesTask:
             return encodings_mat
         if self.encoding_post_processing == "concat":
             return concat_list_df(encoding)
-        
+
     def run(self, error_score=np.nan):
         """
         Runs the defined ina k-fold fashion and returns a dictionary with the scores
@@ -247,7 +251,9 @@ class EntitiesTask:
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
         if self.overlap_genes:
-            outcomes = _get_none_nan_instancies(encodings_df,self.task_definitions.outcomes)
+            outcomes = _get_none_nan_instancies(
+                encodings_df, self.task_definitions.outcomes
+            )
             encodings = self._post_processing_mat(encodings_df.dropna())
         else:
             df = self.task_definitions.outcomes
