@@ -1,8 +1,11 @@
 # Script to extract the embeddings for all genes from a scGPT model and save them to a csv file.
 # It is based on the tutorial in https://github.com/bowang-lab/scGPT/blob/main/tutorials/Tutorial_GRN.ipynb
-# to run, this requires that the scgpt library will be in place.  Tested to work via
+# to run, this requires that the scgpt library will be in place.  
+# requirers python '<3.11,>=3.7.12'
 #   > git clone https://github.com/bowang-lab/scGPT.git
 #   > pip install -e .
+#   > pip install click 
+#   > pip install gdown
 import json
 from pathlib import Path
 
@@ -41,7 +44,7 @@ def download_google_drive_file(url, file_name, output_dir):
     file_id = url.split("/d/")[1].split("/view")[0]
     download_url = f"https://drive.google.com/uc?id={file_id}"
     output = output_dir / file_name
-    gdown.download(download_url, output, quiet=False)
+    gdown.download(download_url, str(output), quiet=False)
 
 
 def get_vocabulary(vocab_file: str) -> GeneVocab:
