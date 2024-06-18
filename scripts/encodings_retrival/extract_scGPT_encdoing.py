@@ -8,6 +8,7 @@
 
 import json
 from pathlib import Path
+import gdown
 
 import click
 import numpy as np
@@ -16,7 +17,19 @@ import torch
 from scgpt.model import TransformerModel
 from scgpt.tokenizer.gene_tokenizer import GeneVocab
 
-DATA_URL = 'https://drive.google.com/drive/folders/1kkug5C7NjvXIwQGGaGoqXTk_Lb_pDrBU'
+MODEL_URLS = {
+'args.json':'https://drive.google.com/file/d/1y4UJVflGl-b2qm-fvpxIoQ3XcC2umjj0/view?usp=drive_link',
+'vocab.json':'https://drive.google.com/file/d/127FdcUyY1EM7rQfAS0YI4ms6LwjmnT9J/view?usp=drive_link',
+'model.pt':'https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link',
+}
+
+
+def download_google_drive_file(json_url,encoding_directory,file_name):
+    file_id = json_url.split('/d/')[1].split('/view')[0]
+    download_url = f'https://drive.google.com/uc?id={file_id}'
+    output = encoding_directory + '/' + file_name
+    gdown.download(download_url, output, quiet=False)
+
 
 def get_vocabulary(vocab_file: str) -> GeneVocab:
     """
@@ -135,28 +148,27 @@ def load_scgpt_embedding(model_dir):
     "--allow-downloads",
     "-l",
     type=click.BOOL,
-    help=f"download files directly from {DATA_URL}",
+    help=f"download files directly from {MODEL_URLS.values()}",
     default=False,
 )
 @click.option(
-    "--input-file", type=click.STRING, help="The path to the data file", default=None
+    "--input-file", type=click.STRING, help="The path to the data file", default="./encodings/scGPT"
 )
 @click.option(
     "--encoding-directory",
     "-m",
     type=click.STRING,
     help="the root directory the encodings will be saved to.",
-    default="./encodings",
+    default="./encodings/scGPT",
 )
 
 def main(allow_downloads,input_file,encoding_directory):
     if allow_downloads:
-        download_model(DATA_URL)
-    else: 
-        load_model(input_file)
-        embedding = load_scgpt_embedding(model_dir=input_file)
-    
-    save_model(encoding_directory)
+        for file_name, url in MODEL_URLS.items():
+            download_google_drive_file(url,encoding_directory,file_name)
+
+    embedding = load_scgpt_embedding(model_dir=input_file)
+    embedding.to_csv(encoding_directory)
 
 
 
