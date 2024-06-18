@@ -24,10 +24,10 @@ MODEL_URLS = {
 }
 
 
-def download_google_drive_file(json_url,encoding_directory,file_name):
-    file_id = json_url.split('/d/')[1].split('/view')[0]
+def download_google_drive_file(url,file_name,output_dir):
+    file_id = url.split('/d/')[1].split('/view')[0]
     download_url = f'https://drive.google.com/uc?id={file_id}'
-    output = encoding_directory + '/' + file_name
+    output = output_dir + '/' + file_name
     gdown.download(download_url, output, quiet=False)
 
 
@@ -152,23 +152,26 @@ def load_scgpt_embedding(model_dir):
     default=False,
 )
 @click.option(
-    "--input-file", type=click.STRING, help="The path to the data file", default="./encodings/scGPT"
+    "--input-file-dir",
+    type=click.STRING,
+    help="The path to the directory with the data files, if no files exists and the user will download from a url, this is the path to the directory the files will be saved to",
+    default="./encodings/scGPT",
 )
 @click.option(
-    "--encoding-directory",
+    "--output-file-name",
     "-m",
     type=click.STRING,
     help="the root directory the encodings will be saved to.",
-    default="./encodings/scGPT",
+    default="./encodings/scGPT/encodings.csv",
 )
 
-def main(allow_downloads,input_file,encoding_directory):
+def main(allow_downloads,input_file_dir,output_file_name):
     if allow_downloads:
         for file_name, url in MODEL_URLS.items():
-            download_google_drive_file(url,encoding_directory,file_name)
+            download_google_drive_file(url,file_name,output_dir = input_file_dir)
 
-    embedding = load_scgpt_embedding(model_dir=input_file)
-    embedding.to_csv(encoding_directory)
+    embedding = load_scgpt_embedding(model_dir=input_file_dir)
+    embedding.to_csv(output_file_name)
 
 
 
