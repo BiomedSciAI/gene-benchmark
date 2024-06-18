@@ -188,12 +188,13 @@ def main(allow_downloads, input_file_dir, model_type):
         model_urls = BLOOD_MODEL_URLS
 
     model_encodings_dir = Path(input_file_dir) / f"ScGPT-{model_type}"
+    model_encodings_dir.mkdir(parents=True, exist_ok=True)
 
     if allow_downloads:
         for file_name, url in model_urls.items():
             download_google_drive_file(url, file_name, output_dir=model_encodings_dir)
 
-    embedding = load_scgpt_embedding(model_dir=input_file_dir)
+    embedding = load_scgpt_embedding(model_dir=model_encodings_dir)
     output_file_path = model_encodings_dir / "encodings.csv"
     embedding.to_csv(output_file_path)
 
