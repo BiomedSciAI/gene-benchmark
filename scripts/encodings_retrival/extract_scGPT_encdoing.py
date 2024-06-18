@@ -17,6 +17,16 @@ MODEL_URLS = {
 
 
 def download_google_drive_file(url, file_name, output_dir):
+    """
+    download google drive files from url and saves locally 
+
+    Args:
+    ----
+        url (str): url of file 
+        file_name (str): file name 
+        output_dir (str): path to dir for saving the file locally 
+
+    """
     file_id = url.split("/d/")[1].split("/view")[0]
     download_url = f"https://drive.google.com/uc?id={file_id}"
     output = output_dir + "/" + file_name
