@@ -9,7 +9,13 @@ import torch
 from scgpt.model import TransformerModel
 from scgpt.tokenizer.gene_tokenizer import GeneVocab
 
-MODEL_URLS = {
+HUMAN_MODEL_URLS = {
+    "args.json": "https://drive.google.com/file/d/1hh2zGKyWAx3DyovD30GStZ3QlzmSqdk1/view?usp=drive_link",
+    "vocab.json": "https://drive.google.com/file/d/1H3E_MJ-Dl36AQV6jLbna2EdvgPaqvqcC/view?usp=drive_link",
+    "best_model.pt": "https://drive.google.com/file/d/14AebJfGOUF047Eg40hk57HCtrb0fyDTm/view?usp=drive_link",
+}
+
+BLOOD_MODEL_URLS = {
     "args.json": "https://drive.google.com/file/d/1y4UJVflGl-b2qm-fvpxIoQ3XcC2umjj0/view?usp=drive_link",
     "vocab.json": "https://drive.google.com/file/d/127FdcUyY1EM7rQfAS0YI4ms6LwjmnT9J/view?usp=drive_link",
     "best_model.pt": "https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link",
@@ -29,7 +35,7 @@ def download_google_drive_file(url, file_name, output_dir):
     """
     file_id = url.split("/d/")[1].split("/view")[0]
     download_url = f"https://drive.google.com/uc?id={file_id}"
-    output = output_dir + "/" + file_name
+    output = output_dir / file_name
     gdown.download(download_url, output, quiet=False)
 
 
@@ -150,29 +156,38 @@ def load_scgpt_embedding(model_dir):
     "--allow-downloads",
     "-l",
     type=click.BOOL,
-    help=f"download files directly from {MODEL_URLS.values()}",
+    help="download files directly from urls",
     default=False,
 )
 @click.option(
     "--input-file-dir",
     type=click.STRING,
     help="The path to the directory with the data files, if no files exists and the user will download from a url, this is the path to the directory the files will be saved to",
-    default="./encodings/scGPT",
+    default="./encodings",
 )
 @click.option(
-    "--output-file-name",
+    "--model-type",
     "-m",
-    type=click.STRING,
-    help="the root directory the encodings will be saved to.",
-    default="./encodings/scGPT/encodings.csv",
+    type=click.Choice(["human", "blood"]),
+    help="type of ScGPT model to use, can be either 'human' or 'blood'.",
+    default="human",
 )
-def main(allow_downloads, input_file_dir, output_file_name):
+def main(allow_downloads, input_file_dir, model_type):
+
+    if model_type == "human":
+        model_urls = HUMAN_MODEL_URLS
+    elif model_type == "blood":
+        model_urls = BLOOD_MODEL_URLS
+
+    model_encodings_dir = Path(input_file_dir) / f"ScGPT-{model_type}"
+
     if allow_downloads:
-        for file_name, url in MODEL_URLS.items():
-            download_google_drive_file(url, file_name, output_dir=input_file_dir)
+        for file_name, url in model_urls.items():
+            download_google_drive_file(url, file_name, output_dir=model_encodings_dir)
 
     embedding = load_scgpt_embedding(model_dir=input_file_dir)
-    embedding.to_csv(output_file_name)
+    output_file_path = model_encodings_dir / "encodings.csv"
+    embedding.to_csv(output_file_path)
 
 
 if __name__ == "__main__":
