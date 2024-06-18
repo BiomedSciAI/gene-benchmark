@@ -222,6 +222,7 @@ class EntitiesTask:
     def _prepare_datamat_and_labels(self):
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
+
         if self.overlap_entities:
             outcomes = _get_none_nan_instancies(
                 encodings_df, self.task_definitions.outcomes
@@ -230,6 +231,7 @@ class EntitiesTask:
         else:
             outcomes = self.task_definitions.outcomes
             encodings = self._post_processing_mat(encodings_df)
+        self.overlapped_task_size = len(outcomes)
         return outcomes, encodings
 
     def run(self, error_score=np.nan):
@@ -287,6 +289,11 @@ class EntitiesTask:
                     str(v)
                     for v in self.task_definitions.outcomes.value_counts().index.values
                 ]
+            )
+        if self.overlap_entities:
+            summary_dict["overlapped_task_size"] = self.overlapped_task_size
+            summary_dict["original_task_size"] = len(
+                self.task_definitions.outcomes.value_counts()
             )
         if self.description_builder:
             summary_dict.update(self.description_builder.summary())
