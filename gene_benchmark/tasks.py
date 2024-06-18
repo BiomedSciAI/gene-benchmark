@@ -292,7 +292,12 @@ class EntitiesTask:
             summary_dict["sub_task"] = self.task_definitions.sub_task
         summary_dict["base_prediction_model"] = str(self.base_prediction_model)
         summary_dict["sample_size"] = self.task_definitions.outcomes.shape[0]
-        if is_binary_outcomes(self.task_definitions.outcomes):
+        is_bin = (
+            self.task_definitions.outcomes.nunique() == 2
+            if isinstance(self.task_definitions.outcomes, pd.Series)
+            else False
+        )
+        if is_bin:
             summary_dict["class_sizes"] = ",".join(
                 [str(v) for v in self.task_definitions.outcomes.value_counts().values]
             )
