@@ -16,25 +16,6 @@ from gene_benchmark.encoder import (
 )
 
 
-def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
-    """
-    Checks if a vector represents a binary prediction task.
-
-    Args:
-    ----
-        outcomes (pd.series): a series containing the labels for prediction
-
-    Returns:
-    -------
-        bool: True if the series represents binary classification
-
-    """
-    if isinstance(outcomes, pd.Series):
-        return outcomes.nunique() == 2
-    else:
-        return False
-
-
 def convert_to_mat(data: pd.Series | pd.DataFrame):
     """
     Convert a 1d series or df with np arrays as values to a 2D/3D np array.
@@ -238,11 +219,7 @@ class EntitiesTask:
         descriptions_df = self._create_encoding()
         encodings_df = self.encoder.encode(descriptions_df)
         encodings = self._post_processing_mat(encodings_df)
-
-        if is_binary_outcomes(self.task_definitions.outcomes):
-            outcomes = pd.get_dummies(self.task_definitions.outcomes).iloc[:, 0]
-        else:
-            outcomes = self.task_definitions.outcomes
+        outcomes = self.task_definitions.outcomes
 
         cs_val = cross_validate(
             self.base_prediction_model,
@@ -272,7 +249,12 @@ class EntitiesTask:
             summary_dict["sub_task"] = self.task_definitions.sub_task
         summary_dict["base_prediction_model"] = str(self.base_prediction_model)
         summary_dict["sample_size"] = self.task_definitions.outcomes.shape[0]
-        if is_binary_outcomes(self.task_definitions.outcomes):
+        is_bin = (
+            self.task_definitions.outcomes.nunique() == 2
+            if isinstance(self.task_definitions.outcomes, pd.Series)
+            else False
+        )
+        if is_bin:
             summary_dict["class_sizes"] = ",".join(
                 [str(v) for v in self.task_definitions.outcomes.value_counts().values]
             )

@@ -21,7 +21,6 @@ from gene_benchmark.tasks import (
     convert_to_mat,
     filter_exclusion,
     get_tasks_definition_names,
-    is_binary_outcomes,
     load_task_definition,
     sub_sample_task_frames,
 )
@@ -351,16 +350,6 @@ class TestTasks(unittest.TestCase):
             ]
         )
         assert full_entity_task._post_processing_mat(threeDmat).shape == (3, 6)
-
-    def test_is_binary_outcomes(self):
-        assert is_binary_outcomes(pd.Series(["Blue", "Blue", "Blue", "Green", "Green"]))
-        assert is_binary_outcomes(pd.Series([0, 0, 1, 1, 0, 1]))
-        assert is_binary_outcomes(pd.Series([True, False, True, False]))
-        assert not is_binary_outcomes(
-            pd.Series(["Blue", "Blue", "Blue", "Green", "Green", "yellow"])
-        )
-        assert not is_binary_outcomes(pd.Series([0, 0, 1, 1, 0, 1, 2, 2]))
-        assert not is_binary_outcomes(pd.Series([True, False, True, False, 5]))
 
     def test_load_multilabel(self):
         task_name = "Protein class"
