@@ -91,8 +91,8 @@ def _convert_df_to_3d_array(df: pd.DataFrame):
 def _get_none_nan_instancies(
     encodings: pd.DataFrame, outcomes: pd.Series | pd.DataFrame
 ):
-    if isinstance(encodings.squeeze(), pd.Series):
-        nan_ind = encodings.isna()
+    if encodings.shape[1] == 1:
+        nan_ind = encodings.squeeze().isna()
     else:
         nan_ind = encodings.isna().any()
     if isinstance(outcomes, pd.Series):
@@ -150,7 +150,7 @@ class EntitiesTask:
         model_name=None,
         sub_task=None,
         multi_label_th=0,
-        overlap_entities=True,
+        overlap_entities=False,
     ) -> None:
         """
         Initiate a ClassificationGeneTask object.
