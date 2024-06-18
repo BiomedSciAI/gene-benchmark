@@ -84,10 +84,35 @@ def verify_source_of_data(input_file: str | None, allow_downloads: bool = False)
     return input_file
 
 
+def get_id_to_symbol_df(list_of_gene_metadata):
+    """
+        crate a data frame mapping from the gene metadata dataframe.
+        remove duplicates if they exist, set the index to the "query",
+        which holds the gene ids and return the mapping dataframe.
+        this is a set of unique mappings.  It is used to map the ids in the data,
+        which will contain duplicates, to the corresponding symbol names
+    Args:
+        list_of_gene_metadata (list): list containing gene metadata.
+
+    Returns
+    -------
+        pd.DataFrame: a data frame with the gene id as index with the symbol as value
+
+    """
+    gene_metadata_df = pd.DataFrame(list_of_gene_metadata)
+    # some target ids have multiple symbols
+    gene_metadata_df = gene_metadata_df.drop_duplicates(subset="query")
+    gene_metadata_df.index = gene_metadata_df["query"]
+    return gene_metadata_df
+
+
 def get_symbols(gene_targetId_list):
     """
         given s list of gene id's (names Like ENSG00000006468) this method
         uses the MyGenInfo package to retrieve the gene symbol (name like PLAC4).
+        The retreaved dataframe is made into a translation df from id to metadata (symbol in this case),
+        and is used to translate the original list ot a symbols of the same length, with the matching symbols
+        in the corresponding locations.
 
     Args:
     ----
@@ -109,26 +134,7 @@ def get_symbols(gene_targetId_list):
     )
 
 
-def get_id_to_symbol_df(list_of_gene_metadata):
-    """
-        The method converts a list of gene metadata into a data frame,
-        each dictionary will contain the field symbol and the gene id as the query value
-    Args:
-        list_of_gene_metadata (list): list containing gene metadata.
-
-    Returns
-    -------
-        pd.DataFrame: a data frame with the gene id as index with the symbol as value
-
-    """
-    gene_metadata_df = pd.DataFrame(list_of_gene_metadata)
-    # some target ids have multiple symbols
-    gene_metadata_df = gene_metadata_df.drop_duplicates(subset="query")
-    gene_metadata_df.index = gene_metadata_df["query"]
-    return gene_metadata_df
-
-
-def get_gda_data(input_file: str):
+def get_gene_drug_assosiation_data(input_file: str):
     """
     read data from open-targets' parquet data files, either directly or from a local file copy.
     The files are arranged with a fixed base name and part-index going from 0 to 199.  This is a standard way to save such data in parts
@@ -233,16 +239,16 @@ def main(
     if verbose:
         print(f"creating the {task_name} task")
         print("This may take several minutes")
-    downloaded_dataframe = get_gda_data(input_file=input_path_or_url)
-    gda_df = downloaded_dataframe.loc[
+    downloaded_dataframe = get_gene_drug_assosiation_data(input_file=input_path_or_url)
+    gene_drug_assosiation_df = downloaded_dataframe.loc[
         downloaded_dataframe["datatypeId"] == association_type, :
     ]
-    symbols = get_symbols(gda_df[COLUMN_OF_SYMBOLS])
-    diseaseId = gda_df["diseaseId"]
+    symbols = get_symbols(gene_drug_assosiation_df[COLUMN_OF_SYMBOLS])
+    diseaseId = gene_drug_assosiation_df["diseaseId"]
     entities = pd.concat(
         [symbols.reset_index(drop=True), diseaseId.reset_index(drop=True)], axis=1
     )
-    outcomes = extract_outcome_df(gda_df)
+    outcomes = extract_outcome_df(gene_drug_assosiation_df)
 
     assert len(entities) == len(
         outcomes
