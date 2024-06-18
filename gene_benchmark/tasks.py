@@ -16,25 +16,6 @@ from gene_benchmark.encoder import (
 )
 
 
-def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
-    """
-    Checks if a vector represents a binary prediction task.
-
-    Args:
-    ----
-        outcomes (pd.series): a series containing the labels for prediction
-
-    Returns:
-    -------
-        bool: True if the series represents binary classification
-
-    """
-    if isinstance(outcomes, pd.Series):
-        return outcomes.nunique() == 2
-    else:
-        return False
-
-
 def convert_to_mat(data: pd.Series | pd.DataFrame):
     """
     Convert a 1d series or df with np arrays as values to a 2D/3D np array.
