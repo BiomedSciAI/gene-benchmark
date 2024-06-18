@@ -16,6 +16,7 @@ import torch
 from scgpt.model import TransformerModel
 from scgpt.tokenizer.gene_tokenizer import GeneVocab
 
+DATA_URL = 'https://drive.google.com/drive/folders/1kkug5C7NjvXIwQGGaGoqXTk_Lb_pDrBU'
 
 def get_vocabulary(vocab_file: str) -> GeneVocab:
     """
@@ -131,23 +132,32 @@ def load_scgpt_embedding(model_dir):
 
 @click.command()
 @click.option(
-    "--model_dir",
-    type=click.STRING,
-    help="directory with scGPT model and gene vocabulary",
-    default="/dccstor/bmfm-targets/ScGPT_weights/blood_model",
-    # model downloaded from https://drive.google.com/drive/folders/1kkug5C7NjvXIwQGGaGoqXTk_Lb_pDrBU
+    "--allow-downloads",
+    "-l",
+    type=click.BOOL,
+    help=f"download files directly from {DATA_URL}",
+    default=False,
 )
 @click.option(
-    "--output-file-name",
-    type=click.STRING,
-    help="The output csv file name",
-    default="/dccstor/bmfm-targets/ScGPT_weights/blood_model_embedding.csv",
+    "--input-file", type=click.STRING, help="The path to the data file", default=None
 )
-def main(model_dir, output_file_name):
-    print(f"Reading scGPT model from {model_dir}")
-    embedding = load_scgpt_embedding(model_dir=model_dir)
-    embedding.to_csv(output_file_name)
-    print(f"Saved to {output_file_name}")
+@click.option(
+    "--encoding-directory",
+    "-m",
+    type=click.STRING,
+    help="the root directory the encodings will be saved to.",
+    default="./encodings",
+)
+
+def main(allow_downloads,input_file,encoding_directory):
+    if allow_downloads:
+        download_model(DATA_URL)
+    else: 
+        load_model(input_file)
+        embedding = load_scgpt_embedding(model_dir=input_file)
+    
+    save_model(encoding_directory)
+
 
 
 if __name__ == "__main__":
