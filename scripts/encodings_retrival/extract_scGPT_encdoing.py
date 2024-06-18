@@ -1,11 +1,3 @@
-# Script to extract the embeddings for all genes from a scGPT model and save them to a csv file.
-# It is based on the tutorial in https://github.com/bowang-lab/scGPT/blob/main/tutorials/Tutorial_GRN.ipynb
-# to run, this requires that the scgpt library will be in place.  Tested to work via
-#   > git clone https://github.com/bowang-lab/scGPT.git
-#   > pip install -e .
-#   > pip install click
-
-
 import json
 from pathlib import Path
 
