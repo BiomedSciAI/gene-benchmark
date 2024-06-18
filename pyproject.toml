@@ -24,6 +24,7 @@ dependencies = [
 "mygene",
 "sentence_transformers",
 "scikit-learn",
+"click",
 ]
 
 [project.optional-dependencies]
