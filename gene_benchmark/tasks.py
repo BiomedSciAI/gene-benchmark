@@ -114,7 +114,7 @@ def _get_none_nan_instancies(
         nan_ind = encodings.isna()
     else:
         nan_ind = encodings.isna().any()
-    if isinstance(encodings, pd.Series):
+    if isinstance(outcomes, pd.Series):
         return outcomes[~nan_ind]
     else:
         return outcomes.loc[~nan_ind, :]
