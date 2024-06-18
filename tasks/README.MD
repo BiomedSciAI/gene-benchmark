@@ -6,3 +6,5 @@ For task descriptions see [here](task_descriptions.xlsx)
 
 Note the the scripts might be used to download data from various sources to do so the user needs to explicitly allow this,
 use this only if you trust the urls appearing in the scripts.
+
+Gene-benchmark has a unit test assumes that the tasks from the scripts are populated into this folder.
