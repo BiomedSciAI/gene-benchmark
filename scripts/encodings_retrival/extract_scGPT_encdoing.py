@@ -8,9 +8,9 @@
 
 import json
 from pathlib import Path
-import gdown
 
 import click
+import gdown
 import numpy as np
 import pandas as pd
 import torch
@@ -18,16 +18,16 @@ from scgpt.model import TransformerModel
 from scgpt.tokenizer.gene_tokenizer import GeneVocab
 
 MODEL_URLS = {
-'args.json':'https://drive.google.com/file/d/1y4UJVflGl-b2qm-fvpxIoQ3XcC2umjj0/view?usp=drive_link',
-'vocab.json':'https://drive.google.com/file/d/127FdcUyY1EM7rQfAS0YI4ms6LwjmnT9J/view?usp=drive_link',
-'best_model.pt':'https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link',
+    "args.json": "https://drive.google.com/file/d/1y4UJVflGl-b2qm-fvpxIoQ3XcC2umjj0/view?usp=drive_link",
+    "vocab.json": "https://drive.google.com/file/d/127FdcUyY1EM7rQfAS0YI4ms6LwjmnT9J/view?usp=drive_link",
+    "best_model.pt": "https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link",
 }
 
 
-def download_google_drive_file(url,file_name,output_dir):
-    file_id = url.split('/d/')[1].split('/view')[0]
-    download_url = f'https://drive.google.com/uc?id={file_id}'
-    output = output_dir + '/' + file_name
+def download_google_drive_file(url, file_name, output_dir):
+    file_id = url.split("/d/")[1].split("/view")[0]
+    download_url = f"https://drive.google.com/uc?id={file_id}"
+    output = output_dir + "/" + file_name
     gdown.download(download_url, output, quiet=False)
 
 
@@ -164,15 +164,13 @@ def load_scgpt_embedding(model_dir):
     help="the root directory the encodings will be saved to.",
     default="./encodings/scGPT/encodings.csv",
 )
-
-def main(allow_downloads,input_file_dir,output_file_name):
+def main(allow_downloads, input_file_dir, output_file_name):
     if allow_downloads:
         for file_name, url in MODEL_URLS.items():
-            download_google_drive_file(url,file_name,output_dir = input_file_dir)
+            download_google_drive_file(url, file_name, output_dir=input_file_dir)
 
     embedding = load_scgpt_embedding(model_dir=input_file_dir)
     embedding.to_csv(output_file_name)
-
 
 
 if __name__ == "__main__":
