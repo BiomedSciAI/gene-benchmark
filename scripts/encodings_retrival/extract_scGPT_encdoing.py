@@ -20,7 +20,7 @@ from scgpt.tokenizer.gene_tokenizer import GeneVocab
 MODEL_URLS = {
 'args.json':'https://drive.google.com/file/d/1y4UJVflGl-b2qm-fvpxIoQ3XcC2umjj0/view?usp=drive_link',
 'vocab.json':'https://drive.google.com/file/d/127FdcUyY1EM7rQfAS0YI4ms6LwjmnT9J/view?usp=drive_link',
-'model.pt':'https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link',
+'best_model.pt':'https://drive.google.com/file/d/1MJaavaG0ZZkC_yPO4giGRnuCe3F1zt30/view?usp=drive_link',
 }
 
 
