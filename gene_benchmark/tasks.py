@@ -91,7 +91,7 @@ def _convert_df_to_3d_array(df: pd.DataFrame):
 def _get_none_nan_instancies(
     encodings: pd.DataFrame, outcomes: pd.Series | pd.DataFrame
 ):
-    if isinstance(encodings, pd.Series):
+    if isinstance(encodings.squeeze(), pd.Series):
         nan_ind = encodings.isna()
     else:
         nan_ind = encodings.isna().any()
