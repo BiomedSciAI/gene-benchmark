@@ -81,11 +81,10 @@ def dump_to_task(task_dir, outcomes_df):
     default="Pathways",
 )
 @click.option(
-    "--use-local-files",
-    "-l",
+    "--allow-downloads",
     type=click.BOOL,
     help="If false data files will be downloaded directly from HGNC and reactome, set to true only if you trust the urls above",
-    default=True,
+    default=False,
 )
 @click.option(
     "--pathways-file",
@@ -100,17 +99,17 @@ def dump_to_task(task_dir, outcomes_df):
     default="",
 )
 def main(
-    main_task_directory, task_name, use_local_files, pathways_file, top_pathways_file
+    main_task_directory, task_name, allow_downloads, pathways_file, top_pathways_file
 ):
-    if use_local_files:
-        df_path = pd.read_csv(pathways_file)
-        top_level = pd.read_csv(top_pathways_file)
-    else:
+    if allow_downloads:
         symb_list = get_symbol_list()
         token = get_token(symb_list)
         url = f"https://reactome.org/AnalysisService/download/{token}/pathways/TOTAL/result.csv"
         df_path = pd.read_csv(url, index_col="Pathway identifier")
         top_level = get_top_level_pathway()
+    else:
+        df_path = pd.read_csv(pathways_file)
+        top_level = pd.read_csv(top_pathways_file)
 
     top_in_file_paths = top_level.intersection(set(df_path.index))
     df_path_top = df_path.loc[list(top_in_file_paths), :]
