@@ -31,6 +31,13 @@ BLOOD_MODEL_URLS = {
 }
 
 
+def load_url_dict(model_type):
+    if model_type == "human":
+        return HUMAN_MODEL_URLS
+    elif model_type == "blood":
+        return BLOOD_MODEL_URLS
+
+
 def download_google_drive_file(url, file_name, output_dir):
     """
     download google drive files from url and saves locally.
@@ -165,13 +172,19 @@ def load_scgpt_embedding(model_dir):
     "--allow-downloads",
     "-l",
     type=click.BOOL,
-    help="download files directly from urls",
+    help="download files directly from urls, from the Gdrive, use this option only if you trust the URLs.",
     default=False,
 )
 @click.option(
     "--input-file-dir",
     type=click.STRING,
-    help="The path to the directory with the data files, if no files exists and the user will download from a url, this is the path to the directory the files will be saved to",
+    help="The path to the directory with the data files",
+    default=None,
+)
+@click.option(
+    "--output-file-dir",
+    type=click.STRING,
+    help="output files path",
     default="./encodings",
 )
 @click.option(
@@ -181,15 +194,9 @@ def load_scgpt_embedding(model_dir):
     help="type of ScGPT model to use, can be either 'human' or 'blood'.",
     default="human",
 )
-def main(allow_downloads, input_file_dir, model_type):
+def main(allow_downloads, input_file_dir, output_file_dir, model_type):
 
-    if model_type == "human":
-        model_urls = HUMAN_MODEL_URLS
-    elif model_type == "blood":
-        model_urls = BLOOD_MODEL_URLS
-
-    model_encodings_dir = Path(input_file_dir) / f"ScGPT-{model_type}"
-    model_encodings_dir.mkdir(parents=True, exist_ok=True)
+    model_urls = load_url_dict(model_type)
 
     if allow_downloads:
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -198,7 +205,10 @@ def main(allow_downloads, input_file_dir, model_type):
                 download_google_drive_file(url, file_name, output_dir=tmpdir)
             embedding = load_scgpt_embedding(model_dir=tmpdir)
     else:
-        embedding = load_scgpt_embedding(model_dir=model_encodings_dir)
+        embedding = load_scgpt_embedding(model_dir=input_file_dir)
+
+    model_encodings_dir = Path(output_file_dir) / f"ScGPT-{model_type}"
+    model_encodings_dir.mkdir(parents=True, exist_ok=True)
     output_file_path = model_encodings_dir / "encodings.csv"
     embedding.to_csv(output_file_path)
 
