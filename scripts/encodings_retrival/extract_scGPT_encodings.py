@@ -167,6 +167,13 @@ def load_scgpt_embedding(model_dir):
     return gene_embeddings_df
 
 
+def save_encodings(embedding, model_type, output_file_dir):
+    model_encodings_dir = Path(output_file_dir) / f"ScGPT-{model_type}"
+    model_encodings_dir.mkdir(parents=True, exist_ok=True)
+    output_file_path = model_encodings_dir / "encodings.csv"
+    embedding.to_csv(output_file_path)
+
+
 @click.command()
 @click.option(
     "--allow-downloads",
@@ -207,10 +214,7 @@ def main(allow_downloads, input_file_dir, output_file_dir, model_type):
     else:
         embedding = load_scgpt_embedding(model_dir=input_file_dir)
 
-    model_encodings_dir = Path(output_file_dir) / f"ScGPT-{model_type}"
-    model_encodings_dir.mkdir(parents=True, exist_ok=True)
-    output_file_path = model_encodings_dir / "encodings.csv"
-    embedding.to_csv(output_file_path)
+    save_encodings(embedding, model_type, output_file_dir)
 
 
 if __name__ == "__main__":
