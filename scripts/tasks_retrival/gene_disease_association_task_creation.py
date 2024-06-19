@@ -235,6 +235,12 @@ def dump_to_task(task_df, task_name, main_task_directory, entities_cols):
     default=False,
 )
 @click.option(
+    "--average-duplicates",
+    help="Due to conversion from ensemble id to symbol multiple entries might occur with the same symbol, this will average their association score",
+    type=click.BOOL,
+    default=True,
+)
+@click.option(
     "--main-task-directory",
     "-m",
     type=click.STRING,
@@ -248,9 +254,10 @@ def dump_to_task(task_df, task_name, main_task_directory, entities_cols):
 )
 def main(
     task_name,
-    main_task_directory,
     input_file,
     allow_downloads,
+    main_task_directory,
+    average_duplicates,
     verbose,
 ):
     input_path_or_url = verify_source_of_data(
