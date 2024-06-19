@@ -271,8 +271,13 @@ def main(
     downloaded_dataframe["symbols"] = get_symbols(
         downloaded_dataframe[COLUMN_OF_SYMBOLS]
     )
-
-    dump_to_task(downloaded_dataframe, main_task_directory)
+    if average_duplicates:
+        downloaded_dataframe = average_duplicates(downloaded_dataframe)
+    dump_to_task(
+        downloaded_dataframe,
+        task_name,
+        main_task_directory,
+    )
     if verbose:
         report_task(downloaded_dataframe, main_task_directory, task_name)
 
