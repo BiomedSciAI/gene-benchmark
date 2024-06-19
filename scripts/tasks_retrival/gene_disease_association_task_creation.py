@@ -174,15 +174,24 @@ def get_gene_drug_assosiation_data(input_file: str):
 def extract_outcome_df(
     downloaded_dataframe: pd.DataFrame, target_column_name: str = COLUMN_OF_OUTCOME
 ) -> pd.DataFrame:
-    """Splice the two columns of interest into a new data frame, rename and extract HLC Class from the name."""
-    outcomes = pd.DataFrame({"Outcomes": downloaded_dataframe[target_column_name]})
-    # make sure there are no extra spaces around the values and return
+    outcomes = pd.Series(downloaded_dataframe[target_column_name], name="Outcomes")
     return outcomes.map(lambda x: x.strip() if isinstance(x, str) else x)
 
 
-def report_task(df, task_dir_name, max_counts=10):
-    print(f"Task saved to {task_dir_name}/\n")
+def report_task(df, main_task_directory, task_name):
+    print(f"Task saved at {main_task_directory}  under {task_name} /\n")
     print(f"total samples = {len(df)}")
+
+
+def dump_to_task(downloaded_dataframe, task_name, main_task_directory, entities_cols):
+    outcomes = extract_outcome_df(downloaded_dataframe)
+    main_task_directory = Path(main_task_directory)
+    task_dir_name = main_task_directory / task_name
+    task_dir_name.mkdir(exist_ok=True)
+    downloaded_dataframe[entities_cols].to_csv(
+        task_dir_name / "entities.csv", index=False
+    )
+    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -214,12 +223,6 @@ def report_task(df, task_dir_name, max_counts=10):
     default="./tasks",
 )
 @click.option(
-    "--association-type",
-    type=click.STRING,
-    help="The type of association to save",
-    default="genetic_association",
-)
-@click.option(
     "--verbose",
     "-v",
     is_flag=True,
@@ -227,7 +230,6 @@ def report_task(df, task_dir_name, max_counts=10):
 def main(
     task_name,
     main_task_directory,
-    association_type,
     input_file,
     allow_downloads,
     verbose,
@@ -240,38 +242,13 @@ def main(
         print(f"creating the {task_name} task")
         print("This may take several minutes")
     downloaded_dataframe = get_gene_drug_assosiation_data(input_file=input_path_or_url)
-    gene_drug_assosiation_df = downloaded_dataframe.loc[
-        downloaded_dataframe["datatypeId"] == association_type, :
-    ]
     downloaded_dataframe["symbols"] = get_symbols(
-        gene_drug_assosiation_df[COLUMN_OF_SYMBOLS]
+        downloaded_dataframe[COLUMN_OF_SYMBOLS]
     )
-    symbols = downloaded_dataframe["symbols"]
-    diseaseId = gene_drug_assosiation_df["diseaseId"]
-    entities = pd.concat(
-        [symbols.reset_index(drop=True), diseaseId.reset_index(drop=True)], axis=1
-    )
-    outcomes = extract_outcome_df(gene_drug_assosiation_df)
 
-    assert len(entities) == len(
-        outcomes
-    ), " the lengths of the concatinated files does not match"
-
-    # entered by the user.
-    main_task_directory = Path(main_task_directory)
-
-    # the specific directory for the task
-    task_dir_name = main_task_directory / task_name
-    task_dir_name.mkdir(exist_ok=True)
-
-    # save symbols to CSV file
-    entities.to_csv(task_dir_name / "entities.csv", index=False)
-
-    # save outcomes to CSV file
-    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
-
+    dump_to_task(downloaded_dataframe, main_task_directory)
     if verbose:
-        report_task(outcomes, task_dir_name)
+        report_task(downloaded_dataframe, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
