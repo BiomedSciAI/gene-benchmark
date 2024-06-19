@@ -88,19 +88,6 @@ def _convert_df_to_3d_array(df: pd.DataFrame):
     return np.hstack(reshaped_embeddings)
 
 
-def _get_none_nan_instancies(
-    encodings: pd.DataFrame, outcomes: pd.Series | pd.DataFrame
-):
-    if encodings.shape[1] == 1:
-        nan_ind = encodings.squeeze().isna()
-    else:
-        nan_ind = encodings.isna().any()
-    if isinstance(outcomes, pd.Series):
-        return outcomes[~nan_ind]
-    else:
-        return outcomes.loc[~nan_ind, :]
-
-
 @dataclass
 class TaskDefinition:
     """
@@ -224,10 +211,10 @@ class EntitiesTask:
         encodings_df = self.encoder.encode(descriptions_df)
 
         if self.overlap_entities:
-            outcomes = _get_none_nan_instancies(
-                encodings_df, self.task_definitions.outcomes
-            )
+            nan_ind = encodings_df.isna().any(axis=1)
+            outcomes = self.task_definitions.outcomes.loc[~nan_ind]
             encodings = self._post_processing_mat(encodings_df.dropna())
+            self.overlap_idx = nan_ind
         else:
             outcomes = self.task_definitions.outcomes
             encodings = self._post_processing_mat(encodings_df)
@@ -280,20 +267,15 @@ class EntitiesTask:
             if isinstance(self.task_definitions.outcomes, pd.Series)
             else False
         )
+        if self.overlap_entities:
+            summary_dict["overlapped_sample_size"] = len(self.nan_ind)
+            outcomes = self.task_definitions.outcomes.loc[self.nan_ind]
         if is_bin:
             summary_dict["class_sizes"] = ",".join(
-                [str(v) for v in self.task_definitions.outcomes.value_counts().values]
+                [str(v) for v in outcomes.value_counts().values]
             )
             summary_dict["classes_names"] = ",".join(
-                [
-                    str(v)
-                    for v in self.task_definitions.outcomes.value_counts().index.values
-                ]
-            )
-        if self.overlap_entities:
-            summary_dict["overlapped_task_size"] = self.overlapped_task_size
-            summary_dict["original_task_size"] = len(
-                self.task_definitions.outcomes.value_counts()
+                [str(v) for v in outcomes.value_counts().index.values]
             )
         if self.description_builder:
             summary_dict.update(self.description_builder.summary())
