@@ -34,6 +34,18 @@ BLOOD_MODEL_URLS = {
 
 
 def load_url_dict(model_type):
+    """
+    Depending on the model type, load the dictionary with the correct url links.
+
+    Args:
+    ----
+        model_type (str): "blood" or "human"
+
+    Returns:
+    -------
+        a dictionary of file urls
+
+    """
     if model_type == "human":
         return HUMAN_MODEL_URLS
     elif model_type == "blood":
@@ -160,6 +172,16 @@ def load_scgpt_encodings(model_dir):
 
 
 def save_encodings(encodings, model_type, output_file_dir):
+    """
+    Save the gene encodings to the output dir.
+
+    Args:
+    ----
+        encodings (pd.DataFrame): the encodings
+        model_type (str): "blood" or "human"
+        output_file_dir (str): path to dir for saving the file
+
+    """
     model_encodings_dir = Path(output_file_dir) / f"ScGPT-{model_type}"
     model_encodings_dir.mkdir(parents=True, exist_ok=True)
     output_file_path = model_encodings_dir / "encodings.csv"
