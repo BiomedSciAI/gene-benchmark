@@ -268,16 +268,15 @@ def main(
         print(f"creating the {task_name} task")
         print("This may take several minutes")
     downloaded_dataframe = get_gene_drug_assosiation_data(input_file=input_path_or_url)
-    downloaded_dataframe["symbols"] = get_symbols(
+    downloaded_dataframe["symbol"] = get_symbols(
         downloaded_dataframe[COLUMN_OF_SYMBOLS]
     )
+    entities_cols = ["symbol", "diseaseId"]
     if average_duplicates:
-        downloaded_dataframe = average_duplicates(downloaded_dataframe)
-    dump_to_task(
-        downloaded_dataframe,
-        task_name,
-        main_task_directory,
-    )
+        downloaded_dataframe = (
+            downloaded_dataframe.groupby(entities_cols)["score"].mean().reset_index()
+        )
+    dump_to_task(downloaded_dataframe, task_name, main_task_directory, entities_cols)
     if verbose:
         report_task(downloaded_dataframe, main_task_directory, task_name)
 
