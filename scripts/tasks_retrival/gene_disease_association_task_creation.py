@@ -179,18 +179,37 @@ def extract_outcome_df(
 
 
 def report_task(df, main_task_directory, task_name):
+    """
+    prints a short task report.
+
+    Args:
+    ----
+        df (pd.DataFrame): The data frame which size will be printed
+        main_task_directory (str): the main folder for the task
+        task_name (str): The task name
+
+    """
     print(f"Task saved at {main_task_directory}  under {task_name} /\n")
     print(f"total samples = {len(df)}")
 
 
-def dump_to_task(downloaded_dataframe, task_name, main_task_directory, entities_cols):
-    outcomes = extract_outcome_df(downloaded_dataframe)
+def dump_to_task(task_df, task_name, main_task_directory, entities_cols):
+    """
+    Save a dataframe in the task definition format.
+
+    Args:
+    ----
+        task_df (pd.DataFrame): The data frame containing the task
+        task_name (str): the task name
+        main_task_directory (str|Path): the main folder to save the task
+        entities_cols (list[str]): the columns names to  be saved as entities
+
+    """
+    outcomes = extract_outcome_df(task_df)
     main_task_directory = Path(main_task_directory)
     task_dir_name = main_task_directory / task_name
     task_dir_name.mkdir(exist_ok=True)
-    downloaded_dataframe[entities_cols].to_csv(
-        task_dir_name / "entities.csv", index=False
-    )
+    task_df[entities_cols].to_csv(task_dir_name / "entities.csv", index=False)
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
 
 
