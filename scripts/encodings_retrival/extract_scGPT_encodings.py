@@ -211,7 +211,7 @@ def save_encodings(encodings, model_type, output_file_dir):
 @click.option(
     "--model-type",
     "-m",
-    type=click.Choice(["human", "blood"]),
+    type=click.Choice(["human", "blood"], case_sensitive=True),
     help="type of ScGPT model to use, can be either 'human' or 'blood'.",
     default="human",
 )
