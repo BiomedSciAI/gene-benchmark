@@ -1,5 +1,7 @@
 # Script to extract the encodings for all genes from a scGPT model and save them to a csv file.
 # It is based on the tutorial in https://github.com/bowang-lab/scGPT/blob/main/tutorials/Tutorial_GRN.ipynb
+# The human model is taken from: https://drive.google.com/drive/folders/1oWh_-ZRdhtoGQ2Fw24HP41FgLoomVo-y
+# the blood model is taken from: https://drive.google.com/drive/folders/1kkug5C7NjvXIwQGGaGoqXTk_Lb_pDrBU
 # to run, this requires that the scgpt library will be in place.
 # requires python '<3.11,>=3.7.12'
 #   > git clone https://github.com/bowang-lab/scGPT.git
