@@ -1,4 +1,4 @@
-# Script to extract the embeddings for all genes from a scGPT model and save them to a csv file.
+# Script to extract the encodings for all genes from a scGPT model and save them to a csv file.
 # It is based on the tutorial in https://github.com/bowang-lab/scGPT/blob/main/tutorials/Tutorial_GRN.ipynb
 # to run, this requires that the scgpt library will be in place.
 # requires python '<3.11,>=3.7.12'
@@ -109,13 +109,11 @@ def create_empty_model(model_config_file: str, vocab: GeneVocab) -> TransformerM
     return model
 
 
-def load_scgpt_embedding(model_dir):
+def load_scgpt_encodings(model_dir):
     """
-    Retrieve the data-independent gene embeddings from scGPT:
+    Retrieve the data-independent gene encodings from scGPT:
     This method does the main part of the job.  The input is a path to a directory containing the
     scGPT model.
-    This specific model saving structure matches that of the scGPT pretrained "blood model"
-    taken from https://drive.google.com/drive/folders/1kkug5C7NjvXIwQGGaGoqXTk_Lb_pDrBU
     The model itself comes in three files:
         * vocab.json:  the vocabulary with links the symbols (gene names) and the token IDs
         * args.json:  Parameters to override the default values for model shapes and such
@@ -131,7 +129,7 @@ def load_scgpt_embedding(model_dir):
 
     Returns:
     -------
-        pd.DataFrame: A dataframe that maps symboles to an embedding (as a vector of length 512)
+        pd.DataFrame: A dataframe that maps symbols to encodings (as a vector of length 512)
 
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -142,36 +140,28 @@ def load_scgpt_embedding(model_dir):
     model_file = model_dir / "best_model.pt"
     vocab_file = model_dir / "vocab.json"
 
-    # read vocabulary file
     vocab = get_vocabulary(vocab_file)
-    # map from gene name to gene idx.
     gene2idx = vocab.get_stoi()
 
-    # upload the model from the files:
     model = create_empty_model(model_config_file=model_config_file, vocab=vocab)
-    # load the model via torch
     torch_model = torch.load(model_file, map_location=torch.device("cpu"))
-    # upload the parameters from the torch model
     model.load_state_dict(torch_model, strict=False)
 
-    # extract the list of gene and matching token ids
     gene_symbols = list(gene2idx.keys())
     gene_ids = np.array([gene2idx[k] for k in gene_symbols])
-    # extract the encoding vectors for the ids above from the model
-    gene_embeddings = model.encoder(torch.tensor(gene_ids, dtype=torch.long).to(device))
+    gene_encodings = model.encoder(torch.tensor(gene_ids, dtype=torch.long).to(device))
 
-    # move the embedding into a data frame so we can use merge to add the symbols to the vectors
-    gene_embeddings_df = pd.DataFrame(
-        gene_embeddings.detach().cpu().numpy(), index=gene_symbols
+    gene_encodings_df = pd.DataFrame(
+        gene_encodings.detach().cpu().numpy(), index=gene_symbols
     )
-    return gene_embeddings_df
+    return gene_encodings_df
 
 
-def save_encodings(embedding, model_type, output_file_dir):
+def save_encodings(encodings, model_type, output_file_dir):
     model_encodings_dir = Path(output_file_dir) / f"ScGPT-{model_type}"
     model_encodings_dir.mkdir(parents=True, exist_ok=True)
     output_file_path = model_encodings_dir / "encodings.csv"
-    embedding.to_csv(output_file_path)
+    encodings.to_csv(output_file_path)
 
 
 @click.command()
@@ -210,11 +200,11 @@ def main(allow_downloads, input_file_dir, output_file_dir, model_type):
             tmpdir = Path(tmpdirname)
             for file_name, url in model_urls.items():
                 download_google_drive_file(url, file_name, output_dir=tmpdir)
-            embedding = load_scgpt_embedding(model_dir=tmpdir)
+            encodings = load_scgpt_encodings(model_dir=tmpdir)
     else:
-        embedding = load_scgpt_embedding(model_dir=input_file_dir)
+        encodings = load_scgpt_encodings(model_dir=input_file_dir)
 
-    save_encodings(embedding, model_type, output_file_dir)
+    save_encodings(encodings, model_type, output_file_dir)
 
 
 if __name__ == "__main__":
