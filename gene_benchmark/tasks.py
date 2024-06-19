@@ -270,6 +270,8 @@ class EntitiesTask:
         if self.overlap_entities:
             summary_dict["overlapped_sample_size"] = len(self.nan_ind)
             outcomes = self.task_definitions.outcomes.loc[self.nan_ind]
+        else:
+            outcomes = self.task_definitions.outcomes
         if is_bin:
             summary_dict["class_sizes"] = ",".join(
                 [str(v) for v in outcomes.value_counts().values]
