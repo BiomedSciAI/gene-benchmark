@@ -158,7 +158,7 @@ def get_gene_drug_assosiation_data(input_file: str):
     part_ind = 0
     while file_exist:
         try:
-            link_ars = f"associationByDatasourceDirect/part-{part_ind:05}-6866be1a-be5d-40cf-bdf6-627bef1d0410-c000.snappy.parquet"
+            link_ars = f"associationByOverallDirect/part-{part_ind:05}-f96bc7c3-79fa-4d2a-8c16-5dfe4f3b853d-c000.snappy.parquet	"
             gda_df = pd.read_parquet(input_file + link_ars)
             res.append(gda_df)
             part_ind = part_ind + 1
@@ -243,7 +243,10 @@ def main(
     gene_drug_assosiation_df = downloaded_dataframe.loc[
         downloaded_dataframe["datatypeId"] == association_type, :
     ]
-    symbols = get_symbols(gene_drug_assosiation_df[COLUMN_OF_SYMBOLS])
+    downloaded_dataframe["symbols"] = get_symbols(
+        gene_drug_assosiation_df[COLUMN_OF_SYMBOLS]
+    )
+    symbols = downloaded_dataframe["symbols"]
     diseaseId = gene_drug_assosiation_df["diseaseId"]
     entities = pd.concat(
         [symbols.reset_index(drop=True), diseaseId.reset_index(drop=True)], axis=1
