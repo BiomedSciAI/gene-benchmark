@@ -16,6 +16,31 @@ from gene_benchmark.encoder import (
 )
 
 
+def dump_task_definitions(
+    entities: pd.DataFrame,
+    outcomes: pd.DataFrame | pd.Series,
+    main_task_directory: str,
+    task_name: str,
+):
+    """
+    Save the entities and outcomes into main_task_directory under task_name
+    in the format suitable for task definitions.
+
+    Args:
+    ----
+        entities (pd.DataFrame): The entities to save
+        outcomes (pd.DataFrame | pd.Series): the outcomes to save
+        main_task_directory (str): the main task folder
+        task_name (str): the task name under which the files will be saved
+
+    """
+    main_task_directory = Path(main_task_directory)
+    task_dir_name = main_task_directory / task_name
+    task_dir_name.mkdir(exist_ok=True)
+    entities.to_csv(task_dir_name / "entities.csv", index=False)
+    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
+
+
 def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
     """
     Checks if a vector represents a binary prediction task.
