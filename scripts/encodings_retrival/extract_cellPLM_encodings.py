@@ -35,6 +35,19 @@ def download_file_from_dropbox(url, name, output_dir):
 
 
 def load_files(input_file_dir):
+    """
+    Load the config.json file and the best.ckpt file from a directory.
+
+    Args:
+    ----
+    input_file_dir (str) : path to directory
+
+    Returns:
+    -------
+    model_configs: the model config file
+    model: the model from the ckpt
+
+    """
     model_file = f"{input_file_dir}/best.ckpt"
     model_config_file = f"{input_file_dir}/config.json"
     with open(model_config_file) as f:
@@ -45,6 +58,21 @@ def load_files(input_file_dir):
 
 
 def find_gene_embedding_layer(model_configs, model):
+    """
+    Find the gene encoding layer from a model state dict.
+    The encoding layer has a shape of `[num genes, embedding width]`.
+    This method relies on the fact that the encoding size of cellPLM is 1024.
+
+    Args:
+    ----
+    model_configs: the model config file
+    model: the model from the ckpt
+
+    Returns:
+    -------
+    layer_name: the name of the layer with the gene encodings.
+
+    """
     gene_list = model_configs["gene_list"]
     total_number_of_genes = len(gene_list)
     for layer_name in model["model_state_dict"].keys():
