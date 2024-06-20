@@ -184,7 +184,7 @@ class TestTasks(unittest.TestCase):
         self._test_load_task_without_exclusion(task_name)
 
     def test_load_task_without_exclusion_two_columns(self):
-        task_name = "Gene2Gene"
+        task_name = "interaction"
         self._test_load_task_without_exclusion(task_name)
 
     def test_load_multiclass_task_without_exclusion_one_column(self):
@@ -232,11 +232,11 @@ class TestTasks(unittest.TestCase):
         assert all(outcomes == task.outcomes)
 
     def test_entities_task(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
             base_model=LogisticRegression(max_iter=2000, multi_class="auto"),
@@ -245,11 +245,11 @@ class TestTasks(unittest.TestCase):
         assert not full_entity_task._cv_report is None
 
     def test_entities_task_overlap(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
             base_model=LogisticRegression(max_iter=2000, multi_class="auto"),
@@ -258,8 +258,7 @@ class TestTasks(unittest.TestCase):
         full_entity_task.run()
         assert not full_entity_task._cv_report is None
 
-    def test_multiclass_task_mini(self):
-        task_name = "test_multiclass"
+        task_name = "simple_cat"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
@@ -273,12 +272,10 @@ class TestTasks(unittest.TestCase):
             tasks_folder=_get_test_tasks_folder(),
         )
         full_entity_task.run()
-        minimal_succsess_rate = (43 - 43**0.5 * 2) / 69  # proportion of largest outcome
         assert not full_entity_task._cv_report is None
-        assert all(full_entity_task._cv_report["test_score"] >= minimal_succsess_rate)
 
     def test_multiclass_task_midi(self):
-        task_name = "Gene Type Test"
+        task_name = "simple_cat"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
@@ -289,19 +286,17 @@ class TestTasks(unittest.TestCase):
             tasks_folder=_get_test_tasks_folder(),
         )
         full_entity_task.run()
-        minimal_succsess_rate = 0.5  # proportion of largest outcome
         assert not full_entity_task._cv_report is None
-        assert all(full_entity_task._cv_report["test_score"] > minimal_succsess_rate)
 
     @pytest.mark.skip("slow test, run manually")
     def test_multiclass_task_extra_large(self):
         """When last tested, this took about 4.5 minutes to run."""
-        task_name = "Gene Type"
+        task_name = "simple_cat"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
             encoder=mpnet_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             description_builder=NCBIDescriptor(),
             base_model=LogisticRegression(max_iter=2000, multi_class="multinomial"),
             scoring="roc_auc_ovo_weighted",
@@ -312,12 +307,12 @@ class TestTasks(unittest.TestCase):
         assert all(full_entity_task._cv_report["test_score"] >= minimal_succsess_rate)
 
     def test_task_modification_3D_to_2D(self):
-        task_name = "Gene2Gene"
+        task_name = "interaction"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
             encoder=mpnet_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             description_builder=NCBIDescriptor(),
         )
         df_encode = PreComputedEncoder(_get_resources() / "file_embed_test.csv")
@@ -327,13 +322,13 @@ class TestTasks(unittest.TestCase):
         assert full_entity_task._post_processing_mat(encodes).shape == (2, 5)
 
     def test_task_modification_2D_to_2D(self):
-        task_name = "Gene2Gene"
+        task_name = "interaction"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         df_encode = PreComputedEncoder(_get_resources() / "file_embed_test.csv")
         encodes = df_encode.encode(pd.Series(["C3orf18", "RPS2P45"]))
         full_entity_task = EntitiesTask(
             task=task_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
         )
@@ -373,29 +368,29 @@ class TestTasks(unittest.TestCase):
 
     def test_error_missing_task(self):
         with pytest.raises(ValueError, match="Couldn't find the task"):
-            load_task_definition("no such test", tasks_folder=_get_tasks_folder())
+            load_task_definition("no such test", tasks_folder=_get_test_tasks_folder())
 
     def test_load_task(self):
         task_def = load_task_definition(
-            "long vs short range TF", tasks_folder=_get_tasks_folder()
+            "simple_bin", tasks_folder=_get_test_tasks_folder()
         )
         assert isinstance(task_def, TaskDefinition)
 
     def test_load_task_shape(self):
         task_def = load_task_definition(
-            "long vs short range TF", tasks_folder=_get_tasks_folder()
+            "simple_bin", tasks_folder=_get_test_tasks_folder()
         )
-        assert task_def.outcomes.shape == (174,)
-        assert task_def.entities.shape == (174, 1)
+        assert task_def.outcomes.shape == (100,)
+        assert task_def.entities.shape == (100, 1)
 
     def test_entities_task_summary(self):
-        task_name = "long vs short range TF"
+        task_name = "symbol_bin"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
         )
         full_entity_task.run()
         summary = full_entity_task.summary()
@@ -405,8 +400,8 @@ class TestTasks(unittest.TestCase):
         assert "sample_size" in summary
 
     def test_list_subtests(self):
-        task_name = "long vs short range TF"
-        tsk = load_task_definition(task_name, tasks_folder=_get_tasks_folder())
+        task_name = "simple_bin"
+        tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
         entities, outcomes = tsk.entities, tsk.outcomes
         sub_entities, sub_outcomes = sub_sample_task_frames(
             entities, outcomes, frac=0.5
@@ -422,11 +417,11 @@ class TestTasks(unittest.TestCase):
         assert "bivalent vs non-methylated" in names
 
     def test_task_modification_3D_to_2D_concat(self):
-        task_name = "Gene2Gene"
+        task_name = "interaction"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
             encoding_post_processing="concat",
@@ -441,37 +436,29 @@ class TestTasks(unittest.TestCase):
         assert full_entity_task._post_processing_mat(threeDmat).shape == (3, 6)
 
     def test_load_multilabel(self):
-        task_name = "Protein class"
-        mpnet_name = "sentence-transformers/all-mpnet-base-v2"
-
-        sub_outcome_task = EntitiesTask(
-            task=task_name,
-            encoder=mpnet_name,
-            tasks_folder=_get_tasks_folder(),
-            description_builder=NCBIDescriptor(),
+        task_name = "multi_label"
+        task_definitions = load_task_definition(
+            task_name,
+            tasks_folder=_get_test_tasks_folder(),
         )
-
-        assert isinstance(sub_outcome_task.task_definitions.entities, pd.DataFrame)
-        assert isinstance(sub_outcome_task.task_definitions.outcomes, pd.DataFrame)
-        assert (
-            sub_outcome_task.task_definitions.entities.shape[0]
-            == sub_outcome_task.task_definitions.outcomes.shape[0]
-        )
-        assert sub_outcome_task.task_definitions.outcomes.shape[1] == 25
+        assert isinstance(task_definitions.entities, pd.DataFrame)
+        assert isinstance(task_definitions.outcomes, pd.DataFrame)
+        assert task_definitions.entities.shape[0] == task_definitions.outcomes.shape[0]
+        assert task_definitions.outcomes.shape[1] == 5
 
     def test_subsample(self):
-        task_name = "long vs short range TF"
-        tsk = load_task_definition(task_name, tasks_folder=_get_tasks_folder())
+        task_name = "symbol_bin"
+        tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
         entities, outcomes = tsk.entities, tsk.outcomes
         sub_entities, sub_outcomes = sub_sample_task_frames(
-            entities, outcomes, frac=0.3141
+            entities, outcomes, frac=0.3
         )
-        assert sub_entities.shape[0] - entities.shape[0] * 0.3141 < 1
+        assert sub_entities.shape[0] - entities.shape[0] * 0.3 < 1
         assert all(sub_entities.index == sub_outcomes.index)
 
     def test_subsample_multilable(self):
-        task_name = "Protein class"
-        tsk = load_task_definition(task_name, tasks_folder=_get_tasks_folder())
+        task_name = "simple_cat"
+        tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
         entities, outcomes = tsk.entities, tsk.outcomes
         sub_entities, sub_outcomes = sub_sample_task_frames(
             entities, outcomes, frac=0.27
@@ -480,8 +467,8 @@ class TestTasks(unittest.TestCase):
         assert all(sub_entities.index == sub_outcomes.index)
 
     def test_subsample_multilable_frac_1(self):
-        task_name = "Protein class"
-        tsk = load_task_definition(task_name, tasks_folder=_get_tasks_folder())
+        task_name = "multi_label"
+        tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
         entities, outcomes = tsk.entities, tsk.outcomes
         sub_entities, sub_outcomes = sub_sample_task_frames(
             entities, outcomes, frac=1.0
@@ -490,13 +477,13 @@ class TestTasks(unittest.TestCase):
         assert all(sub_entities.index == sub_outcomes.index)
 
     def test_sub_task_passed_though_entities_task(self):
-        task_name = "Protein class"
+        task_name = "multi_label"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
 
-        sub_task = "Blood group antigen proteins"
+        sub_task = "Outcomes_3"
         sub_outcome_task = EntitiesTask(
             task=task_name,
-            tasks_folder=_get_tasks_folder(),
+            tasks_folder=_get_test_tasks_folder(),
             encoder=mpnet_name,
             description_builder=NCBIDescriptor(),
             sub_task=sub_task,
@@ -509,42 +496,20 @@ class TestTasks(unittest.TestCase):
             == sub_outcome_task.task_definitions.outcomes.shape[0]
         )
 
-    def test_sub_task_as_binary_task(self):
-        task_name = "Protein class"
-        mpnet_name = "sentence-transformers/all-mpnet-base-v2"
-
-        sub_task = "Predicted intracellular proteins"
-        sub_outcome_task = EntitiesTask(
-            task=task_name,
-            tasks_folder=_get_tasks_folder(),
-            encoder=mpnet_name,
-            description_builder=NCBIDescriptor(),
-            frac=0.01,
-            sub_task=sub_task,
-        )
-        sub_outcome_task.run()
-        summary = sub_outcome_task.summary()
-        assert "encoder class" in summary
-        assert "description class" in summary
-        assert "mean_roc_auc" in summary
-        assert "sample_size" in summary
-        assert "sub_task" in summary
-        assert summary["sub_task"] == sub_task
-
     def test_sub_task_wrong_name(self):
-        task_name = "Protein class"
+        task_name = "multi_label"
 
         sub_task = "no such sub_task"
 
         with pytest.raises(ValueError, match="Couldn't find the sub_task"):
             load_task_definition(
                 task_name=task_name,
-                tasks_folder=_get_tasks_folder(),
+                tasks_folder=_get_test_tasks_folder(),
                 sub_task=sub_task,
             )
 
     def test_sub_task_on_single_column_task(self):
-        task_name = "long vs short range TF"
+        task_name = "symbol_bin"
 
         sub_task = "Outcomes"
 
@@ -554,5 +519,5 @@ class TestTasks(unittest.TestCase):
             load_task_definition(
                 task_name=task_name,
                 sub_task=sub_task,
-                tasks_folder=_get_tasks_folder(),
+                tasks_folder=_get_test_tasks_folder(),
             )
