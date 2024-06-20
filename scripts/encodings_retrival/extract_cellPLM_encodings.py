@@ -83,7 +83,7 @@ def save_encodings(encodings, output_file_dir):
 @click.option(
     "--input-file-dir",
     type=click.STRING,
-    help="The path to the directory with the data files. there needs to be two files: best.ckpt = the model ckpt, config.json = the config file",
+    help="The path to the directory with the data files. there needs to be two files: best.ckpt = the model ckpt, config.json = the config file,https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h?rlkey=o8hi0xads9ol07o48jdityzv1&e=1&dl=0",
     default=None,
 )
 @click.option(
