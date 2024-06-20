@@ -3,35 +3,16 @@
 # Github https://github.com/OmicsML/CellPLM
 # Directs us to the dropBox folder for downloading the model check-point:
 # https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h?rlkey=o8hi0xads9ol07o48jdityzv1&e=1&dl=0
+# "config.json": "https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h/ckpt/20230926_85M.config.json?rlkey=o8hi0xads9ol07o48jdityzv1&dl=0",
+# "best.ckpt": "https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h/ckpt/20230926_85M.best.ckpt?rlkey=o8hi0xads9ol07o48jdityzv1&dl=0",
 
 
 import json
-import tempfile
 from pathlib import Path
 
 import click
 import pandas as pd
-import requests
 import torch
-
-MODEL_URLS = {
-    "config.json": "https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h/ckpt/20230926_85M.config.json?rlkey=o8hi0xads9ol07o48jdityzv1&dl=0",
-    "best.ckpt": "https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h/ckpt/20230926_85M.best.ckpt?rlkey=o8hi0xads9ol07o48jdityzv1&dl=0",
-}
-
-
-def download_file_from_dropbox(url, name, output_dir):
-
-    modified_url = url.replace("dl=0", "dl=1")
-    response = requests.get(modified_url, stream=True)
-    output = output_dir / name
-    if response.status_code == 200:
-        with open(output, "wb") as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        print(f"File downloaded successfully to {output}")
-    else:
-        print(f"Failed to download file. HTTP status code: {response.status_code}")
 
 
 def load_files(input_file_dir):
@@ -100,13 +81,6 @@ def save_encodings(encodings, output_file_dir):
 
 @click.command()
 @click.option(
-    "--allow-downloads",
-    "-l",
-    type=click.BOOL,
-    help="download files directly from urls, from the box, use this option only if you trust the URLs.",
-    default=False,
-)
-@click.option(
     "--input-file-dir",
     type=click.STRING,
     help="The path to the directory with the data files. there needs to be two files: best.ckpt = the model ckpt, config.json = the config file",
@@ -118,17 +92,9 @@ def save_encodings(encodings, output_file_dir):
     help="output files path",
     default="./encodings",
 )
-def main(allow_downloads, input_file_dir, output_file_dir):
+def main(input_file_dir, output_file_dir):
 
-    if allow_downloads:
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            tmpdir = Path(tmpdirname)
-            for name, url in MODEL_URLS.items():
-                download_file_from_dropbox(url, name, output_dir=tmpdir)
-            model_configs, model = load_files(tmpdir)
-    else:
-        model_configs, model = load_files(input_file_dir)
-
+    model_configs, model = load_files(input_file_dir)
     embedding_layer = find_gene_embedding_layer(model_configs, model)
     encodings = model["model_state_dict"][embedding_layer].numpy()
     encodings_df = pd.DataFrame(encodings, index=model_configs["gene_list"])
