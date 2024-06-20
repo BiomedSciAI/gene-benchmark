@@ -22,7 +22,7 @@ MODEL_URLS = {
 
 def download_file_from_dropbox(url, name, output_dir):
 
-    modified_url = url.replace("?dl=0", "?dl=1")
+    modified_url = url.replace("dl=0", "dl=1")
     response = requests.get(modified_url, stream=True)
     output = output_dir / name
     if response.status_code == 200:
@@ -81,7 +81,7 @@ def save_encodings(encodings, output_file_dir):
 @click.option(
     "--input-file-dir",
     type=click.STRING,
-    help="The path to the directory with the data files",
+    help="The path to the directory with the data files. there needs to be two files: best.ckpt = the model ckpt, config.json = the config file",
     default=None,
 )
 @click.option(
