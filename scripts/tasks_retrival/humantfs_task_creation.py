@@ -30,87 +30,16 @@ doi: 10.1016/j.cell.2018.01.029. Review.
 
 """
 
-from pathlib import Path
-from urllib.parse import urlparse
-
 import click
-import pandas as pd
+from task_retrival import read_table, report_task_single_col, verify_source_of_data
+
+from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = (
     "https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
 )
 TASK_NAME = "TF vs non-TF"
 COLUMN_OF_SYMBOLS = "HGNC symbol"
-
-
-def verify_source_of_data(input_file: str | None, allow_downloads: bool = False) -> str:
-    """
-    verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
-    the DATA_URL.
-    This method will exit with an error if the input is not consistent with the workflow.
-
-    Args:
-    ----
-        input_file (str | None): name if input file.  None if not set, non-url path if set.
-        allow_downloads (bool, optional): has the user opted in to download the data from the source.
-            Defaults to False.
-
-    Returns:
-    -------
-        str: path to data file, wither local of the default.
-
-    """
-    if input_file is None:
-        if not allow_downloads:
-            raise ValueError(
-                f"Please enter path to local file via --input-file or turn on --allow-downloads to download task source from {input_file}"
-            )
-        # input file not given, allow download on.
-        return DATA_URL
-    elif allow_downloads:
-        raise ValueError(
-            "Arguments ambiguous:  Either give a local path of download from the web."
-        )
-    parsed_path = urlparse(str(input_file))
-    if not parsed_path.netloc == "":
-        raise ValueError(
-            f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
-        )
-    return input_file
-
-
-def read_table(input_file: str | Path, allow_downloads: bool = False, **kwargs):
-    try:
-        #  "NA" is the symbol for "neuroacanthocytosis".  Unless the na_filter is turned off, it would be read as Nan
-        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=False)
-    except Exception as exception:
-        raise RuntimeError(f"could not read {input_file}") from exception
-    return downloaded_dataframe
-
-
-def extract_symbols_df(
-    downloaded_dataframe: pd.DataFrame, column_of_symbols: str = COLUMN_OF_SYMBOLS
-) -> pd.DataFrame:
-    """Splice the column of the gene symbols into a new data frame and rename."""
-    symbols = pd.DataFrame({"symbol": downloaded_dataframe[column_of_symbols]})
-    return symbols.map(lambda x: x.strip() if type(x) == str else x)
-
-
-def extract_outcome_df(
-    downloaded_dataframe: pd.DataFrame, target_column_name: str = "Is TF?"
-) -> pd.DataFrame:
-    """Splice the two columns of interest into a new data frame, rename and extract HLC Class from the name."""
-    outcomes = pd.DataFrame({"Outcomes": downloaded_dataframe[target_column_name]})
-    # make sure there are no extra spaces around the values and return
-    return outcomes.map(lambda x: x.strip() if type(x) == str else x)
-
-
-def report_task(df, task_dir_name):
-    print(f"Task saved to {task_dir_name}/")
-
-    col_name = df.columns[0]
-    print()  # for readability of the message
-    print(df[col_name].value_counts().to_string())
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -142,35 +71,39 @@ def report_task(df, task_dir_name):
     default="./tasks",
 )
 @click.option(
+    "--outcome_column_name",
+    type=click.STRING,
+    help="The task root directory.  Will not be created.",
+    default="Is TF?",
+)
+@click.option(
     "--verbose/--quite",
     "-v/-q",
     is_flag=True,
     default=True,
 )
-def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
+def main(
+    task_name,
+    main_task_directory,
+    input_file,
+    allow_downloads,
+    outcome_column_name,
+    verbose,
+):
     input_path_or_url = verify_source_of_data(
-        input_file, allow_downloads=allow_downloads
+        input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
 
-    downloaded_dataframe = read_table(input_file=input_path_or_url)
-    symbols = extract_symbols_df(downloaded_dataframe)
-    outcomes = extract_outcome_df(downloaded_dataframe)
-
-    # entered by the user.
-    main_task_directory = Path(main_task_directory)
-
-    # the specific directory for the task
-    task_dir_name = main_task_directory / task_name
-    task_dir_name.mkdir(exist_ok=True)
-
-    # save symbols to CSV file
-    symbols.to_csv(task_dir_name / "entities.csv", index=False)
-
-    # save outcomes to CSV file
-    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
+    downloaded_dataframe = read_table(input_file=input_path_or_url, strip_value=True)
+    downloaded_dataframe = downloaded_dataframe.map(
+        lambda x: x.strip() if type(x) == str else x
+    )
+    symbols = downloaded_dataframe[COLUMN_OF_SYMBOLS]
+    outcomes = downloaded_dataframe[outcome_column_name]
+    dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
     if verbose:
-        report_task(outcomes, task_dir_name)
+        report_task_single_col(outcomes, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
