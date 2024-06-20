@@ -6,6 +6,7 @@
 
 
 import json
+from pathlib import Path
 
 import click
 import pandas as pd
@@ -36,6 +37,22 @@ def find_gene_embedding_layer(model_configs, model):
                 return layer_name
 
 
+def save_encodings(encodings, output_file_dir):
+    """
+    Save the gene encodings to the output dir.
+
+    Args:
+    ----
+        encodings (pd.DataFrame): the encodings
+        output_file_dir (str): path to dir for saving the file
+
+    """
+    model_encodings_dir = Path(output_file_dir) / "cellPLM"
+    model_encodings_dir.mkdir(parents=True, exist_ok=True)
+    output_file_path = model_encodings_dir / "encodings.csv"
+    encodings.to_csv(output_file_path)
+
+
 @click.command()
 @click.option(
     "--allow-downloads",
@@ -64,13 +81,10 @@ def main(allow_downloads, input_file_dir, output_file_dir):
         model_configs, model = load_files(input_file_dir)
 
     embedding_layer = find_gene_embedding_layer(model_configs, model)
-    # load the tensor
     encodings = model["model_state_dict"][embedding_layer].numpy()
-    # convert to df
     encodings_df = pd.DataFrame(encodings, index=model_configs["gene_list"])
 
-    output_file_name = f"{output_file_dir}/20230926_85M_encoding.csv"
-    encodings_df.to_csv(output_file_name)
+    save_encodings(encodings_df, output_file_dir)
 
 
 if __name__ == "__main__":
