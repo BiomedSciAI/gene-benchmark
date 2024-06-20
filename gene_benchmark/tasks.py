@@ -41,25 +41,6 @@ def dump_task_definitions(
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
 
 
-def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
-    """
-    Checks if a vector represents a binary prediction task.
-
-    Args:
-    ----
-        outcomes (pd.series): a series containing the labels for prediction
-
-    Returns:
-    -------
-        bool: True if the series represents binary classification
-
-    """
-    if isinstance(outcomes, pd.Series):
-        return outcomes.nunique() == 2
-    else:
-        return False
-
-
 def convert_to_mat(data: pd.Series | pd.DataFrame):
     """
     Convert a 1d series or df with np arrays as values to a 2D/3D np array.
@@ -181,6 +162,7 @@ class EntitiesTask:
         model_name=None,
         sub_task=None,
         multi_label_th=0,
+        overlap_entities=False,
     ) -> None:
         """
         Initiate a ClassificationGeneTask object.
@@ -229,6 +211,7 @@ class EntitiesTask:
         self.return_estimator = return_estimator
         self.encoding_post_processing = encoding_post_processing
         self.model_name = model_name
+        self.overlap_entities = overlap_entities
 
     def _create_encoding(self):
         if self.description_builder is None:
@@ -248,6 +231,21 @@ class EntitiesTask:
         if self.encoding_post_processing == "concat":
             return concat_list_df(encoding)
 
+    def _prepare_datamat_and_labels(self):
+        descriptions_df = self._create_encoding()
+        encodings_df = self.encoder.encode(descriptions_df)
+
+        if self.overlap_entities:
+            nan_ind = encodings_df.isna().any(axis=1)
+            outcomes = self.task_definitions.outcomes.loc[~nan_ind]
+            encodings = self._post_processing_mat(encodings_df.dropna())
+            self.overlap_idx = nan_ind
+        else:
+            outcomes = self.task_definitions.outcomes
+            encodings = self._post_processing_mat(encodings_df)
+        self.overlapped_task_size = len(outcomes)
+        return outcomes, encodings
+
     def run(self, error_score=np.nan):
         """
         Runs the defined ina k-fold fashion and returns a dictionary with the scores
@@ -260,15 +258,7 @@ class EntitiesTask:
             dict: a dictionary containing the score results and metadata on the run.
 
         """
-        descriptions_df = self._create_encoding()
-        encodings_df = self.encoder.encode(descriptions_df)
-        encodings = self._post_processing_mat(encodings_df)
-
-        if is_binary_outcomes(self.task_definitions.outcomes):
-            outcomes = pd.get_dummies(self.task_definitions.outcomes).iloc[:, 0]
-        else:
-            outcomes = self.task_definitions.outcomes
-
+        outcomes, encodings = self._prepare_datamat_and_labels()
         cs_val = cross_validate(
             self.base_prediction_model,
             encodings,
@@ -297,15 +287,22 @@ class EntitiesTask:
             summary_dict["sub_task"] = self.task_definitions.sub_task
         summary_dict["base_prediction_model"] = str(self.base_prediction_model)
         summary_dict["sample_size"] = self.task_definitions.outcomes.shape[0]
-        if is_binary_outcomes(self.task_definitions.outcomes):
+        is_bin = (
+            self.task_definitions.outcomes.nunique() == 2
+            if isinstance(self.task_definitions.outcomes, pd.Series)
+            else False
+        )
+        if self.overlap_entities:
+            summary_dict["overlapped_sample_size"] = len(self.nan_ind)
+            outcomes = self.task_definitions.outcomes.loc[self.nan_ind]
+        else:
+            outcomes = self.task_definitions.outcomes
+        if is_bin:
             summary_dict["class_sizes"] = ",".join(
-                [str(v) for v in self.task_definitions.outcomes.value_counts().values]
+                [str(v) for v in outcomes.value_counts().values]
             )
             summary_dict["classes_names"] = ",".join(
-                [
-                    str(v)
-                    for v in self.task_definitions.outcomes.value_counts().index.values
-                ]
+                [str(v) for v in outcomes.value_counts().index.values]
             )
         if self.description_builder:
             summary_dict.update(self.description_builder.summary())
