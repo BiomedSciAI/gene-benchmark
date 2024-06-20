@@ -117,8 +117,8 @@ def _add_computed_tasks(main_task_directory):
 
 
 class TestTasks(unittest.TestCase):
-    def _test_filter_entitiles(self, task_name):
-        tasks_folder = _get_tasks_folder()
+    def _test_filter_entities(self, task_name):
+        tasks_folder = _get_test_tasks_folder()
         entities, outcomes = _load_task_definitions_from_folder(task_name, tasks_folder)
 
         original_length = entities.shape[0]
@@ -142,17 +142,17 @@ class TestTasks(unittest.TestCase):
     # test filter_exclusion function directly
 
     def test_filter_exclusion_diretly_one_column(self):
-        task_name = "long vs short range TF"
-        self._test_filter_entitiles(task_name)
+        task_name = "simple_bin"
+        self._test_filter_entities(task_name)
 
     def test_filter_exclusion_diretly_two_columns(self):
-        task_name = "Gene2Gene"
-        self._test_filter_entitiles(task_name)
+        task_name = "interaction"
+        self._test_filter_entities(task_name)
 
     # test load_task_definition with exclusion
 
     def test_load_task_with_exclusion_one_column(self):
-        task_name = "long vs short range TF"
+        task_name = "simple_bin"
         self._test_load_task_with_exclusion(task_name)
 
     # test load from subdir
@@ -174,13 +174,13 @@ class TestTasks(unittest.TestCase):
             self._test_load_task_without_exclusion(task_name)
 
     def test_load_task_with_exclusion_two_columns(self):
-        task_name = "Gene2Gene"
+        task_name = "interaction"
         self._test_load_task_with_exclusion(task_name)
 
     # test load_task_definition with empty exclusion
 
     def test_load_task_without_exclusion_one_column(self):
-        task_name = "long vs short range TF"
+        task_name = "simple_bin"
         self._test_load_task_without_exclusion(task_name)
 
     def test_load_task_without_exclusion_two_columns(self):
@@ -194,7 +194,7 @@ class TestTasks(unittest.TestCase):
         )
 
     def _test_load_task_with_exclusion(self, task_name):
-        tasks_folder = _get_tasks_folder()
+        tasks_folder = _get_test_tasks_folder()
         entities, outcomes = _load_task_definitions_from_folder(task_name, tasks_folder)
 
         original_length = entities.shape[0]
@@ -218,7 +218,7 @@ class TestTasks(unittest.TestCase):
 
     def _test_load_task_without_exclusion(self, task_name, tasks_folder=None):
         if tasks_folder is None:
-            tasks_folder = _get_tasks_folder()
+            tasks_folder = _get_test_tasks_folder()
         entities, outcomes = _load_task_definitions_from_folder(task_name, tasks_folder)
 
         excluded = []
@@ -232,7 +232,7 @@ class TestTasks(unittest.TestCase):
         assert all(outcomes == task.outcomes)
 
     def test_entities_task(self):
-        task_name = "long vs short range TF"
+        task_name = "simple_bin"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
@@ -245,7 +245,7 @@ class TestTasks(unittest.TestCase):
         assert not full_entity_task._cv_report is None
 
     def test_entities_task_overlap(self):
-        task_name = "long vs short range TF"
+        task_name = "simple_bin"
         mpnet_name = "sentence-transformers/all-mpnet-base-v2"
         full_entity_task = EntitiesTask(
             task=task_name,
