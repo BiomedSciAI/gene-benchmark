@@ -8,6 +8,7 @@
 import json
 
 import click
+import pandas as pd
 import torch
 
 
@@ -23,6 +24,16 @@ def load_files(input_file_dir):
 
     model = torch.load(model_file, map_location=torch.device("cpu"))
     return model_configs, model
+
+
+def find_gene_embedding_layer(model_configs, model):
+    gene_list = model_configs["gene_list"]
+    total_number_of_genes = len(gene_list)
+    for layer_name in model["model_state_dict"].keys():
+        layer_shape = model["model_state_dict"][layer_name].shape
+        if (total_number_of_genes in layer_shape) & (len(layer_shape) == 2):
+            if layer_shape[1] == 1024:
+                return layer_name
 
 
 @click.command()
@@ -51,6 +62,15 @@ def main(allow_downloads, input_file_dir, output_file_dir):
         model_configs, model = download_files()
     else:
         model_configs, model = load_files(input_file_dir)
+
+    embedding_layer = find_gene_embedding_layer(model_configs, model)
+    # load the tensor
+    encodings = model["model_state_dict"][embedding_layer].numpy()
+    # convert to df
+    encodings_df = pd.DataFrame(encodings, index=model_configs["gene_list"])
+
+    output_file_name = f"{output_file_dir}/20230926_85M_encoding.csv"
+    encodings_df.to_csv(output_file_name)
 
 
 if __name__ == "__main__":
