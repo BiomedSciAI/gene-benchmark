@@ -38,7 +38,6 @@ from gene_benchmark.tasks import dump_task_definitions
 DATA_URL = (
     "https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
 )
-TASK_NAME = "TF vs non-TF"
 COLUMN_OF_SYMBOLS = "HGNC symbol"
 
 
@@ -48,7 +47,7 @@ COLUMN_OF_SYMBOLS = "HGNC symbol"
     "-n",
     type=click.STRING,
     help="name for the specific task",
-    default=TASK_NAME,
+    default="TF vs non-TF",
 )
 @click.option(
     "--input-file",
