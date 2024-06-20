@@ -104,7 +104,7 @@ def _add_computed_tasks(main_task_directory):
         main_task_directory (str): The folder to populate with the testing tasks
     """
     task_dict = {
-        "simple_bin": {},
+        "symbol_bin": {},
         "simple_cat": {"class_num": 5},
         "interaction": {"entities_type_num": 2},
         "two_int": {"entities_type_num": 2, "entities_type_name": ["symb1", "symb2"]},
@@ -142,7 +142,7 @@ class TestTasks(unittest.TestCase):
     # test filter_exclusion function directly
 
     def test_filter_exclusion_diretly_one_column(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         self._test_filter_entities(task_name)
 
     def test_filter_exclusion_diretly_two_columns(self):
@@ -152,7 +152,7 @@ class TestTasks(unittest.TestCase):
     # test load_task_definition with exclusion
 
     def test_load_task_with_exclusion_one_column(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         self._test_load_task_with_exclusion(task_name)
 
     # test load from subdir
@@ -180,7 +180,7 @@ class TestTasks(unittest.TestCase):
     # test load_task_definition with empty exclusion
 
     def test_load_task_without_exclusion_one_column(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         self._test_load_task_without_exclusion(task_name)
 
     def test_load_task_without_exclusion_two_columns(self):
@@ -372,13 +372,13 @@ class TestTasks(unittest.TestCase):
 
     def test_load_task(self):
         task_def = load_task_definition(
-            "simple_bin", tasks_folder=_get_test_tasks_folder()
+            "symbol_bin", tasks_folder=_get_test_tasks_folder()
         )
         assert isinstance(task_def, TaskDefinition)
 
     def test_load_task_shape(self):
         task_def = load_task_definition(
-            "simple_bin", tasks_folder=_get_test_tasks_folder()
+            "symbol_bin", tasks_folder=_get_test_tasks_folder()
         )
         assert task_def.outcomes.shape == (100,)
         assert task_def.entities.shape == (100, 1)
@@ -400,7 +400,7 @@ class TestTasks(unittest.TestCase):
         assert "sample_size" in summary
 
     def test_list_subtests(self):
-        task_name = "simple_bin"
+        task_name = "symbol_bin"
         tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
         entities, outcomes = tsk.entities, tsk.outcomes
         sub_entities, sub_outcomes = sub_sample_task_frames(
