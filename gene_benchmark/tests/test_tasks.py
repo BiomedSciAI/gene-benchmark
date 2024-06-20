@@ -19,6 +19,7 @@ from gene_benchmark.tasks import (
     TaskDefinition,
     _load_task_definitions_from_folder,
     convert_to_mat,
+    dump_task_definitions,
     filter_exclusion,
     get_tasks_definition_names,
     load_task_definition,
@@ -39,6 +40,80 @@ def _get_tasks_folder():
     tasks_folder = Path(os.environ.get("GENE_BENCHMARKS_TASKS_FOLDER", git_location))
     assert tasks_folder.exists
     return tasks_folder
+
+
+def _generate_class_task_definitions(
+    sample_num=100,
+    class_num=2,
+    entities_type_num=1,
+    outcome_num=1,
+    entities_type_name=None,
+    numeric_class=False,
+    p=0.03,
+):
+    """Generates task definitions according to user specifications.
+
+    Args:
+        sample_num (int, optional): The number of samples in that task i.e. length. Defaults to 100.
+        class_num (int, optional): the number of classes in the outcome. Defaults to 5.
+        entities_type_num (int, optional): The number of entities type. Defaults to 1.
+        outcome_num (int, optional): The number of outcomes. Defaults to 1.
+        entities_type_name (list[str], optional): The names of each entities type. Defaults to None.
+        numeric_class (bool, optional): If True the classes are numeric. Defaults to False.
+        p (float, 0.03):
+
+    Returns:
+        tuple(pd.DataFrame,pd.DtaFrame|pd.Series): the entities and outcomes of a task
+    """
+    cls_names = {i: i if numeric_class else f"class_{i}" for i in range(class_num)}
+    entities_list = [f"Gene_{i}" for i in range(sample_num)]
+    data = np.vstack(
+        [
+            np.random.choice(entities_list, size=sample_num, replace=False)
+            for i in range(entities_type_num)
+        ]
+    ).T
+    entities_names = (
+        ["symbol"] * entities_type_num
+        if entities_type_name is None
+        else entities_type_name
+    )
+    entities = pd.DataFrame(data=data, columns=entities_names)
+    out_labels = [cls_names[i % class_num] for i in range(sample_num)]
+    out_data = np.vstack(
+        [
+            np.random.choice(out_labels, size=sample_num, replace=False)
+            for i in range(outcome_num)
+        ]
+    ).T
+    out_columns = (
+        ["Outcomes"]
+        if outcome_num == 1
+        else [f"Outcomes_{i}" for i in range(outcome_num)]
+    )
+    outcomes = pd.DataFrame(data=out_data, columns=out_columns).squeeze()
+    if outcome_num >= 2 and class_num == 2 and numeric_class:
+        outcomes.iloc[:, -1] = np.random.choice([0, 1], 100, p=[1 - p, p])
+    return entities, outcomes
+
+
+def _add_computed_tasks(main_task_directory):
+    """Populate the test task folder with test. The method was used an the output is in the appropriate locations.
+
+    Args:
+        main_task_directory (str): The folder to populate with the testing tasks
+    """
+    task_dict = {
+        "simple_bin": {},
+        "simple_cat": {"class_num": 5},
+        "interaction": {"entities_type_num": 2},
+        "two_int": {"entities_type_num": 2, "entities_type_name": ["symb1", "symb2"]},
+        "multi_label": {"numeric_class": True, "outcome_num": 5, "class_num": 2},
+    }
+    for task_name, params in task_dict.items():
+        dump_task_definitions(
+            *_generate_class_task_definitions(**params), main_task_directory, task_name
+        )
 
 
 class TestTasks(unittest.TestCase):
