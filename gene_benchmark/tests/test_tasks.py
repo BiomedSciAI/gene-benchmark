@@ -42,6 +42,57 @@ def _get_tasks_folder():
     return tasks_folder
 
 
+def _generate_class_task_definitions(
+    sample_num=100,
+    class_num=5,
+    entities_type_num=1,
+    outcome_num=1,
+    entities_type_name=None,
+    numeric_class=False,
+):
+    """Generates task definitions according to user specifications.
+
+    Args:
+        sample_num (int, optional): The number of samples in that task i.e. length. Defaults to 100.
+        class_num (int, optional): the number of classes in the outcome. Defaults to 5.
+        entities_type_num (int, optional): The number of entities type. Defaults to 1.
+        outcome_num (int, optional): The number of outcomes. Defaults to 1.
+        entities_type_name (list[str], optional): The names of each entities type. Defaults to None.
+        numeric_class (bool, optional): If True the classes are numeric. Defaults to False.
+
+    Returns:
+        _type_: _description_
+    """
+    cls_names = {i: i if numeric_class else f"class_{i}" for i in range(class_num)}
+    entities_list = [f"Gene_{i}" for i in range(sample_num)]
+    data = np.vstack(
+        [
+            np.random.choice(entities_list, size=sample_num, replace=False)
+            for i in range(entities_type_num)
+        ]
+    ).T
+    entities_names = (
+        ["symbol"] * entities_type_num
+        if entities_type_name is None
+        else entities_type_name
+    )
+    entities = pd.DataFrame(data=data, columns=entities_names)
+    out_labels = [cls_names[i % class_num] for i in range(sample_num)]
+    out_data = np.vstack(
+        [
+            np.random.choice(out_labels, size=sample_num, replace=False)
+            for i in range(outcome_num)
+        ]
+    ).T
+    out_columns = (
+        ["Outcomes"]
+        if outcome_num == 1
+        else [f"Outcomes_{i}" for i in range(outcome_num)]
+    )
+    outcomes = pd.DataFrame(data=out_data, columns=out_columns).squeeze()
+    return entities, outcomes
+
+
 class TestTasks(unittest.TestCase):
     def _test_filter_entitiles(self, task_name):
         tasks_folder = _get_tasks_folder()
