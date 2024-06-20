@@ -76,7 +76,7 @@ def save_encodings(encodings, output_file_dir):
     model_encodings_dir = Path(output_file_dir) / "cellPLM"
     model_encodings_dir.mkdir(parents=True, exist_ok=True)
     output_file_path = model_encodings_dir / "encodings.csv"
-    encodings.to_csv(output_file_path)
+    encodings.to_csv(output_file_path, index_label="symbol")
 
 
 @click.command()
