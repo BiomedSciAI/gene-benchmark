@@ -5,7 +5,24 @@
 # https://www.dropbox.com/scl/fo/i5rmxgtqzg7iykt2e9uqm/h?rlkey=o8hi0xads9ol07o48jdityzv1&e=1&dl=0
 
 
+import json
+
 import click
+import torch
+
+
+def download_files():
+    pass
+
+
+def load_files(input_file_dir):
+    model_file = f"{input_file_dir}/20230926_85M.best.ckpt"
+    model_config_file = f"{input_file_dir}/20230926_85M.config.json"
+    with open(model_config_file) as f:
+        model_configs = json.load(f)
+
+    model = torch.load(model_file, map_location=torch.device("cpu"))
+    return model_configs, model
 
 
 @click.command()
@@ -29,7 +46,11 @@ import click
     default="./encodings",
 )
 def main(allow_downloads, input_file_dir, output_file_dir):
-    pass
+
+    if allow_downloads:
+        model_configs, model = download_files()
+    else:
+        model_configs, model = load_files(input_file_dir)
 
 
 if __name__ == "__main__":
