@@ -1,9 +1,16 @@
-from os import makedirs
-from pathlib import Path
-
 import click
 import pandas as pd
 import requests
+from task_retrieval import verify_source_of_data
+
+from gene_benchmark.tasks import dump_task_definitions
+
+TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
+
+
+def get_token_link_for_symbols(symb_list: list[str]):
+    token = get_token(symb_list)
+    return f"https://reactome.org/AnalysisService/download/{token}/pathways/TOTAL/result.csv"
 
 
 def get_symbol_list(
@@ -32,12 +39,7 @@ def get_token(
     return response.json()["summary"]["token"]
 
 
-def get_top_level_pathway(
-    url="https://reactome.org/download/current/ReactomePathwaysRelation.txt",
-):
-    hierarchies_df = pd.read_csv(
-        url, delimiter="\t", header=0, names=["parent", "child"]
-    )
+def get_top_level_pathway(hierarchies_df):
     pathway_that_are_parents = set(hierarchies_df["parent"].values)
     pathway_that_are_children = set(hierarchies_df["child"].values)
     pathway_who_are_just_parents = pathway_that_are_parents - pathway_that_are_children
@@ -101,22 +103,30 @@ def dump_to_task(task_dir, outcomes_df):
 def main(
     main_task_directory, task_name, allow_downloads, pathways_file, top_pathways_file
 ):
+
     if allow_downloads:
-        symb_list = get_symbol_list()
-        token = get_token(symb_list)
-        url = f"https://reactome.org/AnalysisService/download/{token}/pathways/TOTAL/result.csv"
-        df_path = pd.read_csv(url, index_col="Pathway identifier")
-        top_level = get_top_level_pathway()
-    else:
-        df_path = pd.read_csv(pathways_file)
-        top_level = pd.read_csv(top_pathways_file)
+        reactom_url = (
+            get_token_link_for_symbols(get_symbol_list()) if allow_downloads else ""
+        )
+
+    pathways_file = verify_source_of_data(
+        pathways_file, url=reactom_url, allow_downloads=allow_downloads
+    )
+    top_pathways_file = verify_source_of_data(
+        pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
+    )
+    df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
+    hierarchies_df = pd.read_csv(
+        top_pathways_file, delimiter="\t", header=0, names=["parent", "child"]
+    )
+    top_level = get_top_level_pathway(hierarchies_df)
 
     top_in_file_paths = top_level.intersection(set(df_path.index))
     df_path_top = df_path.loc[list(top_in_file_paths), :]
     outcomes = pathway_to_onehot(df_path_top)
-    task_dir = Path(main_task_directory) / f"{task_name}"
-    makedirs(task_dir, exist_ok=True)
-    dump_to_task(task_dir, outcomes)
+    symbols = pd.Series(outcomes.index, name="symbol")
+    dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
+
     return
 
 
