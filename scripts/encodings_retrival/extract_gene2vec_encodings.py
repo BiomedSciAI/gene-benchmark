@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 import pandas as pd
 
-GENE2VEC_URL = "https://github.com/jingcheng-du/Gene2vec/blob/6236e0b21fbc367bf8ff5695ed0cc1443861bd1e/pre_trained_emb/gene2vec_dim_200_iter_9_w2v.txt"
+GENE2VEC_URL = "https://raw.githubusercontent.com/jingcheng-du/Gene2vec/master/pre_trained_emb/gene2vec_dim_200_iter_9_w2v.txt"
 
 
 def load_encodings_w2v_format(path_to_data):
@@ -15,7 +15,7 @@ def load_encodings_w2v_format(path_to_data):
         index_col=0,
         header=None,
         skiprows=1,
-    )
+    ).dropna(axis=1)
 
 
 def save_encodings(encodings, output_file_dir):
@@ -44,7 +44,7 @@ def save_encodings(encodings, output_file_dir):
     default=False,
 )
 @click.option(
-    "--input-file-dir",
+    "--input-file",
     type=click.STRING,
     help="The path to the csv file with the encodings",
     default=None,
@@ -54,11 +54,11 @@ def save_encodings(encodings, output_file_dir):
     type=click.STRING,
     help="output files path",
 )
-def main(allow_downloads, input_file_dir, output_file_dir):
+def main(allow_downloads, input_file, output_file_dir):
 
     if allow_downloads:
         encodings = load_encodings_w2v_format(GENE2VEC_URL)
     else:
-        encodings = load_encodings_w2v_format(input_file_dir)
+        encodings = load_encodings_w2v_format(input_file)
 
     save_encodings(encodings, output_file_dir)
