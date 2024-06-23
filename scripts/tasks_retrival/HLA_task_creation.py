@@ -43,13 +43,11 @@ from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node"
 
-
-TASK_NAME = "HLA class I vs class II"
-COLUMN_OF_SYMBOLS = "Approved symbol"
+ENTITIES_COL = "Approved symbol"
 
 
 def extract_symbols_df(
-    downloaded_dataframe: pd.DataFrame, column_of_symbols: str = COLUMN_OF_SYMBOLS
+    downloaded_dataframe: pd.DataFrame, column_of_symbols: str = ENTITIES_COL
 ) -> pd.DataFrame:
     """Splice the column of the gene symbols into a new data frame and rename."""
     symbols = pd.DataFrame({"symbol": downloaded_dataframe[column_of_symbols]})
@@ -74,21 +72,13 @@ def extract_HLA_class_df(
     return outcomes.map(lambda x: x.strip() if type(x) == str else x)
 
 
-def report_task(df, task_dir_name):
-    print(f"Task saved to {task_dir_name}/")
-
-    col_name = df.columns[0]
-    print()  # for readability of the message
-    print(df[col_name].value_counts().to_string())
-
-
 @click.command("cli", context_settings={"show_default": True})
 @click.option(
     "--task-name",
     "-n",
     type=click.STRING,
     help="name for the specific task",
-    default=TASK_NAME,
+    default="HLA class I vs class II",
 )
 @click.option(
     "--input-file",
@@ -123,7 +113,7 @@ def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
 
     # downloaded_dataframe = read_table(input_file=input_path_or_url)
     downloaded_df = read_table(input_file=input_path_or_url, sep="\t")
-    symbols = extract_symbols_df(downloaded_df)
+    symbols = downloaded_df[ENTITIES_COL]
     outcomes = extract_HLA_class_df(downloaded_df)
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
     if verbose:
