@@ -8,7 +8,7 @@ from gene_benchmark.tasks import dump_task_definitions
 TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
 
 
-def get_token_link_for_symbols(symbols: list[str]):
+def get_token_link_for_symbols(symbols: list[str]) -> str:
     """
     Creates an analysis service pathways link for a given symbol list.
 
@@ -27,7 +27,7 @@ def get_token_link_for_symbols(symbols: list[str]):
 
 def get_symbol_list(
     url="https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json",
-):
+) -> list[str]:
     with requests.get(url) as response:
         response.raise_for_status()
         reactome_res = response.json()
@@ -37,7 +37,7 @@ def get_symbol_list(
 def get_token(
     identifiers: list[str],
     projection_url: str = "https://reactome.org/AnalysisService/identifiers/projection",
-):
+) -> str:
     """
     Data retrieval from Reactome API requires the use of token that represent a list of identifiers,
        the method use the  AnalysisService API to get the token for a given identifiers list.
@@ -65,7 +65,20 @@ def get_token(
     return response.json()["summary"]["token"]
 
 
-def get_top_level_pathway(hierarchies_df):
+def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
+    """
+    Returns the top level pathways from the table of pathways hierarchies.
+        top level are defined as pathways without a parent.
+
+    Args:
+    ----
+        hierarchies_df (pd.DataFrame): A data frame with a parent and child headers
+
+    Returns:
+    -------
+        set[str]: a set of top level pathways
+
+    """
     pathway_that_are_parents = set(hierarchies_df["parent"].values)
     pathway_that_are_children = set(hierarchies_df["child"].values)
     pathway_who_are_just_parents = pathway_that_are_parents - pathway_that_are_children
