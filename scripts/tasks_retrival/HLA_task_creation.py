@@ -35,62 +35,17 @@ doi: 10.1093/nar/gkac888. PMID: 36243972; PMCID: PMC9825485.
 
 """
 
-from pathlib import Path
-from urllib.parse import urlparse
-
 import click
 import pandas as pd
+from task_retrival import read_table, report_task_single_col, verify_source_of_data
+
+from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node"
 
 
 TASK_NAME = "HLA class I vs class II"
 COLUMN_OF_SYMBOLS = "Approved symbol"
-
-
-def verify_source_of_data(input_file: str | None, allow_downloads: bool = False) -> str:
-    """
-    verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
-    the DATA_URL.
-    This method will exit with an error if the input is not consistent with the workflow.
-
-    Args:
-    ----
-        input_file (str | None): name if input file.  None if not set, non-url path if set.
-        allow_downloads (bool, optional): has the user opted in to download the data from the source.
-            Defaults to False.
-
-    Returns:
-    -------
-        str: path to data file, wither local of the default.
-
-    """
-    if input_file is None:
-        if not allow_downloads:
-            raise ValueError(
-                f"Please enter path to local file via --input-file or turn on --allow-downloads to download task source from {input_file}"
-            )
-        # input file not given, allow download on.
-        return DATA_URL
-    elif allow_downloads:
-        raise ValueError(
-            "Arguments ambiguous:  Either give a local path of download from the web."
-        )
-    parsed_path = urlparse(str(input_file))
-    if not parsed_path.netloc == "":
-        raise ValueError(
-            f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
-        )
-    return input_file
-
-
-def read_table(input_file: str | Path, allow_downloads: bool = False, **kwargs):
-    try:
-        #  "NA" is the symbol for "neuroacanthocytosis".  Unless the na_filter is turned off, it would be read as Nan
-        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=False)
-    except Exception as exception:
-        raise RuntimeError(f"could not read {input_file}") from exception
-    return downloaded_dataframe
 
 
 def extract_symbols_df(
@@ -166,25 +121,13 @@ def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
         input_file, allow_downloads=allow_downloads
     )
 
-    downloaded_dataframe = read_table(input_file=input_path_or_url, sep="\t")
-    symbols = extract_symbols_df(downloaded_dataframe)
-    outcomes = extract_HLA_class_df(downloaded_dataframe)
-
-    # entered by the user.
-    main_task_directory = Path(main_task_directory)
-
-    # the specific directory for the task
-    task_dir_name = main_task_directory / task_name
-    task_dir_name.mkdir(exist_ok=True)
-
-    # save symbols to CSV file
-    symbols.to_csv(task_dir_name / "entities.csv", index=False)
-
-    # save outcomes to CSV file
-    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
-
+    # downloaded_dataframe = read_table(input_file=input_path_or_url)
+    downloaded_df = read_table(input_file=input_path_or_url, sep="\t")
+    symbols = extract_symbols_df(downloaded_df)
+    outcomes = extract_HLA_class_df(downloaded_df)
+    dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
     if verbose:
-        report_task(outcomes, task_dir_name)
+        report_task_single_col(outcomes, main_task_directory, task_name)
 
 
 if __name__ == "__main__":

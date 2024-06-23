@@ -50,7 +50,6 @@ def report_task_single_col(df, task_dir_name, task_name):
 
 def read_table(
     input_file: str | Path,
-    allow_downloads: bool = False,
     strip_values: bool = True,
     **kwargs,
 ):
