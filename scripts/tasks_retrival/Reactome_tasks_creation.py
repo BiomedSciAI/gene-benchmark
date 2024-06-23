@@ -8,8 +8,20 @@ from gene_benchmark.tasks import dump_task_definitions
 TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
 
 
-def get_token_link_for_symbols(symb_list: list[str]):
-    token = get_token(symb_list)
+def get_token_link_for_symbols(symbols: list[str]):
+    """
+    Creates an analysis service pathways link for a given symbol list.
+
+    Args:
+    ----
+        symbols (list[str]): list of symbols to create a pathways data file for
+
+    Returns:
+    -------
+        str: the to the csv file with the pathways for the symbols
+
+    """
+    token = get_token(symbols)
     return f"https://reactome.org/AnalysisService/download/{token}/pathways/TOTAL/result.csv"
 
 
