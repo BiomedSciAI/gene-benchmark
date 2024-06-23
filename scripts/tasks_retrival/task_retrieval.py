@@ -72,7 +72,8 @@ def read_table(
     ----
         input_file (str | Path): The location of the input file
         strip_values (bool, optional): Strip the strings of the table. Defaults to True.
-        filter_na (bool, optional): "NA" is the symbol for "neuroacanthocytosis", Unless the na_filter is turned off, it would be read as Nan. Defaults to False.
+        filter_na (bool, optional): "NA" is the symbol for "neuroacanthocytosis", Unless
+        the na_filter is turned off, it would be read as Nan. Defaults to False.
         kwargs: To be transferred to the pandas read CSV method
 
     Raises:
@@ -85,7 +86,7 @@ def read_table(
 
     """
     try:
-        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=False)
+        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=filter_na)
         if strip_values:
             downloaded_dataframe = downloaded_dataframe.map(
                 lambda x: x.strip() if type(x) == str else x
