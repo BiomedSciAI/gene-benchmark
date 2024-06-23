@@ -55,7 +55,7 @@ def save_encodings(encodings, output_file_dir):
     default=False,
 )
 @click.option(
-    "--input-file",
+    "--input-file-dir",
     type=click.STRING,
     help="The path to the csv file with the encodings",
     default=None,
@@ -66,11 +66,16 @@ def save_encodings(encodings, output_file_dir):
     help="output files path",
     default="./encodings",
 )
-def main(allow_downloads, input_file, output_file_dir):
+def main(allow_downloads, input_file_dir, output_file_dir):
 
     if allow_downloads:
         encodings = load_encodings_w2v_format(GENE2VEC_URL)
     else:
-        encodings = load_encodings_w2v_format(input_file)
+        path_to_data = Path(input_file_dir) / "gene2vec_dim_200_iter_9_w2v.txt"
+        encodings = load_encodings_w2v_format(path_to_data)
 
     save_encodings(encodings, output_file_dir)
+
+
+if __name__ == "__main__":
+    main()
