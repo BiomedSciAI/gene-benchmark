@@ -35,14 +35,28 @@ def get_symbol_list(
 
 
 def get_token(
-    token_list,
-    projection_url="https://reactome.org/AnalysisService/identifiers/projection",
+    identifiers: list[str],
+    projection_url: str = "https://reactome.org/AnalysisService/identifiers/projection",
 ):
+    """
+    Data retrieval from Reactome API requires the use of token that represent a list of identifiers,
+       the method use the  AnalysisService API to get the token for a given identifiers list.
+
+    Args:
+    ----
+        identifiers (list[str]): List of identifiers
+        projection_url (str, optional): Analysis service link. Defaults to "https://reactome.org/AnalysisService/identifiers/projection".
+
+    Returns:
+    -------
+        str: A Reactome Analysis service token
+
+    """
     headers = {
         "Accept": "application/json",
         "Content-Type": "text/plain",
     }
-    symbols = "\n".join(token_list)
+    symbols = "\n".join(identifiers)
     response = requests.post(
         projection_url,
         headers=headers,
