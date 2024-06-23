@@ -31,15 +31,17 @@ DATA_URL = (
 TASK_NAME = "Gene2Gene"
 
 
-def concat_tables(input_path_or_url, entity_files, col_names, sep=" ", header=0):
-    param_dict = {"sep": sep, "header": header, "names": col_names}
-    return pd.concat(
+def concat_tables(input_path_or_url, entity_files, column_names, sep=" ", header=None):
+    param_dict = {"sep": sep, "header": header}
+    concat_df = pd.concat(
         [
-            read_table(f"{input_path_or_url}/{entity_file}", param_dict)
+            read_table(f"{input_path_or_url}/{entity_file}", **param_dict)
             for entity_file in entity_files
         ],
         axis=0,
     )
+    concat_df.columns = column_names
+    return concat_df
 
 
 def remove_duplicates(symbols, outcomes):
@@ -105,9 +107,8 @@ def main(
         "valid_label.txt",
         "test_label.txt",
     ]
-
     input_path_or_url = verify_source_of_data(
-        input_file, allow_downloads=allow_downloads
+        input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
     symbols = concat_tables(input_path_or_url, entity_files, ["symbol", "symbol"])
     outcomes = concat_tables(input_path_or_url, outcome_files, ["outcomes"])
