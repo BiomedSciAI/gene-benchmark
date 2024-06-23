@@ -23,7 +23,7 @@ via the supplied textual file that can be found at
 https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node
 
 The data was released under the Creative Commons Public Domain (CC0) License.
-original license statment can be found in https://www.genenames.org/about/license/
+original license statement can be found in https://www.genenames.org/about/license/
 
 
 In citation of this data, please site the original authors:
