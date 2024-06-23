@@ -11,8 +11,8 @@ GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/pyto
 TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/geneformer/token_dictionary.pkl?download=true"
 
 
-def download_geneformer(GENEFORMER_URL):
-    local_filename = "pytorch_model.bin"
+def download_geneformer(dir_path):
+    local_filename = dir_path / "pytorch_model.bin"
     with requests.get(GENEFORMER_URL, stream=True) as response:
         response.raise_for_status()
         with open(local_filename, "wb") as file:
@@ -20,8 +20,8 @@ def download_geneformer(GENEFORMER_URL):
                 file.write(chunk)
 
 
-def download_token_dict(TOKEN_DICT_URL):
-    local_filename = "token_dictionary.pkl"
+def download_token_dict(dir_path):
+    local_filename = dir_path / "token_dictionary.pkl"
     with requests.get(TOKEN_DICT_URL, stream=True) as response:
         response.raise_for_status()
         with open(local_filename, "wb") as file:
