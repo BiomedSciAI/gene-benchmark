@@ -31,17 +31,14 @@ DATA_URL = (
 TASK_NAME = "Gene2Gene"
 
 
-def concat_tables(input_path_or_url, entity_files, tmp_col_names, sep=" ", header=0):
+def concat_tables(input_path_or_url, entity_files, col_names, sep=" ", header=0):
+    param_dict = {"sep": sep, "header": header, "names": col_names}
     return pd.concat(
         [
-            read_table(
-                f"{input_path_or_url}/{entity_file}",
-                sep=sep,
-                header=header,
-                names=tmp_col_names,
-            )
+            read_table(f"{input_path_or_url}/{entity_file}", param_dict)
             for entity_file in entity_files
-        ]
+        ],
+        axis=0,
     )
 
 
@@ -107,7 +104,7 @@ def main(
     input_path_or_url = verify_source_of_data(
         input_file, allow_downloads=allow_downloads
     )
-    symbols = concat_tables(input_path_or_url, entity_files, ["s1", "s2"])
+    symbols = concat_tables(input_path_or_url, entity_files, ["symbol", "symbol"])
     outcomes = concat_tables(input_path_or_url, outcome_files, ["outcomes"])
 
     assert len(symbols) == len(
@@ -120,9 +117,6 @@ def main(
 
         outcomes = outcomes.loc[~duplicate_pairs]
         symbols = symbols.loc[~duplicate_pairs]
-
-    # rename the columns - seems safer not the try and manipulate data frames with non unique coloumn names
-    symbols.columns = ["symbol", "symbol"]
 
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
     if verbose:
