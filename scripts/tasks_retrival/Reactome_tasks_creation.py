@@ -85,25 +85,40 @@ def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
     return pathway_who_are_just_parents
 
 
-def pathway_to_onehot(pathway_df):
+def pathway_to_onehot(
+    pathway_df: pd.DataFrame,
+    pathway_name: str = "Pathway name",
+    included_genes: str = "Submitted entities found",
+) -> pd.DataFrame:
+    """
+    Give a pathway data frame that has each pathway as a row with
+       a list of included genes the method creates a data frame where each
+       row is a gene and each column is a pathway the cells are true when
+       the gene is participating in the pathways.
+
+    Args:
+    ----
+        pathway_df (pd.DataFrame): A data frame with pathways as rows and a gene in one of the cells
+        pathway_name (str): The name of the pathways name columns
+        included_genes (str): The name of the included genes in a pathway
+        Submitted entities found with the participating genes
+
+    Returns:
+    -------
+        pd.DataFrame: A one hot dataframe where rows are genes and columns are pathways
+
+    """
     any_pathway_genes = list(
-        set(";".join(pathway_df["Submitted entities found"].values).split(";"))
+        set(";".join(pathway_df[included_genes].values).split(";"))
     )
     outcomes = pd.DataFrame(
-        index=any_pathway_genes, columns=pathway_df["Pathway name"], data=False
+        index=any_pathway_genes, columns=pathway_df[pathway_name], data=False
     )
     for pathway_idx in pathway_df.index:
-        path_genes = pathway_df.loc[pathway_idx, "Submitted entities found"].split(";")
-        pathway_name = pathway_df.loc[pathway_idx, "Pathway name"]
+        path_genes = pathway_df.loc[pathway_idx, included_genes].split(";")
+        pathway_name = pathway_df.loc[pathway_idx, pathway_name]
         outcomes.loc[path_genes, pathway_name] = True
     return outcomes
-
-
-def dump_to_task(task_dir, outcomes_df):
-    entities_path = task_dir / "entities.csv"
-    outcomes_path = task_dir / "outcomes.csv"
-    pd.Series(outcomes_df.index, name="symbol").to_csv(entities_path, index=False)
-    outcomes_df.to_csv(outcomes_path, index=False)
 
 
 @click.command()
