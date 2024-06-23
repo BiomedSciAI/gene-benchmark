@@ -82,7 +82,7 @@ OUTCOMES_COL = "Approved name"
 )
 def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
     input_path_or_url = verify_source_of_data(
-        input_file, allow_downloads=allow_downloads
+        input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
     downloaded_df = read_table(input_file=input_path_or_url, sep="\t")
     symbols = downloaded_df[ENTITIES_COL]
