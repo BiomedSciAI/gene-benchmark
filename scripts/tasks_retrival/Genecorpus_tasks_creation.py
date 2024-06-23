@@ -32,12 +32,14 @@ Epub ahead of print. (*co-corresponding authors)
 import pickle
 from io import BytesIO
 from pathlib import Path
-from urllib.parse import urlparse
 
 import click
 import mygene
 import pandas as pd
 import requests
+from task_retrieval import report_task_single_col, verify_source_of_data
+
+from gene_benchmark.tasks import dump_task_definitions
 
 DATA_FILE_NAMES = {
     "bivalent_vs_lys4_only": "bivalent_promoters/bivalent_vs_lys4_only.pickle?download=true",
@@ -78,42 +80,6 @@ def load_pickle_from_url(url):
         print(f"Error downloading the file: {e}")
     except pickle.UnpicklingError as e:
         print(f"Error loading the pickle file: {e}")
-
-
-def verify_source_of_data(input_file: str | None, allow_downloads: bool = False) -> str:
-    """
-    verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
-    the DATA_URL.
-    This method will exit with an error if the input is not consistent with the workflow.
-
-    Args:
-    ----
-        input_file (str | None): name if input file.  None if not set, non-url path if set.
-        allow_downloads (bool, optional): has the user opted in to download the data from the source.
-            Defaults to False.
-
-    Returns:
-    -------
-        str: path to data file, wither local of the default.
-
-    """
-    if input_file is None:
-        if not allow_downloads:
-            raise ValueError(
-                f"Please enter path to local file via --input-file or turn on --allow-downloads to download task source from {input_file}"
-            )
-        # input file not given, allow download on.
-        return DATA_URL
-    elif allow_downloads:
-        raise ValueError(
-            "Arguments ambiguous:  Either give a local path of download from the web."
-        )
-    parsed_path = urlparse(str(input_file))
-    if not parsed_path.netloc == "":
-        raise ValueError(
-            f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
-        )
-    return input_file
 
 
 def get_symbols(gene_targetId_list):
@@ -236,26 +202,20 @@ def main(
 ):
     for task_name, task_file in DATA_FILE_NAMES.items():
         input_path_or_url = verify_source_of_data(
-            input_file, allow_downloads=allow_downloads
+            input_file, url=DATA_URL, allow_downloads=allow_downloads
         )
         if allow_downloads:
             full_path = input_path_or_url + task_file
         else:
             full_path = Path(input_path_or_url) / task_file
-        main_task_directory = Path(main_task_directory)
+
         data = load_pickle_from_url(full_path)
-        entities, outcomes = dictionary_to_task(
+        symbols, outcomes = dictionary_to_task(
             create_symbol_dict(data), remove_duplicates=remove_duplicates
         )
-        # the specific directory for the task
-        task_dir_name = main_task_directory / task_name
-        task_dir_name.mkdir(exist_ok=True)
-
-        # save symbols to CSV file
-        entities.to_csv(task_dir_name / "entities.csv", index=False)
-
-        # save outcomes to CSV file
-        outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
+        dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
+        if verbose:
+            report_task_single_col(outcomes, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
