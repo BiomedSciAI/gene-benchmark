@@ -42,10 +42,21 @@ def verify_source_of_data(
     return input_file
 
 
-def report_task_single_col(df, task_dir_name, task_name):
+def report_task_single_col(
+    outcome_series: pd.Series, task_dir_name: str | Path, task_name: str
+):
+    """
+    Reporting the class distribution for a single class prediction task.
+
+    Args:
+    ----
+        outcome_series (pd.Series): The outcome
+        task_dir_name (str | Path): the path in which the task is saved
+        task_name (str): the name of the task
+
+    """
     print(f"Task {task_name} saved to {task_dir_name}/ \n")
-    col_name = df.columns[0]
-    print(df[col_name].value_counts().to_string())
+    print(outcome_series.value_counts().to_string())
 
 
 def read_table(
