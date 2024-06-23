@@ -114,7 +114,7 @@ def main(
 
     assert len(symbols) == len(
         outcomes
-    ), " the lengths of the concatinated files does not match"
+    ), " the lengths of the concatenated files does not match"
     # removed all entities that are duplicated, which indicates an issue with the data curation
     if not keep_duplicates:
         symbols, outcomes = remove_duplicates(symbols, outcomes)
