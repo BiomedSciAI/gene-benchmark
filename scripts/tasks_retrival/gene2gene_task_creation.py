@@ -42,6 +42,11 @@ def concat_tables(input_path_or_url, entity_files, col_names, sep=" ", header=0)
     )
 
 
+def remove_duplicates(symbols, outcomes):
+    duplicate_pairs = symbols.duplicated(keep=False)
+    return symbols.loc[~duplicate_pairs], outcomes.loc[~duplicate_pairs]
+
+
 @click.command("cli", context_settings={"show_default": True})
 @click.option(
     "--task-name",
@@ -110,14 +115,9 @@ def main(
     assert len(symbols) == len(
         outcomes
     ), " the lengths of the concatinated files does not match"
-
     # removed all entities that are duplicated, which indicates an issue with the data curation
     if not keep_duplicates:
-        duplicate_pairs = symbols.duplicated(keep=False)
-
-        outcomes = outcomes.loc[~duplicate_pairs]
-        symbols = symbols.loc[~duplicate_pairs]
-
+        symbols, outcomes = remove_duplicates(symbols, outcomes)
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
     if verbose:
         report_task_single_col(outcomes, main_task_directory, task_name)
