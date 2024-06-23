@@ -93,9 +93,9 @@ def main(
         input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
 
-    downloaded_dataframe = read_table(input_file=input_path_or_url)
-    symbols = downloaded_dataframe[ENTITIES_COL]
-    outcomes = downloaded_dataframe[outcome_column]
+    downloaded_df = read_table(input_file=input_path_or_url)
+    symbols = downloaded_df[ENTITIES_COL]
+    outcomes = downloaded_df[outcome_column]
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
     if verbose:
