@@ -9,6 +9,18 @@ GENE2VEC_URL = "https://raw.githubusercontent.com/jingcheng-du/Gene2vec/master/p
 
 
 def load_encodings_w2v_format(path_to_data):
+    """
+    Read the gene2vec embeddings word2vec format.
+
+    Args:
+    ----
+        path_to_data (str): path to encodings file
+
+    Returns:
+    -------
+        The gene2vec encodings [24447,200]
+
+    """
     return pd.read_csv(
         path_to_data,
         sep=" ",
@@ -25,7 +37,6 @@ def save_encodings(encodings, output_file_dir):
     Args:
     ----
         encodings (pd.DataFrame): the encodings
-        model_type (str): "blood" or "human"
         output_file_dir (str): path to dir for saving the file
 
     """
@@ -53,6 +64,7 @@ def save_encodings(encodings, output_file_dir):
     "--output-file-dir",
     type=click.STRING,
     help="output files path",
+    default="./encodings",
 )
 def main(allow_downloads, input_file, output_file_dir):
 
