@@ -4,6 +4,7 @@ import requests
 from task_retrieval import verify_source_of_data
 
 from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrival.task_retrieval import list_form_to_onehot_form
 
 TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
 
@@ -85,42 +86,6 @@ def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
     return pathway_who_are_just_parents
 
 
-def pathway_to_onehot(
-    pathway_df: pd.DataFrame,
-    pathway_name: str = "Pathway name",
-    included_genes: str = "Submitted entities found",
-) -> pd.DataFrame:
-    """
-    Give a pathway data frame that has each pathway as a row with
-       a list of included genes the method creates a data frame where each
-       row is a gene and each column is a pathway the cells are true when
-       the gene is participating in the pathways.
-
-    Args:
-    ----
-        pathway_df (pd.DataFrame): A data frame with pathways as rows and a gene in one of the cells
-        pathway_name (str): The name of the pathways name columns
-        included_genes (str): The name of the included genes in a pathway
-        Submitted entities found with the participating genes
-
-    Returns:
-    -------
-        pd.DataFrame: A one hot dataframe where rows are genes and columns are pathways
-
-    """
-    any_pathway_genes = list(
-        set(";".join(pathway_df[included_genes].values).split(";"))
-    )
-    outcomes = pd.DataFrame(
-        index=any_pathway_genes, columns=pathway_df[pathway_name], data=False
-    )
-    for pathway_idx in pathway_df.index:
-        path_genes = pathway_df.loc[pathway_idx, included_genes].split(";")
-        pathway_name = pathway_df.loc[pathway_idx, pathway_name]
-        outcomes.loc[path_genes, pathway_name] = True
-    return outcomes
-
-
 @click.command()
 @click.option(
     "--main-task-directory",
@@ -170,6 +135,7 @@ def main(
         pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
     )
     df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
+
     hierarchies_df = pd.read_csv(
         top_pathways_file, delimiter="\t", header=0, names=["parent", "child"]
     )
@@ -177,7 +143,8 @@ def main(
 
     top_in_file_paths = top_level.intersection(set(df_path.index))
     df_path_top = df_path.loc[list(top_in_file_paths), :]
-    outcomes = pathway_to_onehot(df_path_top)
+    df_path_top.index = df_path_top["Pathway name"]
+    outcomes = list_form_to_onehot_form(df_path_top)
     symbols = pd.Series(outcomes.index, name="symbol")
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
