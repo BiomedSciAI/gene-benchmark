@@ -66,11 +66,31 @@ def report_task_single_col(
 def read_table(
     input_file: str | Path,
     strip_values: bool = True,
+    filter_na: bool = False,
     **kwargs,
 ):
+    """
+    Reads a table from an input file.
+
+    Args:
+    ----
+        input_file (str | Path): The location of the input file
+        strip_values (bool, optional): Strip the strings of the table. Defaults to True.
+        filter_na (bool, optional): "NA" is the symbol for "neuroacanthocytosis", Unless
+        the na_filter is turned off, it would be read as Nan. Defaults to False.
+        kwargs: To be transferred to the pandas read CSV method
+
+    Raises:
+    ------
+        RuntimeError: If the table is unreadable
+
+    Returns:
+    -------
+        pd.DataFrame: A data frame containing the table
+
+    """
     try:
-        #  "NA" is the symbol for "neuroacanthocytosis".  Unless the na_filter is turned off, it would be read as Nan
-        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=False)
+        downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=filter_na)
         if strip_values:
             downloaded_dataframe = downloaded_dataframe.map(
                 lambda x: x.strip() if type(x) == str else x
