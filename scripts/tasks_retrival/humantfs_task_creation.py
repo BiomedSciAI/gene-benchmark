@@ -38,7 +38,7 @@ from gene_benchmark.tasks import dump_task_definitions
 DATA_URL = (
     "https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
 )
-COLUMN_OF_SYMBOLS = "HGNC symbol"
+ENTITIES_COL = "HGNC symbol"
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -70,7 +70,7 @@ COLUMN_OF_SYMBOLS = "HGNC symbol"
     default="./tasks",
 )
 @click.option(
-    "--outcome_column_name",
+    "--outcome-column",
     type=click.STRING,
     help="The task root directory.  Will not be created.",
     default="Is TF?",
@@ -86,19 +86,16 @@ def main(
     main_task_directory,
     input_file,
     allow_downloads,
-    outcome_column_name,
+    outcome_column,
     verbose,
 ):
     input_path_or_url = verify_source_of_data(
         input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
 
-    downloaded_dataframe = read_table(input_file=input_path_or_url, strip_value=True)
-    downloaded_dataframe = downloaded_dataframe.map(
-        lambda x: x.strip() if type(x) == str else x
-    )
-    symbols = downloaded_dataframe[COLUMN_OF_SYMBOLS]
-    outcomes = downloaded_dataframe[outcome_column_name]
+    downloaded_dataframe = read_table(input_file=input_path_or_url)
+    symbols = downloaded_dataframe[ENTITIES_COL]
+    outcomes = downloaded_dataframe[outcome_column]
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
     if verbose:

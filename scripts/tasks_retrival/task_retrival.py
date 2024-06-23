@@ -48,10 +48,19 @@ def report_task_single_col(df, task_dir_name, task_name):
     print(df[col_name].value_counts().to_string())
 
 
-def read_table(input_file: str | Path, allow_downloads: bool = False, **kwargs):
+def read_table(
+    input_file: str | Path,
+    allow_downloads: bool = False,
+    strip_values: bool = True,
+    **kwargs,
+):
     try:
         #  "NA" is the symbol for "neuroacanthocytosis".  Unless the na_filter is turned off, it would be read as Nan
         downloaded_dataframe = pd.read_csv(input_file, **kwargs, na_filter=False)
+        if strip_values:
+            downloaded_dataframe = downloaded_dataframe.map(
+                lambda x: x.strip() if type(x) == str else x
+            )
     except Exception as exception:
         raise RuntimeError(f"could not read {input_file}") from exception
     return downloaded_dataframe
