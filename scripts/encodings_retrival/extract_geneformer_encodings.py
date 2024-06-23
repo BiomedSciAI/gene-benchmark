@@ -34,10 +34,6 @@ def add_tokens_as_index(encodings, token_dict):
         encodings["bert.embeddings.word_embeddings.weight"].detach(),
         index=list(token_dict.keys()),
     )
-    encodings_with_symbols = encodings_with_symbols.reset_index()
-    encodings_with_symbols = encodings_with_symbols.rename(
-        columns={"index": "ensembl_gene_id"}
-    )
     return encodings_with_symbols
 
 
