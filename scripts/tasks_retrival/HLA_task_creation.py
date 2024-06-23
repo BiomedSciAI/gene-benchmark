@@ -36,7 +36,6 @@ doi: 10.1093/nar/gkac888. PMID: 36243972; PMCID: PMC9825485.
 """
 
 import click
-import pandas as pd
 from task_retrival import read_table, report_task_single_col, verify_source_of_data
 
 from gene_benchmark.tasks import dump_task_definitions
@@ -44,32 +43,7 @@ from gene_benchmark.tasks import dump_task_definitions
 DATA_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node"
 
 ENTITIES_COL = "Approved symbol"
-
-
-def extract_symbols_df(
-    downloaded_dataframe: pd.DataFrame, column_of_symbols: str = ENTITIES_COL
-) -> pd.DataFrame:
-    """Splice the column of the gene symbols into a new data frame and rename."""
-    symbols = pd.DataFrame({"symbol": downloaded_dataframe[column_of_symbols]})
-    return symbols.map(lambda x: x.strip() if type(x) == str else x)
-
-
-def extract_HLA_class_df(
-    downloaded_dataframe: pd.DataFrame, target_column_name: str = "Approved name"
-) -> pd.DataFrame:
-    """Splice the two columns of interest into a new data frame, rename and extract HLC Class from the name."""
-    # extract and rename to the column to the standard name
-    # class is extracted from the end of the approved name field, after the comma.
-    # class is either "class I" or "class II"
-    outcomes = pd.DataFrame(
-        {
-            "Outcomes": downloaded_dataframe[target_column_name].map(
-                lambda x: x.split(",")[1]
-            ),
-        }
-    )
-    # make sure there are no extra spaces around the values and return
-    return outcomes.map(lambda x: x.strip() if type(x) == str else x)
+OUTCOMES_COL = "Approved name"
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -110,11 +84,9 @@ def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
     input_path_or_url = verify_source_of_data(
         input_file, allow_downloads=allow_downloads
     )
-
-    # downloaded_dataframe = read_table(input_file=input_path_or_url)
     downloaded_df = read_table(input_file=input_path_or_url, sep="\t")
     symbols = downloaded_df[ENTITIES_COL]
-    outcomes = extract_HLA_class_df(downloaded_df)
+    outcomes = downloaded_df[OUTCOMES_COL].apply(lambda x: x.split(",")[1])
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
     if verbose:
         report_task_single_col(outcomes, main_task_directory, task_name)
