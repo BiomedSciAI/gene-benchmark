@@ -79,7 +79,7 @@ def remove_duplicates(symbols, outcomes):
     "--keep-duplicates",
     is_flag=True,
     default=True,
-    help="Do not remove entities that appear more than once",
+    help="Do not remove entities that appear more than once in the source data",
 )
 @click.option(
     "--verbose/--quite",
@@ -115,7 +115,6 @@ def main(
     assert len(symbols) == len(
         outcomes
     ), " the lengths of the concatenated files does not match"
-    # removed all entities that are duplicated, which indicates an issue with the data curation
     if not keep_duplicates:
         symbols, outcomes = remove_duplicates(symbols, outcomes)
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
