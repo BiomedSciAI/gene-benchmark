@@ -11,18 +11,9 @@ GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/pyto
 TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/geneformer/token_dictionary.pkl?download=true"
 
 
-def download_geneformer(dir_path):
-    local_filename = dir_path / "pytorch_model.bin"
-    with requests.get(GENEFORMER_URL, stream=True) as response:
-        response.raise_for_status()
-        with open(local_filename, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-
-def download_token_dict(dir_path):
-    local_filename = dir_path / "token_dictionary.pkl"
-    with requests.get(TOKEN_DICT_URL, stream=True) as response:
+def download_file_from_url(url, file_name, dir_path):
+    local_filename = dir_path / file_name
+    with requests.get(url, stream=True) as response:
         response.raise_for_status()
         with open(local_filename, "wb") as file:
             for chunk in response.iter_content(chunk_size=8192):
@@ -78,8 +69,12 @@ def main(allow_downloads, input_file_dir, output_file_dir):
     if allow_downloads:
         with tempfile.TemporaryDirectory() as tmpdirname:
             tmpdir = Path(tmpdirname)
-            download_geneformer(tmpdir)
-            download_token_dict(tmpdir)
+            download_file_from_url(
+                GENEFORMER_URL, file_name="pytorch_model.bin", dir_path=tmpdir
+            )
+            download_file_from_url(
+                TOKEN_DICT_URL, file_name="token_dictionary.pkl", dir_path=tmpdir
+            )
             path_to_data = Path(tmpdir) / "pytorch_model.bin"
             path_to_tokens = Path(tmpdir) / "token_dictionary.pkl"
             with open(path_to_tokens, "rb") as file:
