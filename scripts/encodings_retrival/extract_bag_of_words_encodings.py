@@ -12,14 +12,14 @@ from gene_benchmark.descriptor import NCBIDescriptor
 GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json"
 
 
-def get_symbol_list(url=GENE_SYMBOL_URL):
+def get_symbol_list(url: str = GENE_SYMBOL_URL):
     with requests.get(url) as response:
         response.raise_for_status()
         reactome_res = response.json()
     return [v["symbol"] for v in reactome_res["response"]["docs"]]
 
 
-def get_descriptions(gene_symbols: list, verbose):
+def get_descriptions(gene_symbols: list, verbose: bool):
     prompts_maker = NCBIDescriptor()
     prompts = prompts_maker.describe(entities=pd.Series(gene_symbols))
     prompts.index = gene_symbols
@@ -39,7 +39,10 @@ def create_bag_of_words(corpus: pd.Series, max_features: int = 1024):
 
 
 def save_encodings(
-    encodings, output_file_dir, sub_dir_name="Bag_of_words", file_name="encodings.csv"
+    encodings: pd.DataFrame,
+    output_file_dir: str,
+    sub_dir_name: str = "Bag_of_words",
+    file_name: str = "encodings.csv",
 ):
     """
     Save the gene encodings to the output dir.
