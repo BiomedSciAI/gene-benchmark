@@ -111,13 +111,13 @@ def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
     "--pathways-file",
     type=click.STRING,
     help="Path to the pathways files from reactome available using the analysis GUI",
-    default="",
+    default=None,
 )
 @click.option(
     "--top-pathways-file",
     type=click.STRING,
     help="The location of the ReactomePathwaysRelation file available at https://reactome.org/download-data",
-    default="",
+    default=None,
 )
 def main(
     main_task_directory, task_name, allow_downloads, pathways_file, top_pathways_file
@@ -132,7 +132,7 @@ def main(
         pathways_file, url=reactom_url, allow_downloads=allow_downloads
     )
     top_pathways_file = verify_source_of_data(
-        pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
+        top_pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
     )
     df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
 

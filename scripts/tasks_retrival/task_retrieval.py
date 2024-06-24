@@ -202,7 +202,7 @@ def list_form_to_onehot_form(
     )
     unique_identifier_list = {x.strip() for x in full_identifier_list}
     onehot_df = pd.DataFrame(
-        index=unique_identifier_list, columns=list_df.index, data=False
+        index=list(unique_identifier_list), columns=list_df.index, data=False
     )
     for pathway_idx in list_df.index:
         path_genes = list_df.loc[pathway_idx, participant_col_name].split(delimiter)
