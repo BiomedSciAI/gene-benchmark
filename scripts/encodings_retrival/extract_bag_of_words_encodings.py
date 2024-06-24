@@ -11,16 +11,22 @@ from gene_benchmark.descriptor import NCBIDescriptor
 GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json"
 
 
-def get_symbol_list(
-    url=GENE_SYMBOL_URL,
-) -> list[str]:
+def get_symbol_list(url=GENE_SYMBOL_URL):
     with requests.get(url) as response:
         response.raise_for_status()
         reactome_res = response.json()
     return [v["symbol"] for v in reactome_res["response"]["docs"]]
 
 
-def create_bag_of_words(corpus):
+def get_descriptions(gene_symbols: list):
+    prompts_maker = NCBIDescriptor()
+    prompts = prompts_maker.describe(entities=pd.Series(gene_symbols))
+    prompts.index = gene_symbols
+    prompts = prompts.dropna()
+    return prompts
+
+
+def create_bag_of_words(corpus: pd.Series):
     vectorizer = CountVectorizer(max_features=1024)
     X = vectorizer.fit_transform(corpus)
     return pd.DataFrame(X.toarray(), index=corpus.index)
@@ -74,10 +80,7 @@ def main(allow_downloads: bool, input_file: str, output_file_dir: str):
         with open(input_file) as file:
             gene_list = yaml.safe_load(file)
 
-    prompts_maker = NCBIDescriptor()
-    prompts = prompts_maker.describe(entities=pd.Series(gene_list))
-    prompts.index = gene_list
-    prompts = prompts.dropna()
+    prompts = get_descriptions(gene_list)
     encodings = create_bag_of_words(corpus=prompts)
     save_encodings(encodings, output_file_dir)
 
