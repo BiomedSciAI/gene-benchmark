@@ -50,6 +50,18 @@ DATA_FILE_NAMES = {
     "N1 network": "notch1_network/n1_target.pickle?download=true",
     "bivalent vs non-methylated": "bivalent_promoters/bivalent_vs_no_methyl.pickle?download=true",
 }
+DATA_LOCAL_FILE_NAMES = {
+    "bivalent_vs_lys4_only": Path("bivalent_promoters")
+    / Path("bivalent_vs_lys4_only.pickle"),
+    "dosage sensitive vs insensitive TF": Path("dosage_sensitive_tfs")
+    / Path("dosage_sensitivity_TFs.pickle"),
+    "long vs short range TF": Path("tf_regulatory_range")
+    / Path("tf_regulatory_range.pickle"),
+    "N1 targets": Path("notch1_network") / Path("n1_network.pickle"),
+    "N1 network": Path("notch1_network") / Path("n1_target.pickle?"),
+    "bivalent vs non-methylated": Path("bivalent_promoters")
+    / Path("bivalent_vs_no_methyl.pickle"),
+}
 DATA_URL = "https://huggingface.co/datasets/ctheodoris/Genecorpus-30M/resolve/main/example_input_files/gene_classification/"
 
 
@@ -134,7 +146,7 @@ def main(
         if allow_downloads:
             full_path = input_path_or_url + task_file
         else:
-            full_path = Path(input_path_or_url) / task_file
+            full_path = Path(input_path_or_url) / DATA_LOCAL_FILE_NAMES[task_name]
 
         data = load_pickle_from_url(full_path)
         symbols, outcomes = dictionary_to_task(
