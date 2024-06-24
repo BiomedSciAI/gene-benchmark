@@ -19,23 +19,23 @@ def get_symbol_list(url: str = GENE_SYMBOL_URL):
     return [v["symbol"] for v in reactome_res["response"]["docs"]]
 
 
-def get_descriptions(gene_symbols: list, verbose: bool):
+def get_descriptions(gene_symbols: list):
     prompts_maker = NCBIDescriptor()
     prompts = prompts_maker.describe(entities=pd.Series(gene_symbols))
     prompts.index = gene_symbols
-    prompts = prompts.dropna()
-    if verbose:
-        print("Created gene descriptions")
-        all_text = " ".join(prompts.values)
-        words = re.findall(r"\b\w+\b", all_text.lower())
-        print(f"Total number of words in vocabulary: {len(set(words))}")
-    return prompts
+    return prompts.dropna()
 
 
 def create_bag_of_words(corpus: pd.Series, max_features: int = 1024):
     vectorizer = CountVectorizer(max_features=max_features)
     X = vectorizer.fit_transform(corpus)
     return pd.DataFrame(X.toarray(), index=corpus.index)
+
+
+def print_number_of_unique_words(df: pd.DataFrame):
+    all_text = " ".join(df.values)
+    words = re.findall(r"\b\w+\b", all_text.lower())
+    print(f"Total number of words in vocabulary: {len(set(words))}")
 
 
 def save_encodings(
@@ -86,15 +86,15 @@ def main(allow_downloads: bool, input_file: str, output_file_dir: str, verbose: 
 
     if allow_downloads:
         gene_list = get_symbol_list(GENE_SYMBOL_URL)
-        if verbose:
-            print(f"Downloaded gene list from {GENE_SYMBOL_URL}")
     else:
         with open(input_file) as file:
             gene_list = yaml.safe_load(file)
-        if verbose:
-            print(f"Loaded gene list from {input_file}")
 
-    prompts = get_descriptions(gene_list, verbose)
+    if verbose:
+        print("Started extracting descriptions")
+    prompts = get_descriptions(gene_list)
+    if verbose:
+        print_number_of_unique_words(prompts)
     encodings = create_bag_of_words(corpus=prompts)
     save_encodings(encodings, output_file_dir)
 
