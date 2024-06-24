@@ -98,6 +98,36 @@ def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
     return pathway_who_are_just_parents
 
 
+def create_top_level_task(
+    hierarchies_df: pd.DataFrame,
+    df_path: pd.DataFrame,
+    entities_name: str = "symbol",
+    pathway_names: str = "Pathway name",
+) -> tuple[pd.Series, pd.DataFrame]:
+    """
+    Creates a top level tasks.
+
+    Args:
+    ----
+        hierarchies_df (pd.DataFrame): The pathways hierarchies table used to find the top pathways
+        df_path (pd.DataFrame): The pathways themselves, used to extract the gene list.
+        entities_name (str, optional): name of the entities. Defaults to 'symbol'.
+        pathway_names (str, optional): names of the pathways (converted from identifiers). Defaults to "Pathway name".
+
+    Returns:
+    -------
+        tuple[pd.Series,pd.DataFrame]: _description_
+
+    """
+    top_level = get_top_level_pathway(hierarchies_df)
+    top_in_file_paths = top_level.intersection(set(df_path.index))
+    df_path_top = df_path.loc[list(top_in_file_paths), :]
+    df_path_top.index = df_path_top[pathway_names]
+    outcomes = list_form_to_onehot_form(df_path_top)
+    symbols = pd.Series(outcomes.index, name=entities_name)
+    return symbols, outcomes
+
+
 @click.command()
 @click.option(
     "--main-task-directory",
@@ -150,13 +180,7 @@ def main(
     hierarchies_df = pd.read_csv(
         top_pathways_file, delimiter="\t", header=0, names=["parent", "child"]
     )
-    top_level = get_top_level_pathway(hierarchies_df)
-
-    top_in_file_paths = top_level.intersection(set(df_path.index))
-    df_path_top = df_path.loc[list(top_in_file_paths), :]
-    df_path_top.index = df_path_top["Pathway name"]
-    outcomes = list_form_to_onehot_form(df_path_top)
-    symbols = pd.Series(outcomes.index, name="symbol")
+    symbols, outcomes = create_top_level_task(hierarchies_df, df_path)
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
     return
