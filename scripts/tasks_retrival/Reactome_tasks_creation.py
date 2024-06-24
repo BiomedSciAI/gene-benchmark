@@ -141,7 +141,7 @@ def create_top_level_task(
     "-n",
     type=click.STRING,
     help="name for the specific task",
-    default="Pathways",
+    default="Pathways HGNC",
 )
 @click.option(
     "--allow-downloads",
@@ -156,13 +156,24 @@ def create_top_level_task(
     default=None,
 )
 @click.option(
-    "--top-pathways-file",
+    "--pathways-relation-file",
     type=click.STRING,
     help="The location of the ReactomePathwaysRelation file available at https://reactome.org/download-data",
     default=None,
 )
+@click.option(
+    "--verbose/--quite",
+    "-v/-q",
+    is_flag=True,
+    default=True,
+)
 def main(
-    main_task_directory, task_name, allow_downloads, pathways_file, top_pathways_file
+    main_task_directory,
+    task_name,
+    allow_downloads,
+    pathways_file,
+    pathways_relation_file,
+    verbose,
 ):
 
     reactom_url = (
@@ -172,17 +183,20 @@ def main(
     pathways_file = verify_source_of_data(
         pathways_file, url=reactom_url, allow_downloads=allow_downloads
     )
-    top_pathways_file = verify_source_of_data(
-        top_pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
+    pathways_relation_file = verify_source_of_data(
+        pathways_relation_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
     )
     df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
 
     hierarchies_df = pd.read_csv(
-        top_pathways_file, delimiter="\t", header=0, names=["parent", "child"]
+        pathways_relation_file, delimiter="\t", header=0, names=["parent", "child"]
     )
     symbols, outcomes = create_top_level_task(hierarchies_df, df_path)
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
-
+    if verbose:
+        print(
+            f"{task_name} was created at {main_task_directory} shaped {outcomes.shape}"
+        )
     return
 
 
