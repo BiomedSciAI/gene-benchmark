@@ -32,8 +32,8 @@ def get_descriptions(gene_symbols: list, verbose):
     return prompts
 
 
-def create_bag_of_words(corpus: pd.Series):
-    vectorizer = CountVectorizer(max_features=1024)
+def create_bag_of_words(corpus: pd.Series, max_features: int = 1024):
+    vectorizer = CountVectorizer(max_features=max_features)
     X = vectorizer.fit_transform(corpus)
     return pd.DataFrame(X.toarray(), index=corpus.index)
 
