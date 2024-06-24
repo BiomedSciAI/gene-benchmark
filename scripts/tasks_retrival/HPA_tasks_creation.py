@@ -42,22 +42,39 @@ def create_tasks(data, main_task_directory):
         )
         data_type = check_data_type(current_col_data)
         if data_type == "multi_class":
-            entities, outcomes = create_multi_label_task(current_col_data)
+            entities, outcomes = tag_list_to_multi_label(current_col_data)
         else:
             entities, outcomes = create_single_label_task(current_col_data)
         task_name = col.replace("/", "|")
         dump_task_definitions(entities, outcomes, main_task_directory, task_name)
 
 
-def create_multi_label_task(current_col_data):
+def tag_list_to_multi_label(
+    current_col_data: pd.Series, entities_name: str = "symbol", delimiter: str = ","
+) -> tuple[pd.Series, pd.DataFrame]:
+    """
+    Takes a table with entities in rows and a tag cloud of attributes in values
+      and converts into a multi label task.
+
+    Args:
+    ----
+        current_col_data (pd.Series): Series with entities as indexes and the attribute list as the values
+        entities_name (str, optional): Type of the entities. Defaults to 'symbol'.
+        delimiter (str, optional): The delimiter in the attributes cloud . Defaults to ','.
+
+    Returns:
+    -------
+        tuple[pd.Series,pd.DataFrame]: A tuple with the entities and a dta frame where each column is a attribute and the values represent the assignment to each attribute
+
+    """
     split_values_df = current_col_data.apply(
-        lambda x: [item.strip() for item in x.split(",")]
+        lambda x: [item.strip() for item in x.split(delimiter)]
     )
     vocab = list(set(np.concatenate(split_values_df.values)))
     outcome_df = pd.DataFrame(0, index=split_values_df.index, columns=vocab)
     for index in range(split_values_df.shape[0]):
         outcome_df.iloc[index][split_values_df.iloc[index]] = 1
-    entities = pd.Series(outcome_df.index, name="symbol")
+    entities = pd.Series(outcome_df.index, name=entities_name)
     return entities, outcome_df
 
 
