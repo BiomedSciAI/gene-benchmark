@@ -78,11 +78,7 @@ def save_encodings(
     help="output files path",
     default="./encodings",
 )
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-)
+@click.option("--verbose", "-v", is_flag=True, default=True)
 def main(allow_downloads: bool, input_file: str, output_file_dir: str, verbose: bool):
 
     if allow_downloads:
