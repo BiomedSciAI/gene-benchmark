@@ -12,6 +12,21 @@ TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/gene
 
 
 def download_file_from_url(url, file_name, dir_path, chunk_size=8192):
+    """
+    Download a file fom a url path.
+
+    Args:
+    ----
+        url (str): url of target file
+        file_name (str): name of output file
+        dir_path (pathlib.Path): path to dir for saving the file
+        chunk_size (int): size of data to be streamed
+
+    Returns:
+    -------
+        The path of the saved file
+
+    """
     local_filename = dir_path / file_name
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
@@ -22,6 +37,19 @@ def download_file_from_url(url, file_name, dir_path, chunk_size=8192):
 
 
 def add_tokens_as_index(encodings, token_dict):
+    """
+    Add tokens names to the encodings file.
+
+    Args:
+    ----
+        encodings (torch.tensor): the encodings
+        token_dict (dict): mapping of symbol name to index
+
+    Returns:
+    -------
+        encodings with the symbols
+
+    """
     encodings_with_symbols = pd.DataFrame(
         encodings["bert.embeddings.word_embeddings.weight"].detach(),
         index=list(token_dict.keys()),
