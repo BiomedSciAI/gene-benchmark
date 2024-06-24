@@ -4,6 +4,7 @@ import click
 import pandas as pd
 import requests
 import yaml
+from sklearn.feature_extraction.text import CountVectorizer
 
 from gene_benchmark.descriptor import NCBIDescriptor
 
@@ -17,6 +18,12 @@ def get_symbol_list(
         response.raise_for_status()
         reactome_res = response.json()
     return [v["symbol"] for v in reactome_res["response"]["docs"]]
+
+
+def create_bag_of_words(corpus):
+    vectorizer = CountVectorizer(max_features=1024)
+    X = vectorizer.fit_transform(corpus)
+    return pd.DataFrame(X.toarray(), index=corpus.index)
 
 
 def save_encodings(
@@ -69,8 +76,10 @@ def main(allow_downloads: bool, input_file: str, output_file_dir: str):
 
     prompts_maker = NCBIDescriptor()
     prompts = prompts_maker.describe(entities=pd.Series(gene_list))
-
-    save_encodings(prompts, output_file_dir)
+    prompts.index = gene_list
+    prompts = prompts.dropna()
+    encodings = create_bag_of_words(corpus=prompts)
+    save_encodings(encodings, output_file_dir)
 
 
 if __name__ == "__main__":
