@@ -1,7 +1,11 @@
+import pickle
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlparse
 
+import mygene
 import pandas as pd
+import requests
 
 
 def verify_source_of_data(
@@ -94,3 +98,77 @@ def read_table(
     except Exception as exception:
         raise RuntimeError(f"could not read {input_file}") from exception
     return downloaded_dataframe
+
+
+def load_pickle_from_url(url):
+    """
+    Load a pickle file from a URL.
+
+    Parameters
+    ----------
+    url (str): The URL of the pickle file.
+
+    Returns
+    -------
+    object: The object loaded from the pickle file.
+
+    """
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Check if the request was successful
+
+        # Create a BytesIO object from the response content
+        file_object = BytesIO(response.content)
+
+        # Load the pickle file from the BytesIO object
+        data = pickle.load(file_object)
+
+        return data
+    except requests.exceptions.RequestException as e:
+        print(f"Error downloading the file: {e}")
+    except pickle.UnpicklingError as e:
+        print(f"Error loading the pickle file: {e}")
+
+
+def get_symbols(gene_targetId_list):
+    """
+        given s list of gene id's (names Like ENSG00000006468) this method
+        uses the MyGenInfo package to retrieve the gene symbol (name like PLAC4).
+
+    Args:
+    ----
+        gene_targetId_list (list): list of gene id's (names Like ENSG00000006468)
+
+    Returns:
+    -------
+        list: List of corresponding symbols
+
+    """
+    mg = mygene.MyGeneInfo()
+    list_of_gene_metadata = mg.querymany(
+        gene_targetId_list, species="human", fields="symbol"
+    )
+    gene_metadata_df = get_id_to_symbol_df(list_of_gene_metadata)
+    symblist = [gene_metadata_df.loc[x, "symbol"] for x in gene_targetId_list]
+    return [v for v in symblist if not pd.isna(v)]
+
+
+def get_id_to_symbol_df(list_of_gene_metadata):
+    """
+        The method converts a list of gene metadata into a data frame,
+        each dictionary will contain the field symbol and the gene id as the query value.
+
+    Args:
+    ----
+        list_of_gene_metadata (list): list containing gene metadata.
+
+    Returns:
+    -------
+        pd.DataFrame: a data frame with the gene id as index with the symbol as value
+
+    """
+    gene_metadata_df = pd.DataFrame(list_of_gene_metadata)
+    # some target id have multiple symbols
+    gene_metadata_df = gene_metadata_df.drop_duplicates(subset="query")
+    gene_metadata_df.index = gene_metadata_df["query"]
+    return gene_metadata_df

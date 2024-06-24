@@ -29,15 +29,18 @@ Epub ahead of print. (*co-corresponding authors)
 
 """
 
-import pickle
-from io import BytesIO
 from pathlib import Path
-from urllib.parse import urlparse
 
 import click
-import mygene
 import pandas as pd
-import requests
+from task_retrieval import (
+    get_symbols,
+    load_pickle_from_url,
+    report_task_single_col,
+    verify_source_of_data,
+)
+
+from gene_benchmark.tasks import dump_task_definitions
 
 DATA_FILE_NAMES = {
     "bivalent_vs_lys4_only": "bivalent_promoters/bivalent_vs_lys4_only.pickle?download=true",
@@ -47,117 +50,19 @@ DATA_FILE_NAMES = {
     "N1 network": "notch1_network/n1_target.pickle?download=true",
     "bivalent vs non-methylated": "bivalent_promoters/bivalent_vs_no_methyl.pickle?download=true",
 }
+DATA_LOCAL_FILE_NAMES = {
+    "bivalent_vs_lys4_only": Path("bivalent_promoters")
+    / Path("bivalent_vs_lys4_only.pickle"),
+    "dosage sensitive vs insensitive TF": Path("dosage_sensitive_tfs")
+    / Path("dosage_sensitivity_TFs.pickle"),
+    "long vs short range TF": Path("tf_regulatory_range")
+    / Path("tf_regulatory_range.pickle"),
+    "N1 targets": Path("notch1_network") / Path("n1_network.pickle"),
+    "N1 network": Path("notch1_network") / Path("n1_target.pickle?"),
+    "bivalent vs non-methylated": Path("bivalent_promoters")
+    / Path("bivalent_vs_no_methyl.pickle"),
+}
 DATA_URL = "https://huggingface.co/datasets/ctheodoris/Genecorpus-30M/resolve/main/example_input_files/gene_classification/"
-
-
-def load_pickle_from_url(url):
-    """
-    Load a pickle file from a URL.
-
-    Parameters
-    ----------
-    url (str): The URL of the pickle file.
-
-    Returns
-    -------
-    object: The object loaded from the pickle file.
-
-    """
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Check if the request was successful
-
-        # Create a BytesIO object from the response content
-        file_object = BytesIO(response.content)
-
-        # Load the pickle file from the BytesIO object
-        data = pickle.load(file_object)
-
-        return data
-    except requests.exceptions.RequestException as e:
-        print(f"Error downloading the file: {e}")
-    except pickle.UnpicklingError as e:
-        print(f"Error loading the pickle file: {e}")
-
-
-def verify_source_of_data(input_file: str | None, allow_downloads: bool = False) -> str:
-    """
-    verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
-    the DATA_URL.
-    This method will exit with an error if the input is not consistent with the workflow.
-
-    Args:
-    ----
-        input_file (str | None): name if input file.  None if not set, non-url path if set.
-        allow_downloads (bool, optional): has the user opted in to download the data from the source.
-            Defaults to False.
-
-    Returns:
-    -------
-        str: path to data file, wither local of the default.
-
-    """
-    if input_file is None:
-        if not allow_downloads:
-            raise ValueError(
-                f"Please enter path to local file via --input-file or turn on --allow-downloads to download task source from {input_file}"
-            )
-        # input file not given, allow download on.
-        return DATA_URL
-    elif allow_downloads:
-        raise ValueError(
-            "Arguments ambiguous:  Either give a local path of download from the web."
-        )
-    parsed_path = urlparse(str(input_file))
-    if not parsed_path.netloc == "":
-        raise ValueError(
-            f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
-        )
-    return input_file
-
-
-def get_symbols(gene_targetId_list):
-    """
-        given s list of gene id's (names Like ENSG00000006468) this method
-        uses the MyGenInfo package to retrieve the gene symbol (name like PLAC4).
-
-    Args:
-    ----
-        gene_targetId_list (list): list of gene id's (names Like ENSG00000006468)
-
-    Returns:
-    -------
-        list: List of corresponding symbols
-
-    """
-    mg = mygene.MyGeneInfo()
-    list_of_gene_metadata = mg.querymany(
-        gene_targetId_list, species="human", fields="symbol"
-    )
-    gene_metadata_df = get_id_to_symbol_df(list_of_gene_metadata)
-    symblist = [gene_metadata_df.loc[x, "symbol"] for x in gene_targetId_list]
-    return [v for v in symblist if not pd.isna(v)]
-
-
-def get_id_to_symbol_df(list_of_gene_metadata):
-    """
-        The method converts a list of gene metadata into a data frame,
-        each dictionary will contain the field symbol and the gene id as the query value.
-
-    Args:
-    ----
-        list_of_gene_metadata (list): list containing gene metadata.
-
-    Returns:
-    -------
-        pd.DataFrame: a data frame with the gene id as index with the symbol as value
-
-    """
-    gene_metadata_df = pd.DataFrame(list_of_gene_metadata)
-    # some target id have multiple symbols
-    gene_metadata_df = gene_metadata_df.drop_duplicates(subset="query")
-    gene_metadata_df.index = gene_metadata_df["query"]
-    return gene_metadata_df
 
 
 def create_symbol_dict(data_dict):
@@ -236,26 +141,20 @@ def main(
 ):
     for task_name, task_file in DATA_FILE_NAMES.items():
         input_path_or_url = verify_source_of_data(
-            input_file, allow_downloads=allow_downloads
+            input_file, url=DATA_URL, allow_downloads=allow_downloads
         )
         if allow_downloads:
             full_path = input_path_or_url + task_file
         else:
-            full_path = Path(input_path_or_url) / task_file
-        main_task_directory = Path(main_task_directory)
+            full_path = Path(input_path_or_url) / DATA_LOCAL_FILE_NAMES[task_name]
+
         data = load_pickle_from_url(full_path)
-        entities, outcomes = dictionary_to_task(
+        symbols, outcomes = dictionary_to_task(
             create_symbol_dict(data), remove_duplicates=remove_duplicates
         )
-        # the specific directory for the task
-        task_dir_name = main_task_directory / task_name
-        task_dir_name.mkdir(exist_ok=True)
-
-        # save symbols to CSV file
-        entities.to_csv(task_dir_name / "entities.csv", index=False)
-
-        # save outcomes to CSV file
-        outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
+        dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
+        if verbose:
+            report_task_single_col(outcomes, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
