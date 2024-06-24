@@ -18,7 +18,7 @@ def import_data(url):
     return data
 
 
-def format_pathology_columns(data, clear_semicolon=None):
+def format_hpa_columns(data, clear_semicolon=None):
     pathology_columns = list(
         filter(lambda x: "Pathology prognostics" in x, data.columns)
     )
@@ -95,7 +95,7 @@ def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
     data = data.set_index("Gene")
     data = data[columns_to_use]
 
-    data = format_pathology_columns(data, clear_semicolon=CELL_LINE)
+    data = format_hpa_columns(data, clear_semicolon=CELL_LINE)
 
     create_tasks(data, main_task_directory)
 
