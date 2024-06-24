@@ -264,3 +264,27 @@ def load_yaml_file(yaml_path: str):
     with open(yaml_path) as f:
         loaded_yaml = safe_load(f)
     return loaded_yaml
+
+
+def create_single_label_task(
+    current_col_data: pd.Series,
+    entities_name: str = "symbol",
+    outcomes_name: str = "Outcomes",
+) -> tuple[pd.Series, pd.Series]:
+    """
+    take a series and creates task from the index and values.
+
+    Args:
+    ----
+        current_col_data (pd.Series): the series to turn into a task
+        entities_name (str, optional): the name to be used for the entities. Defaults to "symbol".
+        outcomes_name (str, optional): the name to be used for the outcomes. Defaults to "Outcomes".
+
+    Returns:
+    -------
+        tuple[pd.Series,pd.Series]: entities and outcomes series
+
+    """
+    entities = pd.Series(current_col_data.index, name=entities_name)
+    outcomes = pd.Series(current_col_data.values, name=outcomes_name)
+    return entities, outcomes

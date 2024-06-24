@@ -6,6 +6,7 @@ import pandas as pd
 
 from scripts.tasks_retrival.task_retrieval import (
     check_data_type,
+    create_single_label_task,
     load_yaml_file,
 )
 
@@ -43,30 +44,6 @@ def create_tasks(data, main_task_directory):
             entities, outcomes = create_single_label_task(current_col_data)
 
         save_task_to_dir(main_task_directory, col, entities, outcomes)
-
-
-def create_single_label_task(
-    current_col_data: pd.Series,
-    entities_name: str = "symbol",
-    outcomes_name: str = "Outcomes",
-) -> tuple[pd.Series, pd.Series]:
-    """
-    take a series and creates task from the index and values.
-
-    Args:
-    ----
-        current_col_data (pd.Series): the series to turn into a task
-        entities_name (str, optional): the name to be used for the entities. Defaults to "symbol".
-        outcomes_name (str, optional): the name to be used for the outcomes. Defaults to "Outcomes".
-
-    Returns:
-    -------
-        tuple[pd.Series,pd.Series]: entities and outcomes series
-
-    """
-    entities = pd.Series(current_col_data.index, name=entities_name)
-    outcomes = pd.Series(current_col_data.values, name=outcomes_name)
-    return entities, outcomes
 
 
 def create_multi_label_task(current_col_data):
