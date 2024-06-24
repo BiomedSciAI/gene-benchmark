@@ -317,7 +317,11 @@ def tag_list_to_multi_label(
     vocab = list(set(np.concatenate(split_values_df.values)))
     outcome_df = pd.DataFrame(0, index=split_values_df.index, columns=vocab)
     for index in split_values_df.index:
-        true_cat = list(chain(*split_values_df[index].values))
+        true_cat = split_values_df[index]
+        if not isinstance(true_cat, list):
+            true_cat = list(set(chain(*true_cat.values)))
+        else:
+            true_cat = list(set(true_cat))
         outcome_df.loc[index, true_cat] = 1
     entities = pd.Series(outcome_df.index, name=entities_name)
     return entities, outcome_df
