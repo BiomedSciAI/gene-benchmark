@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import mygene
 import pandas as pd
 import requests
+from yaml import safe_load
 
 
 def verify_source_of_data(
@@ -208,3 +209,58 @@ def list_form_to_onehot_form(
         path_genes = list_df.loc[pathway_idx, participant_col_name].split(delimiter)
         onehot_df.loc[path_genes, pathway_idx] = True
     return onehot_df
+
+
+def check_data_type(
+    data_col: pd.Series,
+    binary_name: str = "binary",
+    category_name: str = "categorical",
+    numerical_name: str = "numerical",
+    multi_class_name: str = "multi_class",
+    multi_regex: str = "[,;]",
+) -> str:
+    """
+    Determines the column data type.
+
+    Args:
+    ----
+        data_col (pd.Series): The series that is evaluated
+        binary_name (str, optional): The string name to be used if the data is binary. Defaults to "binary".
+        category_name (str, optional): The string name to be used if the data is categorical (multi-class). Defaults to 'categorical'.
+        numerical_name (str, optional): The string name to be used if the data is numerical. Defaults to "numerical".
+        multi_class_name (str, optional): The string name to be used if the data is multi class. Defaults to "multi_class".
+        multi_regex (str, optional): If the values of the series contains the regex then it's a multi label . Defaults to "[,;]".
+
+    Returns:
+    -------
+        str: the string type of the column
+
+    """
+    if data_col.nunique() == 2:
+        return binary_name
+    elif (data_col.nunique() > 2) & (data_col.dtypes == object):
+        if data_col.astype(str).str.contains(multi_regex).any():
+            return multi_class_name
+        return category_name
+    elif (data_col.nunique() > 2) & (
+        (data_col.dtypes == "int64") | (data_col.dtypes == "float64")
+    ):
+        return numerical_name
+
+
+def load_yaml_file(yaml_path: str):
+    """
+    loads a yaml file into an object.
+
+    Args:
+    ----
+        yaml_path (str): the path to a yaml file
+
+    Returns:
+    -------
+        object: the loaded yaml file
+
+    """
+    with open(yaml_path) as f:
+        loaded_yaml = safe_load(f)
+    return loaded_yaml

@@ -3,7 +3,11 @@ import os
 import click
 import numpy as np
 import pandas as pd
-from yaml import safe_load
+
+from scripts.tasks_retrival.task_retrieval import (
+    check_data_type,
+    load_yaml_file,
+)
 
 CELL_LINE = "Cell line expression cluster"
 DATA_URL = "https://v23.proteinatlas.org/download/proteinatlas.tsv.zip"
@@ -14,12 +18,6 @@ def import_data(url):
     return data
 
 
-def load_yaml_file(yaml_path):
-    with open(yaml_path) as f:
-        loaded_yaml = safe_load(f)
-    return loaded_yaml
-
-
 def format_pathology_columns(data):
     pathology_columns = list(
         filter(lambda x: "Pathology prognostics" in x, data.columns)
@@ -28,19 +26,6 @@ def format_pathology_columns(data):
         r"\s*\(\d+\.?\d*e?-?\d*\)", "", regex=True
     )
     return data
-
-
-def check_data_type(data_col):
-    if data_col.nunique() == 2:
-        return "binary"
-    elif (data_col.nunique() > 2) & (data_col.dtypes == object):
-        if data_col.astype(str).str.contains("[,;]").any():
-            return "multi_class"
-        return "categorical"
-    elif (data_col.nunique() > 2) & (
-        (data_col.dtypes == "int64") | (data_col.dtypes == "float64")
-    ):
-        return "numerical"
 
 
 def create_tasks(data, main_task_directory):
