@@ -1,5 +1,6 @@
 import pickle
 from io import BytesIO
+from itertools import chain
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -315,7 +316,8 @@ def tag_list_to_multi_label(
     )
     vocab = list(set(np.concatenate(split_values_df.values)))
     outcome_df = pd.DataFrame(0, index=split_values_df.index, columns=vocab)
-    for index in range(split_values_df.shape[0]):
-        outcome_df.iloc[index][split_values_df.iloc[index]] = 1
+    for index in split_values_df.index:
+        true_cat = list(chain(*split_values_df[index].values))
+        outcome_df.loc[index, true_cat] = 1
     entities = pd.Series(outcome_df.index, name=entities_name)
     return entities, outcome_df
