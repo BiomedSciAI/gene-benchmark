@@ -13,6 +13,18 @@ GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/gen
 
 
 def get_symbol_list(url: str = GENE_SYMBOL_URL):
+    """
+    Get gene symbol list, default from : "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json".
+
+    Args:
+    ----
+        url (str): the url
+
+    Returns:
+    -------
+        A list og gene names [str]
+
+    """
     with requests.get(url) as response:
         response.raise_for_status()
         reactome_res = response.json()
@@ -20,6 +32,18 @@ def get_symbol_list(url: str = GENE_SYMBOL_URL):
 
 
 def get_descriptions(gene_symbols: list):
+    """
+    Get gene descriptions from NCBI, the genes with no description will be dropped.
+
+    Args:
+    ----
+        gene_symbols (list): a list of gene symbol names
+
+    Returns:
+    -------
+        A pd.Series with the gene symbols as index and the descriptions as values.
+
+    """
     prompts_maker = NCBIDescriptor()
     prompts = prompts_maker.describe(entities=pd.Series(gene_symbols))
     prompts.index = gene_symbols
@@ -27,13 +51,34 @@ def get_descriptions(gene_symbols: list):
 
 
 def create_bag_of_words(corpus: pd.Series, max_features: int = 1024):
+    """
+    Create bag of words for a given corpus using sklearn 'CountVectorizer'.
+
+    Args:
+    ----
+        corpus (pd.Series):  A pd.Series with the gene symbols as index and the descriptions as values.
+        max_features (int): Number of features to use for the bag of words
+
+    Returns:
+    -------
+        A pd.DataFrame with the gene symbols as index and the bag of word counts as the columns
+
+    """
     vectorizer = CountVectorizer(max_features=max_features)
     X = vectorizer.fit_transform(corpus)
     return pd.DataFrame(X.toarray(), index=corpus.index)
 
 
-def print_number_of_unique_words(df: pd.DataFrame):
-    all_text = " ".join(df.values)
+def print_number_of_unique_words(series: pd.Series):
+    """
+    Print number of unique words in series.
+
+    Args:
+    ----
+        series (pd.Series):  A pd.Series with the gene symbols as index and the descriptions as values.
+
+    """
+    all_text = " ".join(series.values)
     words = re.findall(r"\b\w+\b", all_text.lower())
     print(f"Total number of words in vocabulary: {len(set(words))}")
 
