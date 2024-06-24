@@ -27,20 +27,8 @@ def get_token_link_for_symbols(symbols: list[str]) -> str:
 
 
 def get_symbol_list(
-    url: str = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json",
+    url="https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json",
 ) -> list[str]:
-    """
-    Retrieves the symbol list from a HGNC json like file.
-
-    Args:
-    ----
-        url (str, optional): url for the json file download. Defaults to "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json".
-
-    Returns:
-    -------
-        list[str]: list of symbols
-
-    """
     with requests.get(url) as response:
         response.raise_for_status()
         reactome_res = response.json()
@@ -123,27 +111,28 @@ def get_top_level_pathway(hierarchies_df: pd.DataFrame) -> set[str]:
     "--pathways-file",
     type=click.STRING,
     help="Path to the pathways files from reactome available using the analysis GUI",
-    default=None,
+    default="",
 )
 @click.option(
     "--top-pathways-file",
     type=click.STRING,
     help="The location of the ReactomePathwaysRelation file available at https://reactome.org/download-data",
-    default=None,
+    default="",
 )
 def main(
     main_task_directory, task_name, allow_downloads, pathways_file, top_pathways_file
 ):
 
-    reactom_url = (
-        get_token_link_for_symbols(get_symbol_list()) if allow_downloads else ""
-    )
+    if allow_downloads:
+        reactom_url = (
+            get_token_link_for_symbols(get_symbol_list()) if allow_downloads else ""
+        )
 
     pathways_file = verify_source_of_data(
         pathways_file, url=reactom_url, allow_downloads=allow_downloads
     )
     top_pathways_file = verify_source_of_data(
-        top_pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
+        pathways_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
     )
     df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
 
