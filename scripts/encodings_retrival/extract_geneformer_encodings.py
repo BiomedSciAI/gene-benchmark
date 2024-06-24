@@ -11,13 +11,14 @@ GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/pyto
 TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/geneformer/token_dictionary.pkl?download=true"
 
 
-def download_file_from_url(url, file_name, dir_path):
+def download_file_from_url(url, file_name, dir_path, chunk_size=8192):
     local_filename = dir_path / file_name
     with requests.get(url, stream=True) as response:
         response.raise_for_status()
         with open(local_filename, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
+            for chunk in response.iter_content(chunk_size=chunk_size):
                 file.write(chunk)
+    return local_filename
 
 
 def add_tokens_as_index(encodings, token_dict):
@@ -69,14 +70,12 @@ def main(allow_downloads, input_file_dir, output_file_dir):
     if allow_downloads:
         with tempfile.TemporaryDirectory() as tmpdirname:
             tmpdir = Path(tmpdirname)
-            download_file_from_url(
+            path_to_data = download_file_from_url(
                 GENEFORMER_URL, file_name="pytorch_model.bin", dir_path=tmpdir
             )
-            download_file_from_url(
+            path_to_tokens = download_file_from_url(
                 TOKEN_DICT_URL, file_name="token_dictionary.pkl", dir_path=tmpdir
             )
-            path_to_data = Path(tmpdir) / "pytorch_model.bin"
-            path_to_tokens = Path(tmpdir) / "token_dictionary.pkl"
             with open(path_to_tokens, "rb") as file:
                 token_dict = pickle.load(file)
             encodings = torch.load(path_to_data, map_location=torch.device("cpu"))
