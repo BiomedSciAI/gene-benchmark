@@ -57,7 +57,9 @@ def add_tokens_as_index(encodings, token_dict):
     return encodings_with_symbols
 
 
-def save_encodings(encodings, output_file_dir):
+def save_encodings(
+    encodings, output_file_dir, sub_dir_name="Geneformer", file_name="encodings.csv"
+):
     """
     Save the gene encodings to the output dir.
 
@@ -65,11 +67,13 @@ def save_encodings(encodings, output_file_dir):
     ----
         encodings (pd.DataFrame): the encodings
         output_file_dir (str): path to dir for saving the file
+        sub_dir_name (str): name od sub directory to save the encodings.
+        file_name (str): name of encoding file
 
     """
-    model_encodings_dir = Path(output_file_dir) / "Geneformer"
+    model_encodings_dir = Path(output_file_dir) / sub_dir_name
     model_encodings_dir.mkdir(parents=True, exist_ok=True)
-    output_file_path = model_encodings_dir / "encodings.csv"
+    output_file_path = model_encodings_dir / file_name
     encodings.to_csv(output_file_path, index_label="symbol")
 
 
