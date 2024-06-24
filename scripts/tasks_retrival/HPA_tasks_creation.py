@@ -18,13 +18,17 @@ def import_data(url):
     return data
 
 
-def format_pathology_columns(data):
+def format_pathology_columns(data, clear_semicolon=None):
     pathology_columns = list(
         filter(lambda x: "Pathology prognostics" in x, data.columns)
     )
     data[pathology_columns] = data[pathology_columns].replace(
         r"\s*\(\d+\.?\d*e?-?\d*\)", "", regex=True
     )
+    if not clear_semicolon is None and CELL_LINE in data.columns:
+        data[clear_semicolon] = (
+            data[clear_semicolon].astype(str).apply(lambda x: x.replace(";", ""))
+        )
     return data
 
 
@@ -91,11 +95,8 @@ def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
     data = data.set_index("Gene")
     data = data[columns_to_use]
 
-    data = format_pathology_columns(data)
-    if CELL_LINE in data.columns:
-        data[CELL_LINE] = (
-            data[CELL_LINE].astype(str).apply(lambda x: x.replace(";", ""))
-        )
+    data = format_pathology_columns(data, clear_semicolon=CELL_LINE)
+
     create_tasks(data, main_task_directory)
 
 
