@@ -64,7 +64,8 @@ def tag_list_to_multi_label(
 
     Returns:
     -------
-        tuple[pd.Series,pd.DataFrame]: A tuple with the entities and a dta frame where each column is a attribute and the values represent the assignment to each attribute
+        tuple[pd.Series,pd.DataFrame]: A tuple with the entities and a dta frame where each column
+        is a attribute and the values represent the assignment to each attribute
 
     """
     split_values_df = current_col_data.apply(
