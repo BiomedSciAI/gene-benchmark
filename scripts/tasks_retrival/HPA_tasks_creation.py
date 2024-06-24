@@ -1,9 +1,8 @@
-import os
-
 import click
 import numpy as np
 import pandas as pd
 
+from gene_benchmark.tasks import dump_task_definitions
 from scripts.tasks_retrival.task_retrieval import (
     check_data_type,
     create_single_label_task,
@@ -42,8 +41,8 @@ def create_tasks(data, main_task_directory):
             entities, outcomes = create_multi_label_task(current_col_data)
         else:
             entities, outcomes = create_single_label_task(current_col_data)
-
-        save_task_to_dir(main_task_directory, col, entities, outcomes)
+        task_name = col.replace("/", "|")
+        dump_task_definitions(entities, outcomes, main_task_directory, task_name)
 
 
 def create_multi_label_task(current_col_data):
@@ -56,16 +55,6 @@ def create_multi_label_task(current_col_data):
         outcome_df.iloc[index][split_values_df.iloc[index]] = 1
     entities = pd.Series(outcome_df.index, name="symbol")
     return entities, outcome_df
-
-
-def save_task_to_dir(main_task_directory, task_name, entities, outcomes):
-    task_name = task_name.replace("/", "|")
-    task_dir = main_task_directory + f"/{task_name}"
-    os.makedirs(task_dir, exist_ok=True)
-    entities_path = task_dir + "/entities.csv"
-    outcomes_path = task_dir + "/outcomes.csv"
-    entities.to_csv(entities_path, index=False, header="symbol")
-    outcomes.to_csv(outcomes_path, index=False, header="Outcomes")
 
 
 @click.command()
@@ -107,7 +96,6 @@ def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
         data[CELL_LINE] = (
             data[CELL_LINE].astype(str).apply(lambda x: x.replace(";", ""))
         )
-
     create_tasks(data, main_task_directory)
 
 
