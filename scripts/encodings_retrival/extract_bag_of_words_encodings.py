@@ -117,7 +117,7 @@ def save_encodings(
 @click.option(
     "--input-file",
     type=click.STRING,
-    help="The path to the csv file with the encodings",
+    help="The path to the yaml file with the gene names",
     default=None,
 )
 @click.option(
