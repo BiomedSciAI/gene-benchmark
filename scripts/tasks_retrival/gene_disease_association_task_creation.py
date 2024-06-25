@@ -33,12 +33,12 @@ Taken from:
 
 """
 
-from pathlib import Path
-from urllib.parse import urlparse
-
 import click
 import mygene
 import pandas as pd
+from task_retrieval import verify_source_of_data
+
+from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = (
     "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/23.09/output/etl/parquet/"
@@ -46,42 +46,6 @@ DATA_URL = (
 TASK_NAME = "Gene Disease Association"
 COLUMN_OF_SYMBOLS = "targetId"
 COLUMN_OF_OUTCOME = "score"
-
-
-def verify_source_of_data(input_file: str | None, allow_downloads: bool = False) -> str:
-    """
-    verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
-    the DATA_URL.
-    This method will exit with an error if the input is not consistent with the workflow.
-
-    Args:
-    ----
-        input_file (str | None): name if input file.  None if not set, non-url path if set.
-        allow_downloads (bool, optional): has the user opted in to download the data from the source.
-            Defaults to False.
-
-    Returns:
-    -------
-        str: path to data file, wither local of the default.
-
-    """
-    if input_file is None:
-        if not allow_downloads:
-            raise ValueError(
-                f"Please enter path to local file via --input-file or turn on --allow-downloads to download task source from {input_file}"
-            )
-        # input file not given, allow download on.
-        return DATA_URL
-    elif allow_downloads:
-        raise ValueError(
-            "Arguments ambiguous:  Either give a local path of download from the web."
-        )
-    parsed_path = urlparse(str(input_file))
-    if not parsed_path.netloc == "":
-        raise ValueError(
-            f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
-        )
-    return input_file
 
 
 def get_id_to_symbol_df(list_of_gene_metadata):
@@ -134,7 +98,7 @@ def get_symbols(gene_targetId_list):
     )
 
 
-def get_gene_drug_assosiation_data(input_file: str):
+def get_gene_drug_association_data(input_file: str):
     """
     read data from open-targets' parquet data files, either directly or from a local file copy.
     The files are arranged with a fixed base name and part-index going from 0 to 199.  This is a standard way to save such data in parts
@@ -150,7 +114,7 @@ def get_gene_drug_assosiation_data(input_file: str):
 
     Returns:
     -------
-        pd.Dataframe: concatinated dataframe containing all the loaded data from all files
+        pd.Dataframe: concatenated dataframe containing all the loaded data from all files
 
     """
     res = []
@@ -178,39 +142,21 @@ def extract_outcome_df(
     return outcomes.map(lambda x: x.strip() if isinstance(x, str) else x)
 
 
-def report_task(df, main_task_directory, task_name):
+def report_numerical_task_task(
+    outcomes: pd.Series, main_task_directory: str, task_name: str
+):
     """
     prints a short task report.
 
     Args:
     ----
-        df (pd.DataFrame): The data frame which size will be printed
+        df (pd.Series): _description_
         main_task_directory (str): the main folder for the task
         task_name (str): The task name
 
     """
     print(f"Task saved at {main_task_directory}  under {task_name} /\n")
-    print(f"total samples = {len(df)}")
-
-
-def dump_to_task(task_df, task_name, main_task_directory, entities_cols):
-    """
-    Save a dataframe in the task definition format.
-
-    Args:
-    ----
-        task_df (pd.DataFrame): The data frame containing the task
-        task_name (str): the task name
-        main_task_directory (str|Path): the main folder to save the task
-        entities_cols (list[str]): the columns names to  be saved as entities
-
-    """
-    outcomes = extract_outcome_df(task_df)
-    main_task_directory = Path(main_task_directory)
-    task_dir_name = main_task_directory / task_name
-    task_dir_name.mkdir(exist_ok=True)
-    task_df[entities_cols].to_csv(task_dir_name / "entities.csv", index=False)
-    outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
+    print(f"n = {len(outcomes)} mean {outcomes.mean():.2f} sd {outcomes.std():.2f}")
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -261,13 +207,13 @@ def main(
     verbose,
 ):
     input_path_or_url = verify_source_of_data(
-        input_file, allow_downloads=allow_downloads
+        input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
 
     if verbose:
         print(f"creating the {task_name} task")
         print("This may take several minutes")
-    downloaded_dataframe = get_gene_drug_assosiation_data(input_file=input_path_or_url)
+    downloaded_dataframe = get_gene_drug_association_data(input_file=input_path_or_url)
     downloaded_dataframe["symbol"] = get_symbols(
         downloaded_dataframe[COLUMN_OF_SYMBOLS]
     )
@@ -276,9 +222,13 @@ def main(
         downloaded_dataframe = (
             downloaded_dataframe.groupby(entities_cols)["score"].mean().reset_index()
         )
-    dump_to_task(downloaded_dataframe, task_name, main_task_directory, entities_cols)
+    outcomes = extract_outcome_df(downloaded_dataframe)
+    dump_task_definitions(
+        entities_cols[entities_cols], outcomes, main_task_directory, task_name
+    )
+
     if verbose:
-        report_task(downloaded_dataframe, main_task_directory, task_name)
+        report_numerical_task_task(downloaded_dataframe, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
