@@ -80,7 +80,8 @@ def print_number_of_unique_words(series: pd.Series):
     """
     all_text = " ".join(series.values)
     words = re.findall(r"\b\w+\b", all_text.lower())
-    print(f"Total number of words in vocabulary: {len(set(words))}")
+    print(f"Total number of words: {words}")
+    print(f"Total number of unique words in vocabulary: {len(set(words))}")
 
 
 def save_encodings(
