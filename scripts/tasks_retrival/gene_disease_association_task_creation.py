@@ -48,7 +48,9 @@ COLUMN_OF_SYMBOLS = "targetId"
 COLUMN_OF_OUTCOME = "score"
 
 
-def get_gene_drug_association_data(input_file: str):
+def get_gene_drug_association_data(
+    input_file: str, strip_df: bool = True
+) -> pd.DateFrame:
     """
     read data from open-targets' parquet data files, either directly or from a local file copy.
     The files are arranged with a fixed base name and part-index going from 0 to 199.  This is a standard way to save such data in parts
@@ -57,6 +59,7 @@ def get_gene_drug_association_data(input_file: str):
     Args:
     ----
         input_file (str): base path (url or file path) of the parquet directory
+        input_file (bool): if so strip the dataframe or not. Default: True
 
     Raises:
     ------
@@ -82,14 +85,10 @@ def get_gene_drug_association_data(input_file: str):
             file_exist = False
             break
 
-    return pd.concat(res)
-
-
-def extract_outcome_df(
-    downloaded_dataframe: pd.DataFrame, target_column_name: str = COLUMN_OF_OUTCOME
-) -> pd.DataFrame:
-    outcomes = pd.Series(downloaded_dataframe[target_column_name], name="Outcomes")
-    return outcomes.map(lambda x: x.strip() if isinstance(x, str) else x)
+    total_df = pd.concat(res)
+    if strip_df:
+        total_df = total_df.map(lambda x: x.strip() if isinstance(x, str) else x)
+    return total_df
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -147,15 +146,18 @@ def main(
         print(f"creating the {task_name} task")
         print("This may take several minutes")
     downloaded_dataframe = get_gene_drug_association_data(input_file=input_path_or_url)
+
     downloaded_dataframe["symbol"] = get_symbols(
         downloaded_dataframe[COLUMN_OF_SYMBOLS]
     )
     entities_cols = ["symbol", "diseaseId"]
     if average_duplicates:
         downloaded_dataframe = (
-            downloaded_dataframe.groupby(entities_cols)["score"].mean().reset_index()
+            downloaded_dataframe.groupby(entities_cols)[COLUMN_OF_OUTCOME]
+            .mean()
+            .reset_index()
         )
-    outcomes = extract_outcome_df(downloaded_dataframe)
+    outcomes = pd.Series(downloaded_dataframe[COLUMN_OF_OUTCOME], name="Outcomes")
     dump_task_definitions(
         entities_cols[entities_cols], outcomes, main_task_directory, task_name
     )
