@@ -34,11 +34,11 @@ Taken from:
 """
 
 import click
-import mygene
 import pandas as pd
-from task_retrieval import verify_source_of_data
+from task_retrieval import get_symbols, verify_source_of_data
 
 from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrival.task_retrieval import report_numerical_task_task
 
 DATA_URL = (
     "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/23.09/output/etl/parquet/"
@@ -48,61 +48,11 @@ COLUMN_OF_SYMBOLS = "targetId"
 COLUMN_OF_OUTCOME = "score"
 
 
-def get_id_to_symbol_df(list_of_gene_metadata):
-    """
-        crate a data frame mapping from the gene metadata dataframe.
-        remove duplicates if they exist, set the index to the "query",
-        which holds the gene ids and return the mapping dataframe.
-        this is a set of unique mappings.  It is used to map the ids in the data,
-        which will contain duplicates, to the corresponding symbol names
-    Args:
-        list_of_gene_metadata (list): list containing gene metadata.
-
-    Returns
-    -------
-        pd.DataFrame: a data frame with the gene id as index with the symbol as value
-
-    """
-    gene_metadata_df = pd.DataFrame(list_of_gene_metadata)
-    # some target ids have multiple symbols
-    gene_metadata_df = gene_metadata_df.drop_duplicates(subset="query")
-    gene_metadata_df.index = gene_metadata_df["query"]
-    return gene_metadata_df
-
-
-def get_symbols(gene_targetId_list):
-    """
-        given s list of gene id's (names Like ENSG00000006468) this method
-        uses the MyGenInfo package to retrieve the gene symbol (name like PLAC4).
-        The retreaved dataframe is made into a translation df from id to metadata (symbol in this case),
-        and is used to translate the original list ot a symbols of the same length, with the matching symbols
-        in the corresponding locations.
-
-    Args:
-    ----
-        gene_targetId_list (list): list of gene id's (names Like ENSG00000006468)
-
-    Returns:
-    -------
-         pd.DataFrame: dataframe with symbols corresponding to the input
-
-    """
-    mg = mygene.MyGeneInfo()
-    list_of_gene_metadata = mg.querymany(
-        gene_targetId_list.drop_duplicates(), species="human", fields="symbol"
-    )
-    gene_metadata_df = get_id_to_symbol_df(list_of_gene_metadata)
-    return pd.DataFrame(
-        [gene_metadata_df.loc[x, "symbol"] for x in gene_targetId_list],
-        columns=["symbol"],
-    )
-
-
 def get_gene_drug_association_data(input_file: str):
     """
     read data from open-targets' parquet data files, either directly or from a local file copy.
     The files are arranged with a fixed base name and part-index going from 0 to 199.  This is a standard way to save such data in parts
-    and the total number of parts differes, so the code starts at 0 until it fails to read the file, and stops there.
+    and the total number of parts differs, so the code starts at 0 until it fails to read the file, and stops there.
 
     Args:
     ----
@@ -140,23 +90,6 @@ def extract_outcome_df(
 ) -> pd.DataFrame:
     outcomes = pd.Series(downloaded_dataframe[target_column_name], name="Outcomes")
     return outcomes.map(lambda x: x.strip() if isinstance(x, str) else x)
-
-
-def report_numerical_task_task(
-    outcomes: pd.Series, main_task_directory: str, task_name: str
-):
-    """
-    prints a short task report.
-
-    Args:
-    ----
-        df (pd.Series): _description_
-        main_task_directory (str): the main folder for the task
-        task_name (str): The task name
-
-    """
-    print(f"Task saved at {main_task_directory}  under {task_name} /\n")
-    print(f"n = {len(outcomes)} mean {outcomes.mean():.2f} sd {outcomes.std():.2f}")
 
 
 @click.command("cli", context_settings={"show_default": True})
