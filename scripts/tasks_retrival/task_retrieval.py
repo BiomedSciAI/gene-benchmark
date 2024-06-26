@@ -174,7 +174,7 @@ def get_id_to_symbol_df(list_of_gene_metadata):
     return gene_metadata_df
 
 
-def report_numerical_task_task(
+def print_numerical_task_report(
     outcomes: pd.Series, main_task_directory: str, task_name: str
 ):
     """
@@ -189,3 +189,39 @@ def report_numerical_task_task(
     """
     print(f"Task saved at {main_task_directory}  under {task_name} /\n")
     print(f"n = {len(outcomes)} mean {outcomes.mean():.2f} sd {outcomes.std():.2f}")
+
+
+def list_form_to_onehot_form(
+    list_df: pd.DataFrame,
+    participant_col_name: str = "Submitted entities found",
+    delimiter: str = ";",
+) -> pd.DataFrame:
+    """
+    Give a pathway data frame that has each pathway as a row with
+       a list of included genes the method creates a data frame where each
+       row is a gene and each column is a pathway the cells are true when
+       the gene is participating in the pathways.
+
+    Args:
+    ----
+        pathway_df (pd.DataFrame): A data frame with pathways as rows and a gene in one of the cells
+        pathway_name (str): The name of the pathways name columns
+        included_genes (str): The name of the included genes in a pathway
+        Submitted entities found with the participating genes
+
+    Returns:
+    -------
+        pd.DataFrame: A one hot dataframe where rows are genes and columns are pathways
+
+    """
+    full_identifier_list = delimiter.join(list_df[participant_col_name].values).split(
+        delimiter
+    )
+    unique_identifier_list = {x.strip() for x in full_identifier_list}
+    onehot_df = pd.DataFrame(
+        index=list(unique_identifier_list), columns=list_df.index, data=False
+    )
+    for pathway_idx in list_df.index:
+        path_genes = list_df.loc[pathway_idx, participant_col_name].split(delimiter)
+        onehot_df.loc[path_genes, pathway_idx] = True
+    return onehot_df

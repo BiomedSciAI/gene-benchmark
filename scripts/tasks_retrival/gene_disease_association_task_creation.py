@@ -38,7 +38,7 @@ import pandas as pd
 from task_retrieval import get_symbols, verify_source_of_data
 
 from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrival.task_retrieval import report_numerical_task_task
+from scripts.tasks_retrival.task_retrieval import print_numerical_task_report
 
 DATA_URL = (
     "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/23.09/output/etl/parquet/"
@@ -163,7 +163,9 @@ def main(
     )
 
     if verbose:
-        report_numerical_task_task(downloaded_dataframe, main_task_directory, task_name)
+        print_numerical_task_report(
+            downloaded_dataframe, main_task_directory, task_name
+        )
 
 
 if __name__ == "__main__":
