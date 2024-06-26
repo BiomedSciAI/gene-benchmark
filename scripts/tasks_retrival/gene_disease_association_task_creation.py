@@ -163,9 +163,7 @@ def main(
     )
 
     if verbose:
-        print_numerical_task_report(
-            downloaded_dataframe, main_task_directory, task_name
-        )
+        print_numerical_task_report(outcomes, main_task_directory, task_name)
 
 
 if __name__ == "__main__":
