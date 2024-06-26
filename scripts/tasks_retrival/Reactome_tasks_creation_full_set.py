@@ -11,11 +11,12 @@ PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathways.gmt.zip"
 
 def get_pathways_data(url):
     pathways_file = pd.read_csv(url, on_bad_lines="skip", header=None, delimiter="\t")
-    pathways_data = pd.DataFrame(columns=["name", "idx", "symbols"])
-    pathways_data[["name", "idx"]] = pathways_file.iloc[:, :2]
-    pathways_data["symbols"] = pathways_file.iloc[:, 2:].apply(
+    pathways_data = pd.DataFrame(columns=["Pathway name", "idx", "symbol"])
+    pathways_data[["Pathway name", "idx"]] = pathways_file.iloc[:, :2]
+    pathways_data["symbol"] = pathways_file.iloc[:, 2:].apply(
         lambda x: ",".join([str(v) for v in set(x) if not pd.isna(v)]), axis=1
     )
+    pathways_data = pathways_data.set_index("idx")
     return pathways_data
 
 
@@ -108,7 +109,6 @@ def create_top_level_task(
 )
 def main(
     main_task_directory,
-    task_name,
     allow_downloads,
     pathways_file,
     pathways_relation_file,
@@ -119,17 +119,18 @@ def main(
     pathways_relation_file = verify_source_of_data(
         pathways_relation_file, url=TOP_PATHWAYS_URL, allow_downloads=allow_downloads
     )
-    df_path = pd.read_csv(pathways_file, index_col="Pathway identifier")
-
     hierarchies_df = pd.read_csv(
         pathways_relation_file, delimiter="\t", header=0, names=["parent", "child"]
     )
-    symbols, outcomes = create_top_level_task(hierarchies_df, df_path)
-    dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
+    pathways_file = verify_source_of_data(
+        pathways_file, url=PATHWAYS_URL, allow_downloads=allow_downloads
+    )
+    pathways_df = get_pathways_data(pathways_file)
+    if add_top_pathways:
+        symbols, outcomes = create_top_level_task(hierarchies_df, pathways_df)
+        dump_task_definitions(symbols, outcomes, main_task_directory, "top pathways")
     if verbose:
-        print(
-            f"{task_name} was created at {main_task_directory} shaped {outcomes.shape}"
-        )
+        print(f"{5} was created at {main_task_directory} shaped {outcomes.shape}")
     return
 
 
