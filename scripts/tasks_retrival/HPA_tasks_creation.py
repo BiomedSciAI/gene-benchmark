@@ -6,6 +6,8 @@ from scripts.tasks_retrival.task_retrieval import (
     check_data_type,
     create_single_label_task,
     load_yaml_file,
+    print_numerical_task_report,
+    report_task_single_col,
     tag_list_to_multi_label,
 )
 
@@ -32,7 +34,7 @@ def format_hpa_columns(data, clear_semicolon=None):
     return data
 
 
-def create_tasks(data, main_task_directory):
+def create_tasks(data, main_task_directory, verbose=False):
     for col in data:
         current_col_data = data[col]
         current_col_data = current_col_data.replace("", pd.NA)
@@ -41,11 +43,19 @@ def create_tasks(data, main_task_directory):
             current_col_data[current_col_data.index.str.contains("ENSG")].index
         )
         data_type = check_data_type(current_col_data)
+        task_name = col.replace("/", "|")
         if data_type == "multi_class":
             entities, outcomes = tag_list_to_multi_label(current_col_data)
+            if verbose:
+                print(
+                    f"Create task {task_name} at {main_task_directory} outcomes shaped {outcomes.shape}"
+                )
         else:
             entities, outcomes = create_single_label_task(current_col_data)
-        task_name = col.replace("/", "|")
+            if data_type == "numerical" and verbose:
+                print_numerical_task_report(outcomes, main_task_directory, task_name)
+            elif verbose:
+                report_task_single_col(outcomes, main_task_directory, task_name)
         dump_task_definitions(entities, outcomes, main_task_directory, task_name)
 
 
