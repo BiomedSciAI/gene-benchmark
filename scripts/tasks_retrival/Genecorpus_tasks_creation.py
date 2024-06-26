@@ -29,6 +29,7 @@ Epub ahead of print. (*co-corresponding authors)
 
 """
 
+import pickle
 from pathlib import Path
 
 import click
@@ -58,7 +59,7 @@ DATA_LOCAL_FILE_NAMES = {
     "long vs short range TF": Path("tf_regulatory_range")
     / Path("tf_regulatory_range.pickle"),
     "N1 targets": Path("notch1_network") / Path("n1_network.pickle"),
-    "N1 network": Path("notch1_network") / Path("n1_target.pickle?"),
+    "N1 network": Path("notch1_network") / Path("n1_target.pickle"),
     "bivalent vs non-methylated": Path("bivalent_promoters")
     / Path("bivalent_vs_no_methyl.pickle"),
 }
@@ -145,10 +146,12 @@ def main(
         )
         if allow_downloads:
             full_path = input_path_or_url + task_file
+            data = load_pickle_from_url(full_path)
         else:
             full_path = Path(input_path_or_url) / DATA_LOCAL_FILE_NAMES[task_name]
+            with open(full_path, "rb") as file_object:
+                data = pickle.load(file_object)
 
-        data = load_pickle_from_url(full_path)
         symbols, outcomes = dictionary_to_task(
             create_symbol_dict(data), remove_duplicates=remove_duplicates
         )
