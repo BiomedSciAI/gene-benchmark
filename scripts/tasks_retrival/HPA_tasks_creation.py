@@ -11,7 +11,7 @@ from scripts.tasks_retrival.task_retrieval import (
     tag_list_to_multi_label,
 )
 
-CELL_LINE = "Cell line expression cluster"
+COLUMN_TO_CLEAR_SEMICOLON = "Cell line expression cluster"
 DATA_URL = "https://v23.proteinatlas.org/download/proteinatlas.tsv.zip"
 
 
@@ -27,7 +27,7 @@ def format_hpa_columns(data, clear_semicolon=None):
     data[pathology_columns] = data[pathology_columns].replace(
         r"\s*\(\d+\.?\d*e?-?\d*\)", "", regex=True
     )
-    if not clear_semicolon is None and CELL_LINE in data.columns:
+    if not clear_semicolon is None and COLUMN_TO_CLEAR_SEMICOLON in data.columns:
         data[clear_semicolon] = (
             data[clear_semicolon].astype(str).apply(lambda x: x.replace(";", ""))
         )
@@ -83,7 +83,15 @@ def create_tasks(data, main_task_directory, verbose=False):
 @click.option(
     "--input-file", type=click.STRING, help="The path to the data file", default=None
 )
-def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    default=True,
+)
+def main(
+    columns_to_use_yaml, main_task_directory, allow_downloads, input_file, verbose
+):
     if allow_downloads:
         data = import_data(DATA_URL)
     else:
@@ -93,9 +101,9 @@ def main(columns_to_use_yaml, main_task_directory, allow_downloads, input_file):
     data = data.set_index("Gene")
     data = data[columns_to_use]
 
-    data = format_hpa_columns(data, clear_semicolon=CELL_LINE)
+    data = format_hpa_columns(data, clear_semicolon=COLUMN_TO_CLEAR_SEMICOLON)
 
-    create_tasks(data, main_task_directory)
+    create_tasks(data, main_task_directory, verbose)
 
 
 if __name__ == "__main__":
