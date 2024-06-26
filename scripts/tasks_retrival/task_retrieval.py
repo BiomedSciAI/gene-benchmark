@@ -174,6 +174,23 @@ def get_id_to_symbol_df(list_of_gene_metadata):
     return gene_metadata_df
 
 
+def print_numerical_task_report(
+    outcomes: pd.Series, main_task_directory: str, task_name: str
+):
+    """
+    prints a short task report.
+
+    Args:
+    ----
+        df (pd.Series): _description_
+        main_task_directory (str): the main folder for the task
+        task_name (str): The task name
+
+    """
+    print(f"Task saved at {main_task_directory}  under {task_name} /\n")
+    print(f"n = {len(outcomes)} mean {outcomes.mean():.2f} sd {outcomes.std():.2f}")
+
+
 def list_form_to_onehot_form(
     list_df: pd.DataFrame,
     participant_col_name: str = "Submitted entities found",
