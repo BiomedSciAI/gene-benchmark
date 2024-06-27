@@ -16,9 +16,9 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import KFold
 from sklearn.multioutput import MultiOutputClassifier
-from utils import load_class
 from yaml import safe_load
 
+from gene_benchmark.deserialization import load_class
 from gene_benchmark.tasks import EntitiesTask
 
 
