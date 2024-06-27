@@ -4,7 +4,7 @@ import requests
 from task_retrieval import verify_source_of_data
 
 from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrival.task_retrieval import list_form_to_onehot_form
+from scripts.tasks_retrieval.task_retrieval import list_form_to_onehot_form
 
 TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
 
