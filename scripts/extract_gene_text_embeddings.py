@@ -5,12 +5,12 @@ from pathlib import Path
 import click
 import pandas as pd
 import yaml
-from utils import load_class
 
 import gene_benchmark
 import gene_benchmark.descriptor
 import gene_benchmark.encoder
 from gene_benchmark.descriptor import NaiveDescriptor
+from gene_benchmark.deserialization import load_class
 
 logger = logging.getLogger()
 FORMAT = (
