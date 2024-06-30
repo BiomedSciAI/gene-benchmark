@@ -141,11 +141,11 @@ class TestTasks(unittest.TestCase):
 
     # test filter_exclusion function directly
 
-    def test_filter_exclusion_diretly_one_column(self):
+    def test_filter_exclusion_directly_one_column(self):
         task_name = "symbol_bin"
         self._test_filter_entities(task_name)
 
-    def test_filter_exclusion_diretly_two_columns(self):
+    def test_filter_exclusion_directly_two_columns(self):
         task_name = "interaction"
         self._test_filter_entities(task_name)
 
@@ -521,3 +521,20 @@ class TestTasks(unittest.TestCase):
                 sub_task=sub_task,
                 tasks_folder=_get_test_tasks_folder(),
             )
+
+    def test_include(self):
+        task_name = "symbol_bin"
+        tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
+        include = tsk.entities.sample(10)
+        tsk_incl = load_task_definition(
+            task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
+        )
+        assert len(set(tsk_incl.entities).intersection(set(include))) == len(include)
+
+    def test_include_interactions(self):
+        task_name = "interaction"
+        include = ["Gene_3", "Gene_80", "Gene_36", "Gene_15", "Gene_61", "Gene_91"]
+        tsk_incl = load_task_definition(
+            task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
+        )
+        assert tsk_incl.entities.shape[0] == 2
