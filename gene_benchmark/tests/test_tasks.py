@@ -525,7 +525,7 @@ class TestTasks(unittest.TestCase):
     def test_include(self):
         task_name = "symbol_bin"
         tsk = load_task_definition(task_name, tasks_folder=_get_test_tasks_folder())
-        include = tsk.entities.sample(10)
+        include = tsk.entities.sample(10).squeeze().values
         tsk_incl = load_task_definition(
             task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
         )

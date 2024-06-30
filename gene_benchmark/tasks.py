@@ -464,9 +464,9 @@ def _load_task_definitions_from_folder(
         tasks_folder / task_name / "outcomes.csv", keep_default_na=keep_default_na
     ).squeeze()
 
-    if exclude_symbols:
+    if not exclude_symbols is None:
         entities, outcomes = filter_exclusion(entities, outcomes, exclude_symbols)
-    if include_symbols:
+    if not include_symbols is None:
         entities, outcomes = filter_inclusion(entities, outcomes, include_symbols)
     return entities, outcomes
 
