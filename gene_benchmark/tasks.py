@@ -367,6 +367,7 @@ def load_task_definition(
     task_name: str,
     tasks_folder: str | Path,
     exclude_symbols=None,
+    include_symbols=None,
     frac=1,
     sub_task=None,
     multi_label_th=0,
@@ -381,6 +382,7 @@ def load_task_definition(
     ----
         path (str): The folder containing two csv files one named entities and one named outcomes.
         exclude_symbols (list[str]|None): a list of symbols to exclude
+        include_symbols (list[str]|None): a list of symbols to include
         frac (float): load a unique fraction of the rows in the task, default 1
         tasks_folder(str|None): Use an alternative task repository (default repository if None)
         sub_task(str|None): Use only one of the columns of the outcome as a binary task
@@ -392,14 +394,9 @@ def load_task_definition(
 
     """
     _check_valid_task_name(task_name, tasks_folder=tasks_folder)
-    if task_name == "Shared pathway":
-        entities, outcomes = _load_gene_gene_pathway(
-            task_name, tasks_folder, exclude_symbols
-        )
-    else:
-        entities, outcomes = _load_task_definitions_from_folder(
-            task_name, tasks_folder, exclude_symbols
-        )
+    entities, outcomes = _load_task_definitions_from_folder(
+        task_name, tasks_folder, exclude_symbols, include_symbols
+    )
 
     if sub_task is not None:
         if not isinstance(outcomes, pd.DataFrame):
@@ -431,6 +428,7 @@ def _load_task_definitions_from_folder(
     task_name: str,
     tasks_folder: str,
     exclude_symbols: list[str] | None = None,
+    include_symbols: list[str] | None = None,
     keep_default_na=False,
 ) -> tuple[pd.DataFrame, pd.Series]:
     """
@@ -442,14 +440,15 @@ def _load_task_definitions_from_folder(
     ----
         task_name (str): the task name
         tasks_folder (str): the folder in which the text description is located
-        excluded_symples (list[str]|None): a list of symbols to exclude
+        exclude_symbols (list[str]|None): a list of symbols to exclude
+        include_symbols (list[str]|None): a list of symbols to include
         keep_default_na(bool): "NA" in the input file is translated into NaN by pd,
-            and NA can (and is) a gene name.  Turn on to read NaNs.  Treatmen of NaN values
+            and NA can (and is) a gene name.  Turn on to read NaNs.  Treatment of NaN values
             was not tested.
 
     Returns:
     -------
-        entities(pd.DateFrame): table of entities for the tast
+        entities(pd.DateFrame): table of entities for the test
         outcomes(pd.Series): outcomes for the task
 
     """
@@ -467,6 +466,8 @@ def _load_task_definitions_from_folder(
 
     if exclude_symbols:
         entities, outcomes = filter_exclusion(entities, outcomes, exclude_symbols)
+    if include_symbols:
+        entities, outcomes = filter_inclusion(entities, outcomes, include_symbols)
     return entities, outcomes
 
 
@@ -483,6 +484,13 @@ def filter_exclusion(
 ) -> tuple[pd.DataFrame, pd.Series]:
     is_not_excluded_row = ~entities.map(lambda x: x in excluded_symbols).max(axis=1)
     return entities[is_not_excluded_row], outcomes[is_not_excluded_row]
+
+
+def filter_inclusion(
+    entities: pd.DataFrame, outcomes: pd.Series, included_symbols: list[str]
+) -> tuple[pd.DataFrame, pd.Series]:
+    is_included_row = entities.map(lambda x: x in included_symbols).min(axis=1)
+    return entities[is_included_row], outcomes[is_included_row]
 
 
 def get_tasks_definition_names(tasks_folder: str | Path):
