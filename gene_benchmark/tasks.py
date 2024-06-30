@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from itertools import chain, combinations
+from itertools import chain
 from pathlib import Path
 
 import numpy as np
@@ -249,7 +249,7 @@ class EntitiesTask:
     def run(self, error_score=np.nan):
         """
         Runs the defined ina k-fold fashion and returns a dictionary with the scores
-        error_score: exposing a cross_validate option - on error in computatin:
+        error_score: exposing a cross_validate option - on error in computation:
             return np.nan (default) or error_score="raise" to raise an exception.
             Useful for debugging.  Default follows default of cross_validate function.
 
@@ -533,64 +533,3 @@ def _check_valid_task_name(task_name: str, tasks_folder: Path):
             f"Couldn't find the task {task_name} known tasks are {','.join(known_tasks)}"
         )
     return
-
-
-def _load_gene_gene_pathway(
-    task_name: str,
-    tasks_folder: str,
-    exclude_symbols: list[str] | None = None,
-) -> tuple[pd.DataFrame, pd.Series]:
-    """
-    Load a shared pathway task directly from the pathways description file creating the entities and outcomes
-    during runtime.
-
-    Args:
-    ----
-        task_name(str): The task name containing the pathway description file
-        tasks_folder(str): The folder containing the task
-        exclude_symbols (list[str]): List of symbols to be excluded.
-
-    Returns:
-    -------
-        entities(pd.DateFrame): table of entities for the tast
-        outcomes(pd.Series): outcomes for the task
-    ------
-
-    """
-    path_ways = pd.read_csv(Path(tasks_folder) / Path(task_name) / "top_paths.csv")
-    path_list = (
-        path_ways["Submitted entities found"].apply(lambda x: set(x.split(";"))).values
-    )
-    any_pathway_genes = chain.from_iterable(path_list)
-    gene_tuple = list(combinations(any_pathway_genes, 2))
-    entities = pd.DataFrame(data=gene_tuple, columns=["symbol", "symbol"])
-    outcomes = entities.apply(
-        lambda r: _share_path(path_list, r.values[1], r.values[0]), axis=1
-    )
-    if exclude_symbols:
-        entities, outcomes = filter_exclusion(entities, outcomes, exclude_symbols)
-    return entities, outcomes
-
-
-def _share_path(path_list, gene_a, gene_b):
-    """
-    Checks if gene a and gene b appear together in on the paths.
-    We stop at the first shared path to slightly improve run time.
-
-    Args:
-    ----
-        path_list[set]: A list of sets. Each set represent a pathway
-        gene_a(str): a gene name
-        gene_b(str): a gene name.
-
-    Returns:
-    -------
-        Bool: True if both genes share a path i.e. a cell in the list
-    ------
-
-    """
-    for path in path_list:
-        if gene_a in path:
-            if gene_b in path:
-                return True
-    return False
