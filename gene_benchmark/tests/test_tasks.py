@@ -529,7 +529,9 @@ class TestTasks(unittest.TestCase):
         tsk_incl = load_task_definition(
             task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
         )
-        assert len(set(tsk_incl.entities).intersection(set(include))) == len(include)
+        assert len(
+            set(tsk_incl.entities.squeeze().values).intersection(set(include))
+        ) == len(include)
 
     def test_include_interactions(self):
         task_name = "interaction"
