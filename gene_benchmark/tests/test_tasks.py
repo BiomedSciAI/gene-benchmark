@@ -533,6 +533,7 @@ class TestTasks(unittest.TestCase):
 
     def test_include_interactions(self):
         task_name = "interaction"
+        # we include two full lines and two lines with one of the two symbols.
         include = ["Gene_3", "Gene_80", "Gene_36", "Gene_15", "Gene_61", "Gene_91"]
         tsk_incl = load_task_definition(
             task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
