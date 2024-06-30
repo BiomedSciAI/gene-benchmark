@@ -1,8 +1,7 @@
 import click
 import pandas as pd
 
-from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrieval.task_retrieval import (
+from gene_benchmark.task_retrieval import (
     check_data_type,
     create_single_label_task,
     load_yaml_file,
@@ -10,6 +9,7 @@ from scripts.tasks_retrieval.task_retrieval import (
     report_task_single_col,
     tag_list_to_multi_label,
 )
+from gene_benchmark.tasks import dump_task_definitions
 
 COLUMN_TO_CLEAR_SEMICOLON = "Cell line expression cluster"
 DATA_URL = "https://v23.proteinatlas.org/download/proteinatlas.tsv.zip"

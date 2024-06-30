@@ -34,13 +34,13 @@ from pathlib import Path
 
 import click
 import pandas as pd
-from task_retrieval import (
+
+from gene_benchmark.task_retrieval import (
     get_symbols,
     load_pickle_from_url,
     report_task_single_col,
     verify_source_of_data,
 )
-
 from gene_benchmark.tasks import dump_task_definitions
 
 DATA_FILE_NAMES = {

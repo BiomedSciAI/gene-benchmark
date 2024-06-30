@@ -31,8 +31,12 @@ doi: 10.1016/j.cell.2018.01.029. Review.
 """
 
 import click
-from task_retrieval import read_table, report_task_single_col, verify_source_of_data
 
+from gene_benchmark.task_retrieval import (
+    read_table,
+    report_task_single_col,
+    verify_source_of_data,
+)
 from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = (
