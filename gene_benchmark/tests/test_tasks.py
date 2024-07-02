@@ -541,3 +541,15 @@ class TestTasks(unittest.TestCase):
             task_name, tasks_folder=_get_test_tasks_folder(), include_symbols=include
         )
         assert tsk_incl.entities.shape[0] == 2
+
+    def test_entities_task_inclusion(self):
+        task_name = "symbol_bin"
+        mpnet_name = "sentence-transformers/all-mpnet-base-v2"
+        full_entity_task = EntitiesTask(
+            task=task_name,
+            encoder=mpnet_name,
+            description_builder=NCBIDescriptor(),
+            tasks_folder=_get_test_tasks_folder(),
+            include_symbols=["ATP6V0A1", "TUBG2", "MRPL43", "DHX8"],
+        )
+        assert full_entity_task.task_definitions.entities.shape[0] == 4
