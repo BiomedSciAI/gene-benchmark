@@ -93,6 +93,13 @@ def expand_task_list(task_list):
     default=None,
 )
 @click.option(
+    "--include-symbols-file",
+    "-e",
+    type=click.STRING,
+    help="A path to a yaml file containing symbols to be excluded",
+    default=None,
+)
+@click.option(
     "--output-file-name",
     type=click.STRING,
     help="The output file name.",
@@ -135,6 +142,7 @@ def main(
     task_names,
     model_config_files,
     excluded_symbols_file,
+    include_symbols_file,
     output_file_name,
     append_results,
     verbose,
@@ -150,6 +158,11 @@ def main(
             exclude_symbols = safe_load(f)
     else:
         exclude_symbols = []
+    if include_symbols_file:
+        with open(include_symbols_file) as f:
+            include_symbols = safe_load(f)
+    else:
+        include_symbols = None
     task_names = expand_task_list(task_names)
     for model_config in model_config_files:
         for task_name in task_names:
@@ -229,6 +242,7 @@ def main(
                 encoder=encoder,
                 description_builder=description_builder,
                 exclude_symbols=exclude_symbols,
+                include_symbols=include_symbols,
                 scoring=scoring,
                 base_model=base_model,
                 cv=cv,
