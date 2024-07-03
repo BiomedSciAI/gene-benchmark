@@ -17,7 +17,7 @@ from gene_benchmark.encoder import (
 )
 
 
-def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
+def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
     """
     Checks if a vector represents a binary prediction task.
 
