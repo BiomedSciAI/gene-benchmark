@@ -270,7 +270,8 @@ class EntitiesTask:
 
     def run(self, error_score=np.nan):
         """
-        Runs the defined ina k-fold fashion and returns a dictionary with the scores
+        Runs the defined ina k-fold fashion and returns a dictionary with the scores.
+        In the case of a binary outcome, the outcomes will be converted to dummy, in alphabetical order.
         error_score: exposing a cross_validate option - on error in computation:
             return np.nan (default) or error_score="raise" to raise an exception.
             Useful for debugging.  Default follows default of cross_validate function.
