@@ -17,6 +17,25 @@ from gene_benchmark.encoder import (
 )
 
 
+def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame):
+    """
+    Checks if a vector represents a binary prediction task.
+
+    Args:
+    ----
+        outcomes (pd.series): a series containing the labels for prediction
+
+    Returns:
+    -------
+        bool: True if the series represents binary classification
+
+    """
+    if isinstance(outcomes, pd.Series):
+        return outcomes.nunique() == 2
+    else:
+        return False
+
+
 def dump_task_definitions(
     entities: pd.DataFrame,
     outcomes: pd.DataFrame | pd.Series,
@@ -262,6 +281,10 @@ class EntitiesTask:
 
         """
         outcomes, encodings = self._prepare_datamat_and_labels()
+        if is_binary_outcomes(self.task_definitions.outcomes):
+            outcomes = pd.get_dummies(self.task_definitions.outcomes).iloc[:, 0]
+        else:
+            outcomes = self.task_definitions.outcomes
         cs_val = cross_validate(
             self.base_prediction_model,
             encodings,
@@ -464,7 +487,8 @@ def _load_task_definitions_from_folder(
         tasks_folder / entities_file, keep_default_na=keep_default_na
     )
     outcomes = pd.read_csv(
-        tasks_folder / task_name / "outcomes.csv", keep_default_na=keep_default_na
+        Path(tasks_folder) / Path(task_name) / Path("outcomes.csv"),
+        keep_default_na=keep_default_na,
     ).squeeze()
 
     if isinstance(exclude_symbols, Iterable):
