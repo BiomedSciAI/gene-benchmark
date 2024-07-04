@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
-from itertools import chain, combinations
+from itertools import chain
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,25 @@ from gene_benchmark.descriptor import (
 from gene_benchmark.encoder import (
     SentenceTransformerEncoder,
 )
+
+
+def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
+    """
+    Checks if a vector represents a binary prediction task.
+
+    Args:
+    ----
+        outcomes (pd.series): a series containing the labels for prediction
+
+    Returns:
+    -------
+        bool: True if the series represents binary classification
+
+    """
+    if isinstance(outcomes, pd.Series):
+        return outcomes.nunique() == 2
+    else:
+        return False
 
 
 def dump_task_definitions(
@@ -158,6 +178,7 @@ class EntitiesTask:
         return_estimator=True,
         encoding_post_processing: str = "average",
         exclude_symbols=None,
+        include_symbols=None,
         frac=1,
         model_name=None,
         sub_task=None,
@@ -189,6 +210,7 @@ class EntitiesTask:
                 task,
                 tasks_folder=tasks_folder,
                 exclude_symbols=exclude_symbols,
+                include_symbols=include_symbols,
                 frac=frac,
                 sub_task=sub_task,
                 multi_label_th=multi_label_th,
@@ -248,8 +270,9 @@ class EntitiesTask:
 
     def run(self, error_score=np.nan):
         """
-        Runs the defined ina k-fold fashion and returns a dictionary with the scores
-        error_score: exposing a cross_validate option - on error in computatin:
+        Runs the defined ina k-fold fashion and returns a dictionary with the scores.
+        In the case of a binary outcome, the outcomes will be converted to dummy, in alphabetical order.
+        error_score: exposing a cross_validate option - on error in computation:
             return np.nan (default) or error_score="raise" to raise an exception.
             Useful for debugging.  Default follows default of cross_validate function.
 
@@ -259,6 +282,10 @@ class EntitiesTask:
 
         """
         outcomes, encodings = self._prepare_datamat_and_labels()
+        if is_binary_outcomes(self.task_definitions.outcomes):
+            outcomes = pd.get_dummies(self.task_definitions.outcomes).iloc[:, 0]
+        else:
+            outcomes = self.task_definitions.outcomes
         cs_val = cross_validate(
             self.base_prediction_model,
             encodings,
@@ -367,6 +394,7 @@ def load_task_definition(
     task_name: str,
     tasks_folder: str | Path,
     exclude_symbols=None,
+    include_symbols=None,
     frac=1,
     sub_task=None,
     multi_label_th=0,
@@ -381,6 +409,7 @@ def load_task_definition(
     ----
         path (str): The folder containing two csv files one named entities and one named outcomes.
         exclude_symbols (list[str]|None): a list of symbols to exclude
+        include_symbols (list[str]|None): a list of symbols to include
         frac (float): load a unique fraction of the rows in the task, default 1
         tasks_folder(str|None): Use an alternative task repository (default repository if None)
         sub_task(str|None): Use only one of the columns of the outcome as a binary task
@@ -392,14 +421,9 @@ def load_task_definition(
 
     """
     _check_valid_task_name(task_name, tasks_folder=tasks_folder)
-    if task_name == "Shared pathway":
-        entities, outcomes = _load_gene_gene_pathway(
-            task_name, tasks_folder, exclude_symbols
-        )
-    else:
-        entities, outcomes = _load_task_definitions_from_folder(
-            task_name, tasks_folder, exclude_symbols
-        )
+    entities, outcomes = _load_task_definitions_from_folder(
+        task_name, tasks_folder, exclude_symbols, include_symbols
+    )
 
     if sub_task is not None:
         if not isinstance(outcomes, pd.DataFrame):
@@ -431,6 +455,7 @@ def _load_task_definitions_from_folder(
     task_name: str,
     tasks_folder: str,
     exclude_symbols: list[str] | None = None,
+    include_symbols: list[str] | None = None,
     keep_default_na=False,
 ) -> tuple[pd.DataFrame, pd.Series]:
     """
@@ -442,14 +467,15 @@ def _load_task_definitions_from_folder(
     ----
         task_name (str): the task name
         tasks_folder (str): the folder in which the text description is located
-        excluded_symples (list[str]|None): a list of symbols to exclude
+        exclude_symbols (list[str]|None): a list of symbols to exclude
+        include_symbols (list[str]|None): a list of symbols to include
         keep_default_na(bool): "NA" in the input file is translated into NaN by pd,
-            and NA can (and is) a gene name.  Turn on to read NaNs.  Treatmen of NaN values
+            and NA can (and is) a gene name.  Turn on to read NaNs.  Treatment of NaN values
             was not tested.
 
     Returns:
     -------
-        entities(pd.DateFrame): table of entities for the tast
+        entities(pd.DateFrame): table of entities for the test
         outcomes(pd.Series): outcomes for the task
 
     """
@@ -462,11 +488,14 @@ def _load_task_definitions_from_folder(
         tasks_folder / entities_file, keep_default_na=keep_default_na
     )
     outcomes = pd.read_csv(
-        tasks_folder / task_name / "outcomes.csv", keep_default_na=keep_default_na
+        Path(tasks_folder) / Path(task_name) / Path("outcomes.csv"),
+        keep_default_na=keep_default_na,
     ).squeeze()
 
-    if exclude_symbols:
+    if isinstance(exclude_symbols, Iterable):
         entities, outcomes = filter_exclusion(entities, outcomes, exclude_symbols)
+    if isinstance(include_symbols, Iterable):
+        entities, outcomes = filter_inclusion(entities, outcomes, include_symbols)
     return entities, outcomes
 
 
@@ -483,6 +512,13 @@ def filter_exclusion(
 ) -> tuple[pd.DataFrame, pd.Series]:
     is_not_excluded_row = ~entities.map(lambda x: x in excluded_symbols).max(axis=1)
     return entities[is_not_excluded_row], outcomes[is_not_excluded_row]
+
+
+def filter_inclusion(
+    entities: pd.DataFrame, outcomes: pd.Series, included_symbols: list[str]
+) -> tuple[pd.DataFrame, pd.Series]:
+    is_included_row = entities.map(lambda x: x in included_symbols).min(axis=1)
+    return entities[is_included_row], outcomes[is_included_row]
 
 
 def get_tasks_definition_names(tasks_folder: str | Path):
@@ -525,64 +561,3 @@ def _check_valid_task_name(task_name: str, tasks_folder: Path):
             f"Couldn't find the task {task_name} known tasks are {','.join(known_tasks)}"
         )
     return
-
-
-def _load_gene_gene_pathway(
-    task_name: str,
-    tasks_folder: str,
-    exclude_symbols: list[str] | None = None,
-) -> tuple[pd.DataFrame, pd.Series]:
-    """
-    Load a shared pathway task directly from the pathways description file creating the entities and outcomes
-    during runtime.
-
-    Args:
-    ----
-        task_name(str): The task name containing the pathway description file
-        tasks_folder(str): The folder containing the task
-        exclude_symbols (list[str]): List of symbols to be excluded.
-
-    Returns:
-    -------
-        entities(pd.DateFrame): table of entities for the tast
-        outcomes(pd.Series): outcomes for the task
-    ------
-
-    """
-    path_ways = pd.read_csv(Path(tasks_folder) / Path(task_name) / "top_paths.csv")
-    path_list = (
-        path_ways["Submitted entities found"].apply(lambda x: set(x.split(";"))).values
-    )
-    any_pathway_genes = chain.from_iterable(path_list)
-    gene_tuple = list(combinations(any_pathway_genes, 2))
-    entities = pd.DataFrame(data=gene_tuple, columns=["symbol", "symbol"])
-    outcomes = entities.apply(
-        lambda r: _share_path(path_list, r.values[1], r.values[0]), axis=1
-    )
-    if exclude_symbols:
-        entities, outcomes = filter_exclusion(entities, outcomes, exclude_symbols)
-    return entities, outcomes
-
-
-def _share_path(path_list, gene_a, gene_b):
-    """
-    Checks if gene a and gene b appear together in on the paths.
-    We stop at the first shared path to slightly improve run time.
-
-    Args:
-    ----
-        path_list[set]: A list of sets. Each set represent a pathway
-        gene_a(str): a gene name
-        gene_b(str): a gene name.
-
-    Returns:
-    -------
-        Bool: True if both genes share a path i.e. a cell in the list
-    ------
-
-    """
-    for path in path_list:
-        if gene_a in path:
-            if gene_b in path:
-                return True
-    return False

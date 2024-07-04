@@ -14,31 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Created on Jun 11, 2024
-Script for extracting the The Human Transcription Factors task.
 
-Original data is downloaded from the The Human Transcription Factors page at
-https://humantfs.ccbr.utoronto.ca/download.php
-via the supplied CSV file that can be found at
-https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv
+Script for extracting the gene symbol to HLA class I/class II task.
+
+Original data is downloaded from the HGNC project page at
+https://www.genenames.org/data/genegroup/#!/group/588
+via the supplied textual file that can be found at
+https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node
+
+The data was released under the Creative Commons Public Domain (CC0) License.
+original license statement can be found in https://www.genenames.org/about/license/
+
 
 In citation of this data, please site the original authors:
 
-Lambert SA, Jolma A, Campitelli LF, Das PK, Yin Y, Albu M, Chen X, Taipale J, Hughes TR, Weirauch MT.(2018)
-The Human Transcription Factors.
-Cell. 172(4):650-665.
-doi: 10.1016/j.cell.2018.01.029. Review.
+Seal RL, Braschi B, Gray K, Jones TEM, Tweedie S, Haim-Vilmovsky L, Bruford EA.
+Genenames.org: the HGNC resources in 2023.
+Nucleic Acids Res. 2023 Jan 6;51(D1):D1003-D1009.
+doi: 10.1093/nar/gkac888. PMID: 36243972; PMCID: PMC9825485.
 
 """
 
 import click
-from task_retrieval import read_table, report_task_single_col, verify_source_of_data
 
+from gene_benchmark.task_retrieval import (
+    read_table,
+    report_task_single_col,
+    verify_source_of_data,
+)
 from gene_benchmark.tasks import dump_task_definitions
 
-DATA_URL = (
-    "https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
-)
-ENTITIES_COL = "HGNC symbol"
+DATA_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node"
+
+ENTITIES_COL = "Approved symbol"
+OUTCOMES_COL = "Approved name"
 
 
 @click.command("cli", context_settings={"show_default": True})
@@ -47,7 +56,7 @@ ENTITIES_COL = "HGNC symbol"
     "-n",
     type=click.STRING,
     help="name for the specific task",
-    default="TF vs non-TF",
+    default="HLA class I vs class II",
 )
 @click.option(
     "--input-file",
@@ -70,34 +79,19 @@ ENTITIES_COL = "HGNC symbol"
     default="./tasks",
 )
 @click.option(
-    "--outcome-column",
-    type=click.STRING,
-    help="The task root directory.  Will not be created.",
-    default="Is TF?",
-)
-@click.option(
     "--verbose/--quite",
     "-v/-q",
     is_flag=True,
     default=True,
 )
-def main(
-    task_name,
-    main_task_directory,
-    input_file,
-    allow_downloads,
-    outcome_column,
-    verbose,
-):
+def main(task_name, main_task_directory, input_file, allow_downloads, verbose):
     input_path_or_url = verify_source_of_data(
         input_file, url=DATA_URL, allow_downloads=allow_downloads
     )
-
-    downloaded_df = read_table(input_file=input_path_or_url)
+    downloaded_df = read_table(input_file=input_path_or_url, sep="\t")
     symbols = downloaded_df[ENTITIES_COL]
-    outcomes = downloaded_df[outcome_column]
+    outcomes = downloaded_df[OUTCOMES_COL].apply(lambda x: x.split(",")[1])
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
-
     if verbose:
         report_task_single_col(outcomes, main_task_directory, task_name)
 

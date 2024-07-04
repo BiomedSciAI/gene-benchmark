@@ -1,8 +1,7 @@
 import click
 import pandas as pd
 
-from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrival.task_retrieval import (
+from gene_benchmark.task_retrieval import (
     check_data_type,
     create_single_label_task,
     load_yaml_file,
@@ -10,6 +9,7 @@ from scripts.tasks_retrival.task_retrieval import (
     report_task_single_col,
     tag_list_to_multi_label,
 )
+from gene_benchmark.tasks import dump_task_definitions
 
 COLUMN_TO_CLEAR_SEMICOLON = "Cell line expression cluster"
 DATA_URL = "https://v23.proteinatlas.org/download/proteinatlas.tsv.zip"
@@ -64,7 +64,7 @@ def create_tasks(data, main_task_directory, verbose=False):
     "--columns-to-use-yaml",
     type=click.STRING,
     help="A path to a yaml file containing the column names to be used as tasks",
-    default="scripts/tasks_retrival/hpa_column_names_for_tasks.yaml",
+    default="scripts/tasks_retrieval/hpa_column_names_for_tasks.yaml",
 )
 @click.option(
     "--main-task-directory",

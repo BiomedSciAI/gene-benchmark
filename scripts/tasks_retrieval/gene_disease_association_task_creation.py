@@ -35,10 +35,13 @@ Taken from:
 
 import click
 import pandas as pd
-from task_retrieval import get_symbols, verify_source_of_data
 
+from gene_benchmark.task_retrieval import (
+    get_symbols,
+    print_numerical_task_report,
+    verify_source_of_data,
+)
 from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrival.task_retrieval import print_numerical_task_report
 
 DATA_URL = (
     "https://ftp.ebi.ac.uk/pub/databases/opentargets/platform/23.09/output/etl/parquet/"
