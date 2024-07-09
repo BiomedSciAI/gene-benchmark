@@ -94,9 +94,9 @@ def expand_task_list(task_list):
 )
 @click.option(
     "--include-symbols-file",
-    "-e",
+    "-i",
     type=click.STRING,
-    help="A path to a yaml file containing symbols to be excluded",
+    help="A path to a yaml file containing symbols to be included",
     default=None,
 )
 @click.option(
@@ -137,6 +137,13 @@ def expand_task_list(task_list):
     help="threshold of imbalance of labels in multi class tasks",
     default=0.0,
 )
+@click.option(
+    "--cat-label-th",
+    "-cth",
+    type=click.FLOAT,
+    help="threshold of imbalance of labels in category tasks",
+    default=0.0,
+)
 def main(
     tasks_folder,
     task_names,
@@ -149,6 +156,7 @@ def main(
     sub_sample,
     scoring_type,
     multi_label_th,
+    cat_label_th,
 ):
     if tasks_folder is None:
         tasks_folder = Path(os.environ["GENE_BENCHMARK_TASKS_FOLDER"])
@@ -251,6 +259,7 @@ def main(
                 encoding_post_processing=post_processing,
                 sub_task=sub_task,
                 multi_label_th=multi_label_th,
+                cat_label_th=cat_label_th,
             )
             _ = task.run()
             report_df = get_report(task, output_file_name, append_results)
