@@ -417,7 +417,7 @@ def load_task_definition(
         tasks_folder(str|None): Use an alternative task repository (default repository if None)
         sub_task(str|None): Use only one of the columns of the outcome as a binary task
         multi_label_th (float): Threshold for multi label tasks outcomes
-        cat_label_th (float): Threshold for categorical tasks outcomes
+        cat_label_th (float): Threshold for categorical tasks outcomes, only categories that have rates above the threshold will be included.
 
 
     Returns:
