@@ -568,7 +568,7 @@ class TestTasks(unittest.TestCase):
             cat_label_th=0.04,
         )
         full_entity_task.run()
-        this_run_df = pd.DataFrame.from_dict(full_entity_task.summary(), orient="index")
+        this_run_df = full_entity_task.summary()
         test_scores = this_run_df["test_roc_auc_ovr_weighted"].split(",")
         test_scores = list(map(float, test_scores))
         assert np.nan not in test_scores
