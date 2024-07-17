@@ -183,6 +183,7 @@ class EntitiesTask:
         model_name=None,
         sub_task=None,
         multi_label_th=0,
+        cat_label_th=0,
         overlap_entities=False,
     ) -> None:
         """
@@ -214,6 +215,7 @@ class EntitiesTask:
                 frac=frac,
                 sub_task=sub_task,
                 multi_label_th=multi_label_th,
+                cat_label_th=cat_label_th,
             )
         else:
             self.task_definitions = task
@@ -398,6 +400,7 @@ def load_task_definition(
     frac=1,
     sub_task=None,
     multi_label_th=0,
+    cat_label_th=0,
 ):
     """
     Loads and returns the task definition object.
@@ -413,6 +416,8 @@ def load_task_definition(
         frac (float): load a unique fraction of the rows in the task, default 1
         tasks_folder(str|None): Use an alternative task repository (default repository if None)
         sub_task(str|None): Use only one of the columns of the outcome as a binary task
+        multi_label_th (float): Threshold for multi label tasks outcomes
+        cat_label_th (float): Threshold for categorical tasks outcomes, only categories that have rates above the threshold will be included.
 
 
     Returns:
@@ -441,6 +446,12 @@ def load_task_definition(
 
     if multi_label_th != 0:
         outcomes = filter_low_threshold_features(outcomes, threshold=multi_label_th)
+
+    if cat_label_th != 0:
+        percent_outcome = outcomes.value_counts(normalize=True)
+        high_th_outcomes = percent_outcome[percent_outcome > cat_label_th].index
+        outcomes = outcomes[outcomes.apply(lambda x: x in high_th_outcomes)]
+        entities = entities.loc[outcomes.index]
 
     return TaskDefinition(
         name=task_name,
