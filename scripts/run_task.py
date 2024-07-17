@@ -73,7 +73,7 @@ def expand_task_list(task_list):
     "--task-names",
     "-t",
     type=click.STRING,
-    help="The output file name.",
+    help="The path to the task yamls, or the task name",
     default=["long vs short range TF"],
     multiple=True,
 )
@@ -81,7 +81,7 @@ def expand_task_list(task_list):
     "--model-config-files",
     "-m",
     type=click.STRING,
-    help="Append results to the files",
+    help="path to model config files",
     default=[str(Path(__file__).parent / "models" / "ncbi_multi_class.yaml")],
     multiple=True,
 )
