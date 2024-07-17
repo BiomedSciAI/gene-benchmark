@@ -274,6 +274,20 @@ class TestDescriptor(unittest.TestCase):
         assert descriptions.iloc[1, 2] == None
         assert descriptions.iloc[0, 1] == "cancer is a very bad disease"
 
+    def test_CSVDescriptions_with_des_col(self):
+        csv_path = "gene_benchmark/tests/resources/disease_descriptions.csv"
+        csv_mod_path = "gene_benchmark/tests/resources/disease_descriptions_mod.csv"
+        base = CSVDescriptions(csv_file_path=csv_path, index_col="id")
+        base_mod = CSVDescriptions(
+            csv_file_path=csv_mod_path,
+            index_col="id",
+            description_col="description_mod",
+        )
+        assert (
+            base.describe(pd.Series(["cancer"]))[0]
+            == base_mod.describe(pd.Series(["cancer"]))[0]
+        )
+
     def test_MultiEntityTypeDescriptor_descriptions_multiple_description_types(self):
         csv_path = "gene_benchmark/tests/resources/disease_descriptions.csv"
         description_dict = {
