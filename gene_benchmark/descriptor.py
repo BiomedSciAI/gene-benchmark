@@ -465,6 +465,7 @@ class CSVDescriptions(SingleEntityTypeDescriptor):
         description_generation_function: callable = None,
         allow_partial: bool = True,
         is_partial_row_function: callable = None,
+        description_col: str = "description",
     ):
         """
         Read the data frame from the file, and set the csv-raw to description function.
@@ -491,6 +492,7 @@ class CSVDescriptions(SingleEntityTypeDescriptor):
         self.csv_file_path = csv_file_path
         self.index_col = index_col
         self.source_data_frame = pd.read_csv(csv_file_path, index_col=index_col)
+        self.description_col = description_col
 
     def _retrieve_dataframe_for_entities(
         self, entities: list, first_description_only=False
@@ -531,7 +533,7 @@ class CSVDescriptions(SingleEntityTypeDescriptor):
             str : description Gene symbol - {'symbol'} full name {name_txt} with the summary {summary_txt}"
 
         """
-        return df_row["description"]
+        return df_row[self.description_col]
 
     def get_missing_entities(self, entities, element_metadata_df):
         """
