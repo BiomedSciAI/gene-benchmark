@@ -7,18 +7,18 @@ import pandas as pd
 import requests
 
 
-def _get_gene_ids(symbols):
+def _get_gene_ids(symbols: str, species: str = "human") -> dict[str, str]:
     mg = mygene.MyGeneInfo()
     query = " ".join(symbols)
-    gene_info = mg.query(
-        query, fields="symbol,entrezgene,ensembl.gene", species="human"
-    )
+    gene_info = mg.query(query, fields="symbol,ensembl.gene", species=species)
     ids = {}
     for hit in gene_info["hits"]:
         symbol = hit["symbol"]
-        entrez_id = hit.get("entrezgene", None)
         ensembl_id = hit.get("ensembl", {}).get("gene", None)
-        ids[symbol] = {"entrez_id": entrez_id, "ensembl_id": ensembl_id}
+        ids[symbol] = ensembl_id
+    for symbol in symbols:
+        if not symbol in ids:
+            ids[symbol] = None
     return ids
 
 
@@ -681,3 +681,15 @@ class BasePairDescriptor(SingleEntityTypeDescriptor):
 
     def __init__(self, specie: str = "human") -> None:
         self.species = specie
+
+    def _retrieve_dataframe_for_entities(
+        self, entities: list, first_description_only=False
+    ):
+        ensembles = _get_gene_ids(entities)
+        base_pairs = {
+            symbol: _fetch_ensembl_sequence(ensemble)
+            for symbol, ensemble in ensembles.items
+        }
+        return pd.DataFrame.from_dict(
+            base_pairs, orient="index", columns=["description"]
+        )
