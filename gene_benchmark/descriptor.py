@@ -16,9 +16,6 @@ def _get_gene_ids(symbols: str, species: str = "human") -> dict[str, str]:
         symbol = hit["symbol"]
         ensembl_id = hit.get("ensembl", {}).get("gene", None)
         ids[symbol] = ensembl_id
-    for symbol in symbols:
-        if not symbol in ids:
-            ids[symbol] = None
     return ids
 
 
@@ -679,17 +676,28 @@ def has_missing_columns(df_row, column_names):
 
 class BasePairDescriptor(SingleEntityTypeDescriptor):
 
-    def __init__(self, specie: str = "human") -> None:
+    def __init__(self, specie: str = "human", description_col="description") -> None:
         self.species = specie
+        self.description_col = description_col
 
     def _retrieve_dataframe_for_entities(
         self, entities: list, first_description_only=False
     ):
-        ensembles = _get_gene_ids(entities)
+        ensembles = _get_gene_ids(entities, species=self.species)
         base_pairs = {
             symbol: _fetch_ensembl_sequence(ensemble)
             for symbol, ensemble in ensembles.items
         }
-        return pd.DataFrame.from_dict(
-            base_pairs, orient="index", columns=["description"]
+        pair_bse_df = pd.DataFrame.from_dict(
+            base_pairs, orient="index", columns=[self.description_col]
         )
+        return pair_bse_df.dropna()
+
+    def get_missing_entities(self, elements, element_metadata_df):
+        return list(filter(lambda x: x not in element_metadata_df.index, elements))
+
+    def row_to_description(self, df_row: pd.Series) -> str:
+        return df_row[self.description_col]
+
+    def is_partial_description_row(self, df_row: pd.Series) -> bool:
+        return False
