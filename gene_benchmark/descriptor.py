@@ -702,8 +702,18 @@ def has_missing_columns(df_row, column_names):
 
 
 class BasePairDescriptor(SingleEntityTypeDescriptor):
+    """A descriptor designated to describe each symbol by its base pair sequence."""
 
     def __init__(self, specie: str = "human", description_col="description") -> None:
+        """
+        Initiates a base pair description object.
+
+        Args:
+        ----
+            specie (str, optional): The species to be used for the base pair sequence. Defaults to "human".
+            description_col (str, optional): Name of the description column. Defaults to "description".
+
+        """
         self.species = specie
         self.description_col = description_col
         self.missing_entities = None
