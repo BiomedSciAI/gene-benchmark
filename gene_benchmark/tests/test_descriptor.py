@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from gene_benchmark.descriptor import (
+    BasePairDescriptor,
     CSVDescriptions,
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
@@ -323,18 +324,33 @@ class TestDescriptor(unittest.TestCase):
         des = descriptor.describe(entities)
         assert all(des == entities)
 
-    def test_symbol_to_ensemble():
+    def test_symbol_to_ensemble(self):
         gene_symbols = ["BRCA1", "TP53", "EGFR", "NOTGENE"]
         ensembles = _gene_symbol_to_ensemble_ids(gene_symbols)
         real_vals = {
             "BRCA1": "ENSG00000012048",
             "TP53": "ENSG00000141510",
             "EGFR": "ENSG00000146648",
-            "NOTGENE": None,
         }
         assert real_vals == ensembles
 
-    def test_ensemble_bp():
+    def test_ensemble_bp(self):
         base_pair_seq = _fetch_ensembl_sequence("ENSG00000146648")
         bp_org = "AGACGTCCGGGCAGCCCCCGGCGCAGCGCGGCCGCAGCAGCCTCCGCCCCCCGCACGGTGTGAGCGCCCGACGCGGCCGA"
         assert base_pair_seq[: len(bp_org)] == bp_org
+
+    def test_base_pair_descriptor_retrieve(self):
+        gene_symbols = ["BRCA1", "TP53", "EGFR", "NOTGENE"]
+        bp = BasePairDescriptor()
+        bp_df = bp._retrieve_dataframe_for_entities(gene_symbols)
+        assert bp_df.shape[0] == 4
+
+    def test_base_pair_descriptor_describe(self):
+        gene_symbols = ["BRCA1", "TP53", "EGFR", "NOTGENE"]
+        bp = BasePairDescriptor()
+        bp_df = bp.describe(pd.Series(gene_symbols))
+        bp.missing_entities
+        assert bp_df.shape[0] == 4
+        assert bp.missing_entities == ["NOTGENE"]
+        assert bp_df[3] is None
+        assert not bp_df[2] is None

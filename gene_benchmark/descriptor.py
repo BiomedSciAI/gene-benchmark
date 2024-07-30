@@ -718,13 +718,16 @@ class BasePairDescriptor(SingleEntityTypeDescriptor):
             symbol: _fetch_ensembl_sequence(ensemble)
             for symbol, ensemble in ensembles.items()
         }
-        pair_bse_df = pd.DataFrame.from_dict(
-            base_pairs, orient="index", columns=[self.description_col]
-        )
-        return pair_bse_df.dropna()
+        pair_bse_df = pd.DataFrame(index=entities, columns=[self.description_col])
+        pair_bse_df[self.description_col] = [
+            base_pairs[v] if v in base_pairs else None for v in pair_bse_df.index
+        ]
+        return pair_bse_df
 
     def get_missing_entities(self, elements, element_metadata_df):
-        return list(filter(lambda x: x not in element_metadata_df.index, elements))
+        return list(
+            filter(lambda x: x not in element_metadata_df.dropna().index, elements)
+        )
 
     def row_to_description(self, df_row: pd.Series) -> str:
         return df_row[self.description_col]
