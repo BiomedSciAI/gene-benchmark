@@ -4,6 +4,33 @@ from collections.abc import Iterable
 
 import mygene
 import pandas as pd
+import requests
+
+
+def _get_gene_ids(symbols):
+    mg = mygene.MyGeneInfo()
+    query = " ".join(symbols)
+    gene_info = mg.query(
+        query, fields="symbol,entrezgene,ensembl.gene", species="human"
+    )
+    ids = {}
+    for hit in gene_info["hits"]:
+        symbol = hit["symbol"]
+        entrez_id = hit.get("entrezgene", None)
+        ensembl_id = hit.get("ensembl", {}).get("gene", None)
+        ids[symbol] = {"entrez_id": entrez_id, "ensembl_id": ensembl_id}
+    return ids
+
+
+def _fetch_ensembl_sequence(ensembl_gene_id):
+    if not ensembl_gene_id:
+        return None
+    url = f"https://rest.ensembl.org/sequence/id/{ensembl_gene_id}?content-type=text/plain"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return None
 
 
 def missing_col_or_nan(df_series, indx):
@@ -648,3 +675,9 @@ def has_missing_columns(df_row, column_names):
 
     """
     return any(missing_col_or_nan(df_row, col) for col in column_names)
+
+
+class BasePairDescriptor(SingleEntityTypeDescriptor):
+
+    def __init__(self, specie: str = "human") -> None:
+        self.species = specie
