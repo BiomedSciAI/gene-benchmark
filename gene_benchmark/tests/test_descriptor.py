@@ -8,6 +8,7 @@ from gene_benchmark.descriptor import (
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
     NCBIDescriptor,
+    _fetch_ensembl_sequence,
     _gene_symbol_to_ensemble_ids,
     add_prefix_to_dict,
     missing_col_or_nan,
@@ -332,3 +333,8 @@ class TestDescriptor(unittest.TestCase):
             "NOTGENE": None,
         }
         assert real_vals == ensembles
+
+    def test_ensemble_bp():
+        base_pair_seq = _fetch_ensembl_sequence("ENSG00000146648")
+        bp_org = "AGACGTCCGGGCAGCCCCCGGCGCAGCGCGGCCGCAGCAGCCTCCGCCCCCCGCACGGTGTGAGCGCCCGACGCGGCCGA"
+        assert base_pair_seq[: len(bp_org)] == bp_org
