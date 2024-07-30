@@ -7,7 +7,22 @@ import pandas as pd
 import requests
 
 
-def _get_gene_ids(symbols: str, species: str = "human") -> dict[str, str]:
+def _gene_symbol_to_ensemble_ids(
+    symbols: list[str], species: str = "human"
+) -> dict[str, str]:
+    """
+    converts between symbols to their ensemble ids.
+
+    Args:
+    ----
+        symbols (list[str]): A list of gene symbols
+        species (str, optional): The species for the ensemble id conversion. Defaults to "human".
+
+    Returns:
+    -------
+        dict[str, str]: dictionary with symbol ensemble pairs (if symbol didn't find a ensemble id it will not appear)
+
+    """
     mg = mygene.MyGeneInfo()
     query = " ".join(symbols)
     gene_info = mg.query(query, fields="symbol,ensembl.gene", species=species)
@@ -679,14 +694,17 @@ class BasePairDescriptor(SingleEntityTypeDescriptor):
     def __init__(self, specie: str = "human", description_col="description") -> None:
         self.species = specie
         self.description_col = description_col
+        self.missing_entities = None
+        self.allow_missing = None
+        self.allow_partial = True
 
     def _retrieve_dataframe_for_entities(
         self, entities: list, first_description_only=False
     ):
-        ensembles = _get_gene_ids(entities, species=self.species)
+        ensembles = _gene_symbol_to_ensemble_ids(entities, species=self.species)
         base_pairs = {
             symbol: _fetch_ensembl_sequence(ensemble)
-            for symbol, ensemble in ensembles.items
+            for symbol, ensemble in ensembles.items()
         }
         pair_bse_df = pd.DataFrame.from_dict(
             base_pairs, orient="index", columns=[self.description_col]

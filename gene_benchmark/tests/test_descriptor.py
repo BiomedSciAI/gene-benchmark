@@ -8,6 +8,7 @@ from gene_benchmark.descriptor import (
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
     NCBIDescriptor,
+    _gene_symbol_to_ensemble_ids,
     add_prefix_to_dict,
     missing_col_or_nan,
 )
@@ -320,3 +321,14 @@ class TestDescriptor(unittest.TestCase):
         entities = pd.Series(data=["PLAC4", "IAMNOTAGENE", "C3orf18"])
         des = descriptor.describe(entities)
         assert all(des == entities)
+
+    def test_symbol_to_ensemble():
+        gene_symbols = ["BRCA1", "TP53", "EGFR", "NOTGENE"]
+        ensembles = _gene_symbol_to_ensemble_ids(gene_symbols)
+        real_vals = {
+            "BRCA1": "ENSG00000012048",
+            "TP53": "ENSG00000141510",
+            "EGFR": "ENSG00000146648",
+            "NOTGENE": None,
+        }
+        assert real_vals == ensembles
