@@ -6,6 +6,7 @@ from gene_benchmark.descriptor import (
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
     NCBIDescriptor,
+    BasePairDescriptor
 )
 from gene_benchmark.encoder import (
     MultiEntityEncoder,
@@ -78,4 +79,6 @@ type_dict = {
     "RandomForestClassifier": RandomForestClassifier,
     "RandomForestRegressor": RandomForestRegressor,
     "get_gene_disease_multi_encoder": get_gene_disease_multi_encoder,
+    "BasePairDescriptor": BasePairDescriptor,
+    
 }
