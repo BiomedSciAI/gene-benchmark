@@ -11,6 +11,9 @@ import gene_benchmark.descriptor
 import gene_benchmark.encoder
 from gene_benchmark.descriptor import NaiveDescriptor
 from gene_benchmark.deserialization import load_class
+import os
+
+os.environ["trust_remote_code"] = "true"
 
 logger = logging.getLogger()
 FORMAT = (
