@@ -6,8 +6,7 @@ import mygene
 import pandas as pd
 import requests
 
-
-def _gene_symbol_to_ensemble_ids(
+def _gene_symbol_to_ensemble_ids_batch(
     symbols: list[str], species: str = "human"
 ) -> dict[str, str]:
     """
@@ -24,15 +23,42 @@ def _gene_symbol_to_ensemble_ids(
 
     """
     mg = mygene.MyGeneInfo()
-    query = " ".join(symbols)
-    gene_info = mg.query(query, fields="symbol,ensembl.gene", species=species)
+    query = ",".join(symbols)
+    gene_info = mg.query(query, fields="symbol,ensembl.gene,summary", scopes="symbol",
+             species=species)
     ids = {}
     for hit in gene_info["hits"]:
-        symbol = hit["symbol"]
-        ensembl_id = hit["ensembl"]["gene"]
+        symbol = hit['symbol']
+        if isinstance(hit["ensembl"],list):
+            ensembl_id = hit["ensembl"][0]["gene"]
+            ensembl_num = len(hit['ensembl'])
+            warnings.warn(f"{symbol} has {ensembl_num} ensembl ids the first {ensembl_id} was used")
+        else:
+            ensembl_id = hit["ensembl"]["gene"]
         ids[symbol] = ensembl_id
     return ids
 
+def _gene_symbol_to_ensemble_ids(
+    symbols: list[str], species: str = "human", batch_size=1000
+) -> dict[str, str]:
+    """
+    converts between symbols to their ensemble ids.
+
+    Args:
+    ----
+        symbols (list[str]): A list of gene symbols
+        species (str, optional): The species for the ensemble id conversion. Defaults to "human".
+
+    Returns:
+    -------
+        dict[str, str]: dictionary with symbol ensemble pairs (if symbol didn't find a ensemble id it will not appear)
+
+    """
+    symb_to_ensembl = {}
+    for batch_ind in range(0,len(symbols),batch_size):
+        batch_symbs = symbols[batch_ind:min(batch_ind+batch_size,len(symbols))]
+        symb_to_ensembl.update(_gene_symbol_to_ensemble_ids_batch(symbols=batch_symbs,species=species))
+    return symb_to_ensembl
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """

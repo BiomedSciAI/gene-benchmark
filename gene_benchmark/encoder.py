@@ -371,9 +371,10 @@ class SentenceTransformerEncoder(SingleEncoder):
         encoder_model: pd.DataFrame = None,
         show_progress_bar: bool = True,
         batch_size: int = 32,
+        trust_remote_code:bool=True
     ):
         if encoder_model is None:
-            self.encoder = SentenceTransformer(encoder_model_name)
+            self.encoder = SentenceTransformer(encoder_model_name,trust_remote_code)
         else:
             self.encoder = encoder_model
         self.encoder_model_name = encoder_model_name
