@@ -36,7 +36,8 @@ def _gene_symbol_to_ensemble_ids(
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
-    retries the base pair sequence of a given ensemble id using ensembl.org API.
+    retries the base pair sequence of a given ensemble id REST ensenmbl API
+    available at https://rest.ensembl.org/.
 
     Args:
     ----
