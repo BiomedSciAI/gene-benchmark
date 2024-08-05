@@ -29,7 +29,7 @@ def _gene_symbol_to_ensemble_ids(
     ids = {}
     for hit in gene_info["hits"]:
         symbol = hit["symbol"]
-        ensembl_id = hit.get("ensembl", {}).get("gene", None)
+        ensembl_id = hit["ensembl"]["gene"]
         ids[symbol] = ensembl_id
     return ids
 
