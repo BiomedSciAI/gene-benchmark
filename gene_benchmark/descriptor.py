@@ -678,9 +678,7 @@ def has_missing_columns(df_row, column_names):
 class BasePairDescriptor(NCBIDescriptor):
     """A descriptor designated to describe each symbol by its base pair sequence."""
 
-    def __init__(
-        self, allow_partial=False, specie="human", description_col="bp"
-    ) -> None:
+    def __init__(self, allow_partial=False, description_col="bp") -> None:
         """
         Initialize descriptor class.
 
@@ -694,7 +692,6 @@ class BasePairDescriptor(NCBIDescriptor):
         super().__init__(allow_partial=allow_partial)
         self.ensemble_des = NCBIDescriptor(allow_partial=allow_partial)
         self.ensemble_des.needed_columns = ["ensembl.gene", "symbol"]
-        self.species = specie
         self.description_col = description_col
 
     def _retrieve_dataframe_for_entities(
@@ -707,3 +704,9 @@ class BasePairDescriptor(NCBIDescriptor):
             lambda x: _fetch_ensembl_sequence(x["ensembl.gene"]), axis=1
         )
         return ensembles
+
+    def row_to_description(self, df_row: pd.Series) -> str:
+        return df_row[self.description_col]
+
+    def is_partial_description_row(self, df_row: pd.Series) -> bool:
+        return False
