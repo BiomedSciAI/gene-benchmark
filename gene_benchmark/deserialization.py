@@ -2,6 +2,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from gene_benchmark.descriptor import (
+    BasePairDescriptor,
     CSVDescriptions,
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
@@ -78,4 +79,5 @@ type_dict = {
     "RandomForestClassifier": RandomForestClassifier,
     "RandomForestRegressor": RandomForestRegressor,
     "get_gene_disease_multi_encoder": get_gene_disease_multi_encoder,
+    "BasePairDescriptor": BasePairDescriptor,
 }
