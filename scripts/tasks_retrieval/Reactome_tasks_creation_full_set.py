@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+import warnings
+from dataclasses import dataclass
 
 import click
 import pandas as pd
@@ -23,9 +24,7 @@ def get_gene_list(url):
         lambda x: [str(v) for v in set(x) if not pd.isna(v)], axis=1
     )
     pathway_to_gene_df = pathway_to_gene_df.set_index("pathway")
-    pathway_to_gene = pathway_to_gene_df["genes"].to_dict()
-
-    return pathway_to_gene, pathway_to_gene_df
+    return pathway_to_gene_df
 
 
 def get_hierarchy_data(url):
@@ -37,48 +36,35 @@ def get_hierarchy_data(url):
     hierarchies = (
         hierarchy_df.groupby(hierarchy_df.index)["child"].apply(list).to_dict()
     )
-    return hierarchies, hierarchy_df
+    return hierarchies
+
+
+def pathways_2_one_hot(pathways, path_2_gene):
+    task_df = pd.DataFrame(columns=["genes"], index=pathways)
+    task_df["genes"] = [
+        ";".join(path_2_gene.populate_pathway(path)) for path in task_df.index
+    ]
+    return list_form_to_onehot_form(
+        task_df, participant_col_name="genes", delimiter=";"
+    )
 
 
 @dataclass
 class PathwaySeeks:
     pathway_to_gene: dict[str, list[str]]
-    pathway_to_gene_df: pd.DataFrame
     hierarchies: dict[str, list[str]]
-    missing_pathways_count: int = field(default=0, init=False)
 
-    def populate_pathway(self, pathways: list[str]) -> (list[str], list[str]):
-        collected_paths = []
-        res = []
-        for path in pathways:
-            if path in self.pathway_to_gene:
-                res.extend(self.pathway_to_gene[path])
-            else:
-                self.missing_pathways_count += 1
-                print(f"Warning: Pathway {path} not found in pathway_to_gene.")
-            if path in self.hierarchies:
-                collected_paths.extend(self.hierarchies[path])
-                # recursively get genes from child pathways
-                for child_path in self.hierarchies[path]:
-                    child_genes, _ = self.populate_pathway([child_path])
-                    res.extend(child_genes)
-        return list(set(res)), collected_paths
-
-    def build_multilabel_task(
-        self, pathway: str, result_genes: list[str], collected_paths: list[str]
-    ) -> pd.DataFrame:
-        pathway_names = [
-            self.pathway_to_gene_df.loc[path, "pathway_description"]
-            for path in collected_paths
-            if path in self.pathway_to_gene_df.index
-        ]
-        data = {
-            "Submitted entities found": [
-                ";".join(sorted(set(self.pathway_to_gene.get(path, []))))
-                for path in collected_paths
-            ]
-        }
-        return pd.DataFrame(data, index=pathway_names)
+    def get_genes(self, pathway: list[str]) -> list[str]:
+        sub_genes = set()
+        if pathway in self.pathway_to_gene:
+            return self.pathway_to_gene[pathway]
+        elif not pathway in self.hierarchies:
+            warnings.warn(f"Pathway {pathway} has no sub pathways and no genes defined")
+        else:
+            for sub_pathways in self.hierarchies[pathway]:
+                sub_genes.update(self.populate_pathway(sub_pathways))
+        self.pathway_to_gene[pathway] = list(sub_genes)
+        return list(sub_genes)
 
 
 @click.command()
@@ -99,7 +85,8 @@ class PathwaySeeks:
     "--pathway-identifier",
     type=click.STRING,
     help="Pathway identifier from which we want to create multilabel task.",
-    default=None,
+    required=True,
+    multiple=True,
 )
 @click.option(
     "--hierarchy-file",
@@ -136,35 +123,21 @@ def main(
     pathway_to_gene_url = verify_source_of_data(
         pathway_to_gene_file, url=GENE_LIST_URL, allow_downloads=allow_downloads
     )
+    pathway_to_gene_df = get_gene_list(pathway_to_gene_url)
+    path_way_dict = pathway_to_gene_df["genes"].to_dict()
+    hire_dict = get_hierarchy_data(hierarchies_file_url)
+    path_2_gene = PathwaySeeks(path_way_dict, hire_dict)
 
-    pathway_to_gene, pathway_to_gene_df = get_gene_list(pathway_to_gene_url)
-    hierarchies, hierarchy_df = get_hierarchy_data(hierarchies_file_url)
-
-    pathway = PathwaySeeks(pathway_to_gene, pathway_to_gene_df, hierarchies)
-    result_genes, collected_paths = pathway.populate_pathway([pathway_identifier])
-    print(f"Total missing pathways: {pathway.missing_pathways_count}")
-
-    if result_genes:
-        df_task = pathway.build_multilabel_task(
-            pathway_identifier, result_genes, collected_paths
-        )
-        outcomes = list_form_to_onehot_form(df_task)
+    for pathway_idx in pathway_identifier:
+        pathways = hire_dict[pathway_idx]
+        outcomes = pathways_2_one_hot(pathways, path_2_gene)
         symbols = pd.Series(outcomes.index, name="symbol")
-
-        if pathway_identifier in pathway_to_gene_df.index:
-            pathway_description = pathway_to_gene_df.loc[
-                pathway_identifier, "pathway_description"
-            ]
-        else:
-            pathway_description = f"Pathway_{pathway_identifier}"
-
         dump_task_definitions(
-            symbols, outcomes, main_task_directory, pathway_description
+            symbols, outcomes, main_task_directory, pathway_identifier
         )
-
         if verbose:
             print(
-                f"{pathway_description} was created at {main_task_directory} shaped {outcomes.shape}"
+                f"{pathway_idx} was created at {main_task_directory} shaped {outcomes.shape}"
             )
 
 
