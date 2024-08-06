@@ -678,7 +678,7 @@ def has_missing_columns(df_row, column_names):
 class BasePairDescriptor(NCBIDescriptor):
     """A descriptor designated to describe each symbol by its base pair sequence."""
 
-    def __init__(self, allow_partial=False, description_col="bp") -> None:
+    def __init__(self, allow_partial=False, description_col: str = "bp") -> None:
         """
         Initialize descriptor class.
 
@@ -687,6 +687,7 @@ class BasePairDescriptor(NCBIDescriptor):
             allow_partial (bool, optional):if true a partial description can be returned if false it will return None if the row is
             missing name, symbol or summary. Defaults to False.
             is_partial_row_function (callable): function to identify if a row only has partial knowledge.
+            description_col (str): column name for the base pair sequence column Defaults to False.
 
         """
         super().__init__(allow_partial=allow_partial)
