@@ -107,6 +107,7 @@ def do_gene_embedding(
             output_folder / f"descriptions_{gene_symbols_name}_{model_name}.csv"
         )
         descriptions.to_csv(descriptions_ofname)
+        logger.info(f"Saved descriptions for {descriptions.shape} symbols")
 
     logger.info(f"Getting encodings for {len(gene_symbol_list)} symbols")
     encoded = encoder.encode(descriptions, randomize_missing=True, random_len=1024)
