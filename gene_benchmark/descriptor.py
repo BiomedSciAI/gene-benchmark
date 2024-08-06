@@ -7,45 +7,6 @@ import pandas as pd
 import requests
 
 
-def _gene_symbol_to_ensemble_ids(
-    symbols: list[str], species: str = "human"
-) -> dict[str, str]:
-    """
-    converts between symbols to their ensemble ids.
-
-    Args:
-    ----
-        symbols (list[str]): A list of gene symbols
-        species (str, optional): The species for the ensemble id conversion. Defaults to "human".
-
-    Returns:
-    -------
-        dict[str, str]: dictionary with symbol ensemble pairs (if symbol didn't find a ensemble id it will not appear)
-
-    """
-    mg = mygene.MyGeneInfo()
-    query = ",".join(symbols)
-    gene_info = mg.querymany(
-        query, fields="symbol,ensembl.gene", scopes="symbol", species=species
-    )
-    ids = {}
-    for hit in gene_info:
-        symbol = hit["symbol"]
-        if "ensembl" in hit:
-            if isinstance(hit["ensembl"], list):
-                ensembl_id = hit["ensembl"][0]["gene"]
-                ensembl_num = len(hit["ensembl"])
-                warnings.warn(
-                    f"{symbol} has {ensembl_num} ensembl ids the first {ensembl_id} was used"
-                )
-            else:
-                ensembl_id = hit["ensembl"]["gene"]
-        else:
-            warnings.warn(f"{symbol} has no ensembl ids")
-        ids[symbol] = ensembl_id
-    return ids
-
-
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
     retries the base pair sequence of a given ensemble id REST ensenmbl API
@@ -714,46 +675,35 @@ def has_missing_columns(df_row, column_names):
     return any(missing_col_or_nan(df_row, col) for col in column_names)
 
 
-class BasePairDescriptor(SingleEntityTypeDescriptor):
+class BasePairDescriptor(NCBIDescriptor):
     """A descriptor designated to describe each symbol by its base pair sequence."""
 
-    def __init__(self, specie: str = "human", description_col="description") -> None:
+    def __init__(
+        self, allow_partial=False, specie="human", description_col="bp"
+    ) -> None:
         """
-        Initiates a base pair description object.
+        Initialize descriptor class.
 
         Args:
         ----
-            specie (str, optional): The species to be used for the base pair sequence. Defaults to "human".
-            description_col (str, optional): Name of the description column. Defaults to "description".
+            allow_partial (bool, optional):if true a partial description can be returned if false it will return None if the row is
+            missing name, symbol or summary. Defaults to False.
+            is_partial_row_function (callable): function to identify if a row only has partial knowledge.
 
         """
+        super().__init__(allow_partial=allow_partial)
+        self.ensemble_des = NCBIDescriptor(allow_partial=allow_partial)
+        self.ensemble_des.needed_columns = ["ensembl.gene", "symbol"]
         self.species = specie
         self.description_col = description_col
-        self.missing_entities = None
-        self.allow_missing = None
-        self.allow_partial = True
 
     def _retrieve_dataframe_for_entities(
         self, entities: list, first_description_only=False
     ):
-        ensembles = _gene_symbol_to_ensemble_ids(entities, species=self.species)
-        base_pairs = {
-            symbol: _fetch_ensembl_sequence(ensemble)
-            for symbol, ensemble in ensembles.items()
-        }
-        pair_bse_df = pd.DataFrame(index=entities, columns=[self.description_col])
-        pair_bse_df[self.description_col] = [
-            base_pairs[v] if v in base_pairs else None for v in pair_bse_df.index
-        ]
-        return pair_bse_df
-
-    def get_missing_entities(self, elements, element_metadata_df):
-        return list(
-            filter(lambda x: x not in element_metadata_df.dropna().index, elements)
+        ensembles = self.ensemble_des._retrieve_dataframe_for_entities(
+            entities, first_description_only=first_description_only
         )
-
-    def row_to_description(self, df_row: pd.Series) -> str:
-        return df_row[self.description_col]
-
-    def is_partial_description_row(self, df_row: pd.Series) -> bool:
-        return False
+        ensembles[self.description_col] = ensembles.apply(
+            lambda x: _fetch_ensembl_sequence(x["ensembl.gene"]), axis=1
+        )
+        return ensembles
