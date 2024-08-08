@@ -40,7 +40,7 @@ from gene_benchmark.task_retrieval import (
 from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = (
-    "https://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
+    "http://humantfs2.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
 )
 ENTITIES_COL = "HGNC symbol"
 
