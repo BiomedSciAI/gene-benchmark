@@ -168,8 +168,8 @@ class PathwaySeeks:
     "-p",
     type=click.STRING,
     help="Pathway identifier from which we want to create multilabel task.",
-    required=True,
     multiple=True,
+    default=None,
 )
 @click.option(
     "--hierarchy-file",
@@ -197,7 +197,8 @@ class PathwaySeeks:
     default=True,
 )
 @click.option(
-    "--add-top-level",
+    "--add-top-levels",
+    help="If true will create a task per all of the top level human pathways and per each top level pathway individually for Homo sapiens",
     type=click.BOOL,
     default=True,
 )
@@ -209,7 +210,7 @@ def main(
     pathway_description,
     pathway_to_gene_file,
     verbose,
-    add_top_level,
+    add_top_levels,
 ):
 
     hierarchies_file_url = verify_source_of_data(
@@ -229,24 +230,24 @@ def main(
     path_2_gene = PathwaySeeks(
         read_gmt_from_url(pathway_to_gene_url, "ReactomePathways.gmt"), hire_dict
     )
+    if add_top_levels:
+        top_dict = get_top_level_dict(hierarchy_df, pathway_des)
+        pathway_set_to_task(
+            top_dict["Homo sapiens"],
+            path_2_gene,
+            pathway_des,
+            "Pathways top level homo sapiens",
+            main_task_directory,
+            verbose,
+        )
+        pathway_identifier = pathway_identifier + tuple(top_dict["Homo sapiens"])
 
     for pathway_idx in pathway_identifier:
         pathways = hire_dict[pathway_idx]
-        path_name = pathway_des.loc[pathway_identifier, "name"]
+        path_name = f"pathway {pathway_des.loc[pathway_idx, 'name']}"
         pathway_set_to_task(
             pathways, path_2_gene, pathway_des, path_name, main_task_directory, verbose
         )
-    if add_top_level:
-        top_dict = get_top_level_dict(hierarchy_df, pathway_des)
-        for species, pathways in top_dict.items():
-            pathway_set_to_task(
-                pathways,
-                path_2_gene,
-                pathway_des,
-                f"top level pathways {species}",
-                main_task_directory,
-                verbose,
-            )
 
 
 if __name__ == "__main__":
