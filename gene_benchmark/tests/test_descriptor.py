@@ -4,10 +4,12 @@ import numpy as np
 import pandas as pd
 
 from gene_benchmark.descriptor import (
+    BasePairDescriptor,
     CSVDescriptions,
     MultiEntityTypeDescriptor,
     NaiveDescriptor,
     NCBIDescriptor,
+    _fetch_ensembl_sequence,
     add_prefix_to_dict,
     missing_col_or_nan,
 )
@@ -274,6 +276,20 @@ class TestDescriptor(unittest.TestCase):
         assert descriptions.iloc[1, 2] == None
         assert descriptions.iloc[0, 1] == "cancer is a very bad disease"
 
+    def test_CSVDescriptions_with_des_col(self):
+        csv_path = "gene_benchmark/tests/resources/disease_descriptions.csv"
+        csv_mod_path = "gene_benchmark/tests/resources/disease_descriptions_mod.csv"
+        base = CSVDescriptions(csv_file_path=csv_path, index_col="id")
+        base_mod = CSVDescriptions(
+            csv_file_path=csv_mod_path,
+            index_col="id",
+            description_col="description_mod",
+        )
+        assert (
+            base.describe(pd.Series(["cancer"]))[0]
+            == base_mod.describe(pd.Series(["cancer"]))[0]
+        )
+
     def test_MultiEntityTypeDescriptor_descriptions_multiple_description_types(self):
         csv_path = "gene_benchmark/tests/resources/disease_descriptions.csv"
         description_dict = {
@@ -320,3 +336,19 @@ class TestDescriptor(unittest.TestCase):
         entities = pd.Series(data=["PLAC4", "IAMNOTAGENE", "C3orf18"])
         des = descriptor.describe(entities)
         assert all(des == entities)
+
+    def test_ensemble_bp(self):
+        base_pair_seq = _fetch_ensembl_sequence("ENSG00000146648")
+        bp_org = "AGACGTCCGGGCAGCCCCCGGCGCAGCGCGGCCGCAGCAGCCTCCGCCCCCCGCACGGTGTGAGCGCCCGACGCGGCCGA"
+        assert base_pair_seq[: len(bp_org)] == bp_org
+
+    def test_base_pair_descriptor_describe(self):
+        gene_symbols = ["BRCA1", "TP53", "EGFR", "NOTGENE"]
+        bp = BasePairDescriptor()
+        bp_df = bp.describe(pd.Series(gene_symbols, index=gene_symbols))
+        bp.missing_entities
+        assert bp_df.shape[0] == 4
+        assert bp.missing_entities == ["NOTGENE"]
+        assert not bp_df["BRCA1"] is None
+        assert bp_df["NOTGENE"] is None
+        assert set(bp_df["BRCA1"]) == {"A", "C", "G", "T"}

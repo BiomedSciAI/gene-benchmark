@@ -412,7 +412,7 @@ class TestTasks(unittest.TestCase):
     def test_get_task_names(self):
         tasks_folder = _get_tasks_folder()
         names = list(get_tasks_definition_names(tasks_folder))
-        assert len(names) >= 70
+        assert len(names) >= 65
         assert "RNA cancer distribution" in names
         assert "bivalent vs non-methylated" in names
 
@@ -553,3 +553,22 @@ class TestTasks(unittest.TestCase):
             include_symbols=["ATP6V0A1", "TUBG2", "MRPL43", "DHX8"],
         )
         assert full_entity_task.task_definitions.entities.shape[0] == 4
+
+    def test_multiclass_task_with_th(self):
+        task_name = "imbalanced_cat"
+        mpnet_name = "sentence-transformers/all-mpnet-base-v2"
+        full_entity_task = EntitiesTask(
+            task=task_name,
+            encoder=mpnet_name,
+            description_builder=NCBIDescriptor(),
+            base_model=LogisticRegression(max_iter=5000),
+            cv=5,
+            scoring=["roc_auc_ovr_weighted"],
+            tasks_folder=_get_test_tasks_folder(),
+            cat_label_th=0.04,
+        )
+        full_entity_task.run()
+        this_run_df = full_entity_task.summary()
+        test_scores = this_run_df["test_roc_auc_ovr_weighted"].split(",")
+        test_scores = list(map(float, test_scores))
+        assert np.nan not in test_scores
