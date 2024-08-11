@@ -1,5 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 
 from gene_benchmark.descriptor import (
     BasePairDescriptor,
@@ -80,4 +81,6 @@ type_dict = {
     "RandomForestRegressor": RandomForestRegressor,
     "get_gene_disease_multi_encoder": get_gene_disease_multi_encoder,
     "BasePairDescriptor": BasePairDescriptor,
+    "Multilayer_Perceptron_classifier": MLPClassifier,
+    "Multilayer_Perceptron_regressor": MLPRegressor,
 }
