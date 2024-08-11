@@ -342,7 +342,9 @@ def main(
     pathway_des = get_gene_descriptions(urls_dict["pathway_to_des"])
     hire_dict, hierarchy_df = get_hierarchy_data(urls_dict["hierarchies"])
     path_2_gene = PathwaySeeks(
-        get_pathway_symbols_dict(urls_dict["pathway_to_gene"], "ReactomePathways.gmt"),
+        get_pathway_symbols_dict(
+            urls_dict["pathway_to_gene"], "ReactomePathways.gmt", allow_downloads
+        ),
         hire_dict,
     )
     if add_top_levels:
