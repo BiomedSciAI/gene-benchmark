@@ -329,23 +329,21 @@ def main(
     verbose,
     add_top_levels,
 ):
+    urls_dict = {}
+    for nme, file, url in zip(
+        ["hierarchies", "pathway_to_gene", "pathway_to_des"],
+        [hierarchy_file, pathway_to_gene_file, pathway_description],
+        [HIERARCHIES_URL, BOTTOM_PATHWAY_TO_GENE_LIST, PATHWAY_DES],
+    ):
+        urls_dict[nme] = verify_source_of_data(
+            file, url=url, allow_downloads=allow_downloads
+        )
 
-    hierarchies_file_url = verify_source_of_data(
-        hierarchy_file, url=HIERARCHIES_URL, allow_downloads=allow_downloads
-    )
-
-    pathway_to_gene_url = verify_source_of_data(
-        pathway_to_gene_file,
-        url=BOTTOM_PATHWAY_TO_GENE_LIST,
-        allow_downloads=allow_downloads,
-    )
-    pathway_des_url = verify_source_of_data(
-        pathway_description, url=PATHWAY_DES, allow_downloads=allow_downloads
-    )
-    pathway_des = get_gene_descriptions(pathway_des_url)
-    hire_dict, hierarchy_df = get_hierarchy_data(hierarchies_file_url)
+    pathway_des = get_gene_descriptions(urls_dict["pathway_to_des"])
+    hire_dict, hierarchy_df = get_hierarchy_data(urls_dict["hierarchies"])
     path_2_gene = PathwaySeeks(
-        get_pathway_symbols_dict(pathway_to_gene_url, "ReactomePathways.gmt"), hire_dict
+        get_pathway_symbols_dict(urls_dict["pathway_to_gene"], "ReactomePathways.gmt"),
+        hire_dict,
     )
     if add_top_levels:
         top_dict = get_top_level_dict(hierarchy_df, pathway_des)
