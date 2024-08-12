@@ -441,9 +441,12 @@ class TransformersEncoder(SingleEncoder):
         super().__init__(encoder_model_name)
 
     def _get_encoding(self, entities, **kwargs):
-        inputs = self.tokenizer(entities, return_tensors="pt")["input_ids"]
-        hidden_states = self.encoder(inputs)[0]
-        return torch.mean(hidden_states[0], dim=0)
+        vec_list = []
+        for ent in entities:
+            inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
+            hidden_states = self.encoder(inputs)[0]
+            vec_list.append(torch.mean(hidden_states[0], dim=0).detach())
+        return np.array(vec_list)
 
     def summary(self):
         summary_dict = super().summary()
