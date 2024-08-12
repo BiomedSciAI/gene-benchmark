@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
+from transformers.models.bert.configuration_bert import BertConfig
 
 from .descriptor import add_prefix_to_dict
 
@@ -426,9 +427,11 @@ class TransformersEncoder(SingleEncoder):
         tokenizer_name: str = None,
         trust_remote_code: bool = False,
     ):
+        config = BertConfig.from_pretrained(encoder_model_name)
         self.encoder = AutoModel.from_pretrained(
-            encoder_model_name, trust_remote_code=trust_remote_code
+            encoder_model_name, trust_remote_code=trust_remote_code, config=config
         )
+
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_name, trust_remote_code=trust_remote_code
         )
@@ -439,7 +442,7 @@ class TransformersEncoder(SingleEncoder):
 
     def _get_encoding(self, entities, **kwargs):
         inputs = self.tokenizer(entities, return_tensors="pt")["input_ids"]
-        hidden_states = self.encoder(inputs)[0]  # [1, sequence_length, 768]
+        hidden_states = self.encoder(inputs)[0]
         return torch.mean(hidden_states[0], dim=0)
 
     def summary(self):

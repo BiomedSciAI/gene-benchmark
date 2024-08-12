@@ -11,6 +11,7 @@ from gene_benchmark.encoder import (
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
+    TransformersEncoder,
     create_random_embedding_matrix,
     randNone_dict,
 )
@@ -413,3 +414,11 @@ class TestEncoder(unittest.TestCase):
         ml_enc = MultiEntityEncoder(enc_dict)
         with pytest.raises(Exception, match="columns which are not in the encoding"):
             ml_enc.encode(to_encode)
+
+    def test_TransformerEncoder(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = TransformersEncoder(model, model, trust_remote_code=True)
+        gene1 = "ACGTAGCATCGGATCTATCTATCGACACTTGGTTATCGATCTACGAGCATCTCGTTAGC"
+        gene2 = "GATTACA"
+        encoded = encoder.encode(pd.Series([gene1, gene2]))
+        assert encoded.shape == (2, 2)
