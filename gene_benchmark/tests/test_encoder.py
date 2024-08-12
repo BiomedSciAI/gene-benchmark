@@ -8,10 +8,10 @@ from gene_benchmark.descriptor import (
     NCBIDescriptor,
 )
 from gene_benchmark.encoder import (
+    BERTEncoder,
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
-    TransformersEncoder,
     create_random_embedding_matrix,
     randNone_dict,
 )
@@ -417,7 +417,7 @@ class TestEncoder(unittest.TestCase):
 
     def test_TransformerEncoder(self):
         model = "zhihan1996/DNABERT-2-117M"
-        encoder = TransformersEncoder(model, model, trust_remote_code=True)
+        encoder = BERTEncoder(model, model, trust_remote_code=True)
         gene1 = "ACGTAGCATCGGATCTATCTATCGACACTTGGTTATCGATCTACGAGCATCTCGTTAGC"
         gene2 = "GATTACA"
         encoded = encoder.encode(pd.Series([gene1, gene2]))

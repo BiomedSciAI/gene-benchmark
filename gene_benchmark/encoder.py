@@ -418,8 +418,8 @@ class SentenceTransformerEncoder(SingleEncoder):
         return summary_dict
 
 
-class TransformersEncoder(SingleEncoder):
-    """encode a list of descriptions into numeric vectors using torch transformers."""
+class BERTEncoder(SingleEncoder):
+    """encode a list of descriptions into numeric vectors using transformers BERT encoders."""
 
     def __init__(
         self,
