@@ -25,6 +25,7 @@ dependencies = [
 "sentence_transformers",
 "scikit-learn",
 "click",
+"einops"
 ]
 
 [project.optional-dependencies]
