@@ -6,6 +6,11 @@ import mygene
 import pandas as pd
 import requests
 
+def _get_ensemble(ens_data):
+    if 'ensembl' in ens_data.index:
+        return ens_data['ensembl'][0]['gene']
+    else:
+        return ens_data['ensembl.gene']
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
@@ -704,10 +709,10 @@ class BasePairDescriptor(NCBIDescriptor):
             entities, first_description_only=first_description_only
         )
         ensembles[self.description_col] = ensembles.apply(
-            lambda x: _fetch_ensembl_sequence(x["ensembl.gene"]), axis=1
+            lambda x: _fetch_ensembl_sequence(_get_ensemble(x)), axis=1
         )
         return ensembles
-
+        
     def row_to_description(self, df_row: pd.Series) -> str:
         return df_row[self.description_col]
 
