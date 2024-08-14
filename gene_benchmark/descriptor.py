@@ -7,10 +7,12 @@ import pandas as pd
 import requests
 
 def _get_ensemble(ens_data):
+    if 'ensembl.gene' in ens_data.index:
+        if not ens_data['ensembl.gene'] is None:
+            return ens_data['ensembl.gene']
     if 'ensembl' in ens_data.index:
         return ens_data['ensembl'][0]['gene']
-    else:
-        return ens_data['ensembl.gene']
+    raise Exception("Unknown data format")
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
