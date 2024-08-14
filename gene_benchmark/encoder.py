@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+import torch
 from sentence_transformers import SentenceTransformer
+from transformers import AutoModel, AutoTokenizer
+from transformers.models.bert.configuration_bert import BertConfig
 
 from .descriptor import add_prefix_to_dict
 
@@ -172,7 +175,7 @@ class SingleEncoder(Encoder):
     def encode(
         self, entities, allow_missing=True, randomize_missing=True, random_len=None
     ):
-        #  A None may couse an issue in sentence_transformers/models/Transformer.py#L121
+        #  A None may cause an issue in sentence_transformers/models/Transformer.py#L121
         unique_entities = list(filter(None, self._get_unique_entities(entities)))
         if len(unique_entities) > 0:
             unique_encodings = self._get_encoding(
@@ -368,7 +371,7 @@ class SentenceTransformerEncoder(SingleEncoder):
     def __init__(
         self,
         encoder_model_name: str = None,
-        encoder_model: pd.DataFrame = None,
+        encoder_model: SentenceTransformer = None,
         show_progress_bar: bool = True,
         batch_size: int = 32,
     ):
@@ -399,7 +402,7 @@ class SentenceTransformerEncoder(SingleEncoder):
         """
         assert (
             None not in entities
-        ), "A downstram bug will crash on encoding None sometimes, so there should never be a None here."
+        ), "A downstream bug will crash on encoding None sometimes, so there should never be a None here."
 
         encodings = self.encoder.encode(
             entities,
@@ -412,4 +415,42 @@ class SentenceTransformerEncoder(SingleEncoder):
         summary_dict = super().summary()
         if self.num_of_missing:
             summary_dict["num_of_missing"] = self.num_of_missing
+        return summary_dict
+
+
+class BERTEncoder(SingleEncoder):
+    """encode a list of descriptions into numeric vectors using transformers BERT encoders."""
+
+    def __init__(
+        self,
+        encoder_model_name: str = None,
+        tokenizer_name: str = None,
+        trust_remote_code: bool = False,
+    ):
+        config = BertConfig.from_pretrained(encoder_model_name)
+        self.encoder = AutoModel.from_pretrained(
+            encoder_model_name, trust_remote_code=trust_remote_code, config=config
+        )
+
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer_name, trust_remote_code=trust_remote_code
+        )
+        self.encoder_model_name = encoder_model_name
+        self.tokenizer_name = tokenizer_name
+        self.trust_remote_code = trust_remote_code
+        super().__init__(encoder_model_name)
+
+    def _get_encoding(self, entities, **kwargs):
+        vec_list = []
+        for ent in entities:
+            inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
+            hidden_states = self.encoder(inputs)[0]
+            vec_list.append(torch.mean(hidden_states[0], dim=0).detach())
+        return np.array(vec_list)
+
+    def summary(self):
+        summary_dict = super().summary()
+        if self.num_of_missing:
+            summary_dict["num_of_missing"] = self.num_of_missing
+        summary_dict["tokenizer_name"] = self.tokenizer_name
         return summary_dict

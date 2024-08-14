@@ -8,6 +8,7 @@ from gene_benchmark.descriptor import (
     NCBIDescriptor,
 )
 from gene_benchmark.encoder import (
+    BERTEncoder,
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
@@ -413,3 +414,11 @@ class TestEncoder(unittest.TestCase):
         ml_enc = MultiEntityEncoder(enc_dict)
         with pytest.raises(Exception, match="columns which are not in the encoding"):
             ml_enc.encode(to_encode)
+
+    def test_TransformerEncoder(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = BERTEncoder(model, model, trust_remote_code=True)
+        gene1 = "ACGTAGCATCGGATCTATCTATCGACACTTGGTTATCGATCTACGAGCATCTCGTTAGC"
+        gene2 = "GATTACA"
+        encoded = encoder.encode(pd.Series([gene1, gene2]))
+        assert encoded.shape[0] == 2
