@@ -10,10 +10,10 @@ from gene_benchmark.descriptor import (
     NCBIDescriptor,
 )
 from gene_benchmark.encoder import (
+    BERTEncoder,
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
-    BERTEncoder
 )
 
 
@@ -84,5 +84,5 @@ type_dict = {
     "BasePairDescriptor": BasePairDescriptor,
     "Multilayer_Perceptron_classifier": MLPClassifier,
     "Multilayer_Perceptron_regressor": MLPRegressor,
-    "BERTEncoder":BERTEncoder
+    "BERTEncoder": BERTEncoder,
 }
