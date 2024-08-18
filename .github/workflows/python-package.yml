@@ -37,6 +37,7 @@ jobs:
           python scripts/tasks_retrieval/HPA_tasks_creation.py --allow-downloads True
           python scripts/tasks_retrieval/humantfs_task_creation.py --allow-downloads True
           python scripts/tasks_retrieval/Reactome_tasks_creation.py  --allow-downloads True
+          python scripts/tasks_retrieval/uniprot_keyword_tasks_creation.py  --allow-downloads True
 
     - name: Test with pytest
       run: |
