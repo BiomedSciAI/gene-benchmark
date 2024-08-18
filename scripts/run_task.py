@@ -182,10 +182,6 @@ def main(
                 description_builder = load_class(**model_dict["descriptor"])
             else:
                 description_builder = None
-            if "base_model" in model_dict:
-                base_model = load_class(**model_dict["base_model"])
-            else:
-                base_model = LogisticRegression(max_iter=5000, n_jobs=-1)
             if scoring_type == "category":
                 scoring = (
                     "roc_auc_ovr_weighted",
@@ -195,6 +191,7 @@ def main(
                     "f1_weighted",
                 )
                 cv = 5
+                base_model = LogisticRegression(max_iter=5000, n_jobs=-1)
             elif scoring_type == "regression":
                 scoring = (
                     "r2",
@@ -236,6 +233,8 @@ def main(
                 post_processing = model_dict["post_processing"]
             else:
                 post_processing = "average"
+            if "base_model" in model_dict:
+                base_model = load_class(**model_dict["base_model"])
             encoder = load_class(**model_dict["encoder"])
             if ";" in task_name:
                 sub_task = task_name.split(";")[1]
