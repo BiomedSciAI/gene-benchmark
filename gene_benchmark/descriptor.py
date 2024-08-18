@@ -6,13 +6,15 @@ import mygene
 import pandas as pd
 import requests
 
+
 def _get_ensemble(ens_data):
-    if 'ensembl.gene' in ens_data.index:
-        if not ens_data['ensembl.gene'] is None:
-            return ens_data['ensembl.gene']
-    if 'ensembl' in ens_data.index:
-        return ens_data['ensembl'][0]['gene']
+    if "ensembl.gene" in ens_data.index:
+        if not ens_data["ensembl.gene"] is None:
+            return ens_data["ensembl.gene"]
+    if "ensembl" in ens_data.index:
+        return ens_data["ensembl"][0]["gene"]
     raise Exception("Unknown data format")
+
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
@@ -714,7 +716,7 @@ class BasePairDescriptor(NCBIDescriptor):
             lambda x: _fetch_ensembl_sequence(_get_ensemble(x)), axis=1
         )
         return ensembles
-        
+
     def row_to_description(self, df_row: pd.Series) -> str:
         return df_row[self.description_col]
 
