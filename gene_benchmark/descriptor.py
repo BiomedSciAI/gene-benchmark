@@ -13,7 +13,9 @@ def _get_ensemble(ens_data):
             return ens_data["ensembl.gene"]
     if "ensembl" in ens_data.index:
         return ens_data["ensembl"][0]["gene"]
-    raise Exception("Unknown data format")
+    else:
+        warnings.warn(f"Format unknown for {ens_data}")
+        return None
 
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
@@ -33,11 +35,16 @@ def _fetch_ensembl_sequence(ensembl_gene_id):
     if not ensembl_gene_id:
         return None
     url = f"https://rest.ensembl.org/sequence/id/{ensembl_gene_id}?content-type=text/plain"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
-    else:
-        return Exception("Request failed")
+
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise (f"Request failed for {ensembl_gene_id}")
+    except:
+        warnings.warn(f"Request failed for {ensembl_gene_id}")
+        return None
 
 
 def missing_col_or_nan(df_series, indx):
