@@ -37,7 +37,7 @@ def _fetch_ensembl_sequence(ensembl_gene_id):
     if response.status_code == 200:
         return response.text
     else:
-        return None
+        return Exception("Request failed")
 
 
 def missing_col_or_nan(df_series, indx):
