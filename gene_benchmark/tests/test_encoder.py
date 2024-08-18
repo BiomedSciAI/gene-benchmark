@@ -422,3 +422,4 @@ class TestEncoder(unittest.TestCase):
         gene2 = "GATTACA"
         encoded = encoder.encode(pd.Series([gene1, gene2]))
         assert encoded.shape[0] == 2
+        assert encoded.sum()[0] > 0.00001
