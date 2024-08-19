@@ -12,7 +12,21 @@ from gene_benchmark.task_retrieval import GENE_SYMBOL_URL
 from gene_benchmark.tasks import dump_task_definitions
 
 
-def get_all_categories_gene_protein_keyword_dfs(gene_proteins):
+def get_gene_protein_keyword_dfs(gene_proteins: list[dict]) -> dict[str, pd.DataFrame]:
+    """
+    Create dict of DataFrames for all UniProt keywords.
+
+    Args:
+    ----
+        gene_proteins (list[dict]): list of proteins that have gene names in their metadata
+
+    Returns:
+    -------
+        dict[str, pd.DataFrame]: dict with keys according to keyword category and values
+          are DataFrames with gene symbol index, keyword value columns and binary values
+          representing whether the gene symbol has the keyword value.
+
+    """
     category_gene_kw_map = create_category_gene_kw_map(gene_proteins)
 
     return {c: make_gene_kw_df(gkm) for c, gkm in category_gene_kw_map.items()}
@@ -42,25 +56,32 @@ def make_gene_kw_df(gene_kw_map: dict[str, set]) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["Gene"] + all_keywords).set_index("Gene")
 
 
-def download_and_load_json_gz(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        compressed_data = BytesIO(response.content)
-        with gzip.GzipFile(fileobj=compressed_data) as gz:
-            json_data = json.load(gz)
+def download_and_load_json_gz(url: str) -> dict:
+    """
+    Download and gunzip a json from a url.
 
-        return json_data
+    Args:
+    ----
+        url (str): url to download
 
-    except requests.exceptions.RequestException as e:
-        print(f"Error during download: {e}")
-        return None
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON: {e}")
-        return None
+    Returns:
+    -------
+        dict: contents of json.gz as a dict
+
+    """
+    response = requests.get(url)
+    response.raise_for_status()
+    compressed_data = BytesIO(response.content)
+    with gzip.GzipFile(fileobj=compressed_data) as gz:
+        json_data = json.load(gz)
+
+    return json_data
 
 
-def get_uniprot_human_protein_features(file=None, allow_downloads=False):
+def get_uniprot_human_protein_features(
+    file: str | None = None, allow_downloads: bool = False
+) -> dict:
+    """Get UniProt Human Proteins data from file or from server."""
     if file and Path(file).exists():
         with open(file) as f:
             return json.load(f)
@@ -131,15 +152,16 @@ def main(
     products of the gene symbol.
     """
     proteins = get_uniprot_human_protein_features(input_file, allow_downloads)
+    # restrict proteins to those with associated named genes
     gene_proteins = [
         i for i in proteins["results"] if "genes" in i and "geneName" in i["genes"][0]
     ]
-    c = get_all_categories_gene_protein_keyword_dfs(gene_proteins)
+    gene_keyword_df_dict = get_gene_protein_keyword_dfs(gene_proteins)
 
-    for task in task_name:  # task_name is multiply defined
+    for task in task_name:  # task_name is multiply defined, so a tuple
         dump_task_definitions(
-            entities=pd.Series(c[task].index),
-            outcomes=c[task],
+            entities=pd.Series(gene_keyword_df_dict[task].index).rename("symbol"),
+            outcomes=gene_keyword_df_dict[task],
             main_task_directory=main_task_directory,
             task_name="UniProt keyword " + task,
         )
