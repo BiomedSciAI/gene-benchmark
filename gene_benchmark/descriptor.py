@@ -8,7 +8,7 @@ import requests
 
 
 def _get_ensemble(ens_data):
-    if "ensembl.gene" in ens_data.index and "ensembl" in ens_data.index :
+    if "ensembl.gene" in ens_data.index and "ensembl" in ens_data.index:
         if pd.isna(ens_data["ensembl.gene"]):
             return ens_data["ensembl"][0]["gene"]
         else:
