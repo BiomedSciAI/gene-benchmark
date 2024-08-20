@@ -8,14 +8,17 @@ import requests
 
 
 def _get_ensemble(ens_data):
-    if "ensembl.gene" in ens_data.index:
-        if not ens_data["ensembl.gene"] is None:
+    if "ensembl.gene" in ens_data.index and "ensembl" in ens_data.index :
+        if pd.isna(ens_data["ensembl.gene"]):
+            return ens_data["ensembl"][0]["gene"]
+        else:
             return ens_data["ensembl.gene"]
     if "ensembl" in ens_data.index:
         return ens_data["ensembl"][0]["gene"]
-    else:
-        warnings.warn(f"Format unknown for {ens_data}")
-        return None
+    if "ensembl.gene" in ens_data.index:
+        return ens_data["ensembl.gene"]
+    warnings.warn(f"Unknown ensemble format {ens_data}")
+    return None
 
 
 def _fetch_ensembl_sequence(ensembl_gene_id):
