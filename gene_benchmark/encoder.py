@@ -10,6 +10,24 @@ from transformers.models.bert.configuration_bert import BertConfig
 from .descriptor import add_prefix_to_dict
 
 
+def _break_string(string: str, max_length: int) -> list[str]:
+    """
+    given a string returns a list where each element is at most max_length
+        where the last element can be shorter.
+
+    Args:
+    ----
+        string (str): the string to break into list
+        max_length (int): the maximal size of each piece
+
+    Returns:
+    -------
+        list[str]: list with the string where each element is at most max_length and the last is shorter
+
+    """
+    return [string[i : i + max_length] for i in range(0, len(string), max_length)]
+
+
 class randNone_dict(dict):
     """An dict extension class that returns method return value each time that the key None is used."""
 
@@ -426,6 +444,7 @@ class BERTEncoder(SingleEncoder):
         encoder_model_name: str = None,
         tokenizer_name: str = None,
         trust_remote_code: bool = False,
+        context_size: int = None,
     ):
         config = BertConfig.from_pretrained(encoder_model_name)
         self.encoder = AutoModel.from_pretrained(
@@ -438,15 +457,19 @@ class BERTEncoder(SingleEncoder):
         self.encoder_model_name = encoder_model_name
         self.tokenizer_name = tokenizer_name
         self.trust_remote_code = trust_remote_code
+        self.context_size = context_size
         super().__init__(encoder_model_name)
 
     def _get_encoding(self, entities, **kwargs):
-        vec_list = []
-        for ent in entities:
-            inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
-            hidden_states = self.encoder(inputs)[0]
-            vec_list.append(torch.mean(hidden_states[0], dim=0).detach())
-        return np.array(vec_list)
+        return list(map(self._encode_multiple_contexts, entities))
+
+    def _encode_multiple_contexts(self, ent):
+        return np.mean(list(map(self._encode_single_entry, _break_string(ent))), axis=0)
+
+    def _encode_single_entry(self, ent):
+        inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
+        hidden_states = self.encoder(inputs)[0]
+        return torch.mean(hidden_states[0], dim=0).detach()
 
     def summary(self):
         summary_dict = super().summary()
