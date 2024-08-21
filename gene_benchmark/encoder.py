@@ -444,7 +444,7 @@ class BERTEncoder(SingleEncoder):
         encoder_model_name: str = None,
         tokenizer_name: str = None,
         trust_remote_code: bool = False,
-        context_size: int = None,
+        maximal_context_size: int = None,
     ):
         config = BertConfig.from_pretrained(encoder_model_name)
         self.encoder = AutoModel.from_pretrained(
@@ -457,14 +457,25 @@ class BERTEncoder(SingleEncoder):
         self.encoder_model_name = encoder_model_name
         self.tokenizer_name = tokenizer_name
         self.trust_remote_code = trust_remote_code
-        self.context_size = context_size
+        self.maximal_context_size = maximal_context_size
         super().__init__(encoder_model_name)
 
     def _get_encoding(self, entities, **kwargs):
-        return list(map(self._encode_multiple_contexts, entities))
+        if self.maximal_context_size is None:
+            return list(map(self._encode_single_entry, entities))
+        else:
+            return list(map(self._encode_multiple_contexts, entities))
 
     def _encode_multiple_contexts(self, ent):
-        return np.mean(list(map(self._encode_single_entry, _break_string(ent))), axis=0)
+        return np.mean(
+            list(
+                map(
+                    self._encode_single_entry,
+                    _break_string(ent, self.maximal_context_size),
+                )
+            ),
+            axis=0,
+        )
 
     def _encode_single_entry(self, ent):
         inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
