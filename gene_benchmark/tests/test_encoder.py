@@ -449,9 +449,9 @@ class TestEncoder(unittest.TestCase):
             model, model, trust_remote_code=True, maximal_context_size=6
         )
         gene2 = ["GATTAC", "GGGTTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"]
-        by_list = encoder._get_encoding_by_context(gene2)
+        by_list = encoder._get_encoding_list(gene2)
         for gene_bp, enc in zip(gene2, by_list):
-            indiv = encoder._encode_single_entry(gene_bp)
+            indiv = encoder._encode_single_context(gene_bp)
             assert all(indiv == enc)
 
     @unittest.skip(
@@ -463,6 +463,6 @@ class TestEncoder(unittest.TestCase):
             model, model, trust_remote_code=True, maximal_context_size=6
         )
         gene = "".join(["GATTAC", "GGGTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"])
-        by_list = encoder._get_encoding_by_context(_break_string(gene, 6))
+        by_list = encoder._get_encoding_list(_break_string(gene, 6))
         total = encoder.encode(pd.Series(gene))
         assert all(np.mean(by_list, axis=0) == total[0])

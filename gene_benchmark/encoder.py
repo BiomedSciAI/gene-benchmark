@@ -462,22 +462,58 @@ class BERTEncoder(SingleEncoder):
 
     def _get_encoding(self, entities, **kwargs):
         if self.maximal_context_size is None:
-            return list(map(self._encode_single_entry, entities))
+            return list(map(self._encode_single_context, entities))
         else:
             return list(map(self._encode_multiple_contexts, entities))
 
-    def _encode_multiple_contexts(self, ent):
+    def _encode_multiple_contexts(self, ent: str):
+        """
+        Breaks the string into context size chunks and returns the mean encoding.
+
+        Args:
+        ----
+            ent (str): The string to be broken into contexts and encoded
+
+        Returns:
+        -------
+            mp.array: The mean encoding
+
+        """
         return np.mean(
-            self._get_encoding_by_context(
-                _break_string(ent, self.maximal_context_size)
-            ),
+            self._get_encoding_list(_break_string(ent, self.maximal_context_size)),
             axis=0,
         )
 
-    def _get_encoding_by_context(self, ent_list):
-        return list(map(self._encode_single_entry, ent_list))
+    def _get_encoding_list(self, ent_list: list[str]) -> list:
+        """
+        Applies the _encode_single_context on the ent_list.
 
-    def _encode_single_entry(self, ent):
+        Args:
+        ----
+            ent_list (list[str]): list of elements to encode
+
+        Returns:
+        -------
+            list: list of encodings
+
+        """
+        return list(map(self._encode_single_context, ent_list))
+
+    def _encode_single_context(self, ent: str):
+        """
+        Encodes a single string.
+
+        Args:
+        ----
+            ent (str): A string to encodes
+
+        Returns:
+        -------
+            np.array: An encoding of the string
+
+        .
+
+        """
         inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
         hidden_states = self.encoder(inputs)[0]
         return torch.mean(hidden_states[0], dim=0).detach()
