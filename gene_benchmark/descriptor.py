@@ -7,6 +7,20 @@ import pandas as pd
 import requests
 
 
+def _get_ensemble(ens_data):
+    if "ensembl.gene" in ens_data.index and "ensembl" in ens_data.index:
+        if pd.isna(ens_data["ensembl.gene"]):
+            return ens_data["ensembl"][0]["gene"]
+        else:
+            return ens_data["ensembl.gene"]
+    if "ensembl" in ens_data.index:
+        return ens_data["ensembl"][0]["gene"]
+    if "ensembl.gene" in ens_data.index:
+        return ens_data["ensembl.gene"]
+    warnings.warn(f"Unknown ensemble format {ens_data}")
+    return None
+
+
 def _fetch_ensembl_sequence(ensembl_gene_id):
     """
     retries the base pair sequence of a given ensemble id REST ensenmbl API
@@ -24,10 +38,15 @@ def _fetch_ensembl_sequence(ensembl_gene_id):
     if not ensembl_gene_id:
         return None
     url = f"https://rest.ensembl.org/sequence/id/{ensembl_gene_id}?content-type=text/plain"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
-    else:
+
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            raise (f"Request failed for {ensembl_gene_id}")
+    except:
+        warnings.warn(f"Request failed for {ensembl_gene_id}")
         return None
 
 
@@ -704,7 +723,7 @@ class BasePairDescriptor(NCBIDescriptor):
             entities, first_description_only=first_description_only
         )
         ensembles[self.description_col] = ensembles.apply(
-            lambda x: _fetch_ensembl_sequence(x["ensembl.gene"]), axis=1
+            lambda x: _fetch_ensembl_sequence(_get_ensemble(x)), axis=1
         )
         return ensembles
 

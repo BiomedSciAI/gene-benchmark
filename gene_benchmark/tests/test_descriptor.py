@@ -352,3 +352,15 @@ class TestDescriptor(unittest.TestCase):
         assert not bp_df["BRCA1"] is None
         assert bp_df["NOTGENE"] is None
         assert set(bp_df["BRCA1"]) == {"A", "C", "G", "T"}
+
+    def test_base_pair_descriptor_describe_mul_ens(self):
+        gene_symbols = ["OR5V1", "SLC12A7"]
+        bp = BasePairDescriptor()
+        bp_df = bp.describe(pd.Series(gene_symbols, index=gene_symbols))
+        assert all(bp_df.notna())
+
+    def test_base_pair_descriptor_describe_mix_ens(self):
+        gene_symbols = ["OR5V1", "SLC12A7", "BRCA1", "TP53"]
+        bp = BasePairDescriptor()
+        bp_df = bp.describe(pd.Series(gene_symbols, index=gene_symbols))
+        assert all(bp_df.notna())
