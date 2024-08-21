@@ -342,3 +342,27 @@ def tag_list_to_multi_label(
         outcome_df.loc[index, true_cat] = 1
     entities = pd.Series(outcome_df.index, name=entities_name)
     return entities, outcome_df
+
+
+def get_symbol_list(
+    url: str = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json",
+) -> list[str]:
+    """
+    Retrieves the symbol list from a HGNC json like file.
+
+    Args:
+    ----
+        url (str, optional): url for the json file download. Defaults to "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json".
+
+    Returns:
+    -------
+        list[str]: list of symbols
+
+    """
+    with requests.get(url) as response:
+        response.raise_for_status()
+        reactome_res = response.json()
+    return [v["symbol"] for v in reactome_res["response"]["docs"]]
+
+
+GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json"
