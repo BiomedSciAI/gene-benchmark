@@ -468,14 +468,14 @@ class BERTEncoder(SingleEncoder):
 
     def _encode_multiple_contexts(self, ent):
         return np.mean(
-            list(
-                map(
-                    self._encode_single_entry,
-                    _break_string(ent, self.maximal_context_size),
-                )
+            self._get_encoding_by_context(
+                _break_string(ent, self.maximal_context_size)
             ),
             axis=0,
         )
+
+    def _get_encoding_by_context(self, ent_list):
+        return list(map(self._encode_single_entry, ent_list))
 
     def _encode_single_entry(self, ent):
         inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]

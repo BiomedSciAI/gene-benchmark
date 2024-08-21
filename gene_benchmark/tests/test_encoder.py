@@ -439,3 +439,30 @@ class TestEncoder(unittest.TestCase):
         res = ["AAAA", "BBBB", "CCC"]
         assert len(breaked) == 3
         assert all(vb == vt for vb, vt in zip(breaked, res))
+
+    @unittest.skip(
+        "Following fails when gpu is activated but there is a issue with  triton flash attention "
+    )
+    def test_TransformerEncoder_max_context_each(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = BERTEncoder(
+            model, model, trust_remote_code=True, maximal_context_size=6
+        )
+        gene2 = ["GATTAC", "GGGTTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"]
+        by_list = encoder._get_encoding_by_context(gene2)
+        for gene_bp, enc in zip(gene2, by_list):
+            indiv = encoder._encode_single_entry(gene_bp)
+            assert all(indiv == enc)
+
+    @unittest.skip(
+        "Following fails when gpu is activated but there is a issue with  triton flash attention "
+    )
+    def test_TransformerEncoder_max_context_mean_describe(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = BERTEncoder(
+            model, model, trust_remote_code=True, maximal_context_size=6
+        )
+        gene = "".join(["GATTAC", "GGGTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"])
+        by_list = encoder._get_encoding_by_context(_break_string(gene, 6))
+        total = encoder.encode(pd.Series(gene))
+        assert all(np.mean(by_list, axis=0) == total[0])
