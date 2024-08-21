@@ -520,7 +520,5 @@ class BERTEncoder(SingleEncoder):
 
     def summary(self):
         summary_dict = super().summary()
-        if self.num_of_missing:
-            summary_dict["num_of_missing"] = self.num_of_missing
         summary_dict["tokenizer_name"] = self.tokenizer_name
         return summary_dict
