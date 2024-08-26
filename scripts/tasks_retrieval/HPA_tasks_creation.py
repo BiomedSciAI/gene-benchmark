@@ -25,7 +25,7 @@ def format_hpa_columns(data, clear_semicolon=None):
         filter(lambda x: "Pathology prognostics" in x, data.columns)
     )
     data[pathology_columns] = data[pathology_columns].replace(
-        r"\s*\(\d+\.?\d*e?-?\d*\)", "", regex=True
+        r"\s*\(\d+\.?\d*e[+-]?\d*\)", "", regex=True
     )
     if not clear_semicolon is None and COLUMN_TO_CLEAR_SEMICOLON in data.columns:
         data[clear_semicolon] = (
