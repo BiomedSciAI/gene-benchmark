@@ -84,5 +84,5 @@ type_dict = {
     "BasePairDescriptor": BasePairDescriptor,
     "Multilayer_Perceptron_classifier": MLPClassifier,
     "Multilayer_Perceptron_regressor": MLPRegressor,
-    "BERTEncoder": AutoTransformerEncoder,
+    "AutoTransformerEncoder": AutoTransformerEncoder,
 }
