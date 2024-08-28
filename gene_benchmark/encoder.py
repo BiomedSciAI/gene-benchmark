@@ -436,7 +436,7 @@ class SentenceTransformerEncoder(SingleEncoder):
         return summary_dict
 
 
-class BERTEncoder(SingleEncoder):
+class AutoTransformerEncoder(SingleEncoder):
     """encode a list of descriptions into numeric vectors using transformers BERT encoders."""
 
     def __init__(
@@ -445,12 +445,31 @@ class BERTEncoder(SingleEncoder):
         tokenizer_name: str = None,
         trust_remote_code: bool = False,
         maximal_context_size: int = None,
+        use_bert_config=True,
     ):
-        config = BertConfig.from_pretrained(encoder_model_name)
-        self.encoder = AutoModel.from_pretrained(
-            encoder_model_name, trust_remote_code=trust_remote_code, config=config
-        )
+        """
+        Creates encoding based on the auto tokenizor from transformer package.
 
+        Args:
+        ----
+            encoder_model_name (str, optional): The encoder model name. Defaults to None.
+            tokenizer_name (str, optional): The tokenizor name . Defaults to the encoder model name.
+            trust_remote_code (bool, optional): The trust_remote_code for the transformer package. Defaults to False.
+            maximal_context_size (int, optional): The maximal context length, if reached the description will be partitioned equal parts of said size . Defaults to None.
+            use_bert_config (bool, optional): If true the encoder will use a BERT config. Defaults to True.
+
+        """
+        if use_bert_config:
+            config = BertConfig.from_pretrained(encoder_model_name)
+            self.encoder = AutoModel.from_pretrained(
+                encoder_model_name, trust_remote_code=trust_remote_code, config=config
+            )
+        else:
+            self.encoder = AutoModel.from_pretrained(
+                encoder_model_name, trust_remote_code=trust_remote_code
+            )
+        if tokenizer_name is None:
+            tokenizer_name = encoder_model_name
         self.tokenizer = AutoTokenizer.from_pretrained(
             tokenizer_name, trust_remote_code=trust_remote_code
         )

@@ -8,7 +8,7 @@ from gene_benchmark.descriptor import (
     NCBIDescriptor,
 )
 from gene_benchmark.encoder import (
-    BERTEncoder,
+    AutoTransformerEncoder,
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
@@ -421,7 +421,7 @@ class TestEncoder(unittest.TestCase):
     )
     def test_TransformerEncoder(self):
         model = "zhihan1996/DNABERT-2-117M"
-        encoder = BERTEncoder(model, model, trust_remote_code=True)
+        encoder = AutoTransformerEncoder(model, model, trust_remote_code=True)
         gene1 = "ACGTAGCATCGGATCTATCTATCGACACTTGGTTATCGATCTACGAGCATCTCGTTAGC"
         gene2 = "GATTACA"
         encoded = encoder.encode(pd.Series([gene1, gene2]))
@@ -445,7 +445,7 @@ class TestEncoder(unittest.TestCase):
     )
     def test_TransformerEncoder_max_context_each(self):
         model = "zhihan1996/DNABERT-2-117M"
-        encoder = BERTEncoder(
+        encoder = AutoTransformerEncoder(
             model, model, trust_remote_code=True, maximal_context_size=6
         )
         gene2 = ["GATTAC", "GGGTTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"]
@@ -459,10 +459,18 @@ class TestEncoder(unittest.TestCase):
     )
     def test_TransformerEncoder_max_context_mean_describe(self):
         model = "zhihan1996/DNABERT-2-117M"
-        encoder = BERTEncoder(
+        encoder = AutoTransformerEncoder(
             model, model, trust_remote_code=True, maximal_context_size=6
         )
         gene = "".join(["GATTAC", "GGGTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"])
         by_list = encoder._get_encoding_list(_break_string(gene, 6))
         total = encoder.encode(pd.Series(gene))
         assert all(np.mean(by_list, axis=0) == total[0])
+
+    def test_AutoTransformerEncoder(self):
+        descriptor = NCBIDescriptor(allow_partial=False)
+        descriptions = descriptor.describe(pd.Series(["BRCA1", "FOXP2"]))
+        granite_name = "ibm-granite/granite-7b-base"
+        encoder = AutoTransformerEncoder(granite_name)
+        encoded = encoder.encode(descriptions)
+        assert (encoded[0] != encoded[1]).all()
