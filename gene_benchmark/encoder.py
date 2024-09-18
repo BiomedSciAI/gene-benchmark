@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 import torch
+import tqdm
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 from transformers.models.bert.configuration_bert import BertConfig
@@ -442,7 +443,7 @@ class BERTEncoder(SingleEncoder):
 
     def _get_encoding(self, entities, **kwargs):
         vec_list = []
-        for ent in entities:
+        for ent in tqdm.tqdm(entities):
             inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
             hidden_states = self.encoder(inputs)[0]
             vec_list.append(torch.mean(hidden_states[0], dim=0).detach())
