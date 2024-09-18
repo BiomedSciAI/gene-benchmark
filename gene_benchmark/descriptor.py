@@ -10,7 +10,11 @@ import requests
 def _get_ensemble(ens_data):
     if "ensembl.gene" in ens_data.index and "ensembl" in ens_data.index:
         if pd.isna(ens_data["ensembl.gene"]):
-            return ens_data["ensembl"][0]["gene"]
+            if isinstance(ens_data["ensembl"], list):
+                return ens_data["ensembl"][0]["gene"]
+            else:
+                warnings.warn(f"Unknown ensemble format {ens_data}")
+                return ens_data["ensembl"]
         else:
             return ens_data["ensembl.gene"]
     if "ensembl" in ens_data.index:
