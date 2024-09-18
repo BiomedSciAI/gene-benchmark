@@ -351,7 +351,7 @@ class TestEncoder(unittest.TestCase):
         expected_summary = {
             "encoder_model_name": "gene_benchmark/tests/resources/file_embed_test.csv",
             "encoder class": "PreComputedEncoder",
-            "num_of_missing_entities": 1,
+            "num_missing_entities": 1,
             "allow_missing": True,
             "randomize_missing": True,
         }
