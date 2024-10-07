@@ -107,7 +107,7 @@ SentenceTransformerEncoder can encode any string and is not limited and is very 
 ## Tasks
 
 The package has the means to create, load and manipulate task definitions.
-The list of available tasks is provided [here]( gene-benchmark/gene_benchmark/tasks/task_descriptions.xlsx)
+The list of available tasks is provided [here]( /gene_benchmark/tasks/task_descriptions.xlsx)
 For each task we provided python scripts that enable to create the tasks either from a local file
 or to download them directly.
 
