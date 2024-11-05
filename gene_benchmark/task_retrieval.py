@@ -345,14 +345,14 @@ def tag_list_to_multi_label(
 
 
 def get_symbol_list(
-    url: str = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json",
+    url: str = "https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json",
 ) -> list[str]:
     """
     Retrieves the symbol list from a HGNC json like file.
 
     Args:
     ----
-        url (str, optional): url for the json file download. Defaults to "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json".
+        url (str, optional): url for the json file download. Defaults to "https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json".
 
     Returns:
     -------
@@ -365,4 +365,4 @@ def get_symbol_list(
     return [v["symbol"] for v in reactome_res["response"]["docs"]]
 
 
-GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json"
+GENE_SYMBOL_URL = "https://storage.googleapis.com/public-download-files/hgnc/json/json/hgnc_complete_set.json"
