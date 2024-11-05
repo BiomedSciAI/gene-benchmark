@@ -79,7 +79,7 @@ python scripts/tasks_retrieval/uniprot_keyword_tasks_creation.py  --allow-downlo
 ```
 Now your [tasks](./tasks/) directory should be populated with subdirectories with the tasks names. Each subdirectory holds two .csv files, one with the gene symbols (entities.csv) and one with the labels (outcomes.csv). The shape of these csv files will be determined based on the task type. For example, for the multi class tasks, the outcomes will be a 2d matrix.
 
-2. Create your task yaml: The script for running the tasks can receive either the task names themselves or a .yaml file contacting the list of task names you wish to run. If you choose to create a .yaml file with the task names, create a separate file for each task type. For example for the binary tasks:
+2. Create your task yaml: The script for running the tasks can receive either the task names themselves or a .yaml file containing the list of task names you wish to run. If you choose to create a .yaml file with the task names, create a separate file for each task type. For example for the binary tasks:
 
 ```sh
 - TF vs non-TF
