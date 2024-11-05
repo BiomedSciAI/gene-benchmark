@@ -67,7 +67,7 @@ pre-commit install
 
 To evaluate your model on the tasks a few basic steps need to be done:
 ### Set up
-1. Create the tasks: To create the tasks, run these commands in your terminal from the root directory:
+1. Create the tasks: To download the files containing the tasks, run the following commands in your terminal from the root directory. Note that each task dataset has its own license, which is separate from the license of this package.
 ```sh
 python scripts/tasks_retrieval/gene2gene_task_creation.py --allow-downloads True
 python scripts/tasks_retrieval/Genecorpus_tasks_creation.py --allow-downloads True
