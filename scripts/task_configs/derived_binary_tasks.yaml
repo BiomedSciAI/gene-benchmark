@@ -1,0 +1,293 @@
+- Pathways;Chromatin organization
+- Pathways;Vesicle-mediated transport
+- Pathways;Muscle contraction
+- Pathways;Immune System
+- Pathways;DNA Repair
+- Pathways;Protein localization
+- Pathways;Cellular responses to stimuli
+- Pathways;Metabolism of proteins
+- Pathways;DNA Replication
+- Pathways;Hemostasis
+- Pathways;Metabolism of RNA
+- Pathways;Extracellular matrix organization
+- Pathways;Metabolism
+- Pathways;Programmed Cell Death
+- Pathways;Signal Transduction
+- Pathways;Transport of small molecules
+- Pathways;Neuronal System
+- Pathways;Disease
+- Pathways;Sensory Perception
+- Pathways;Developmental Biology
+- Pathways;Autophagy
+- Pathways;Cell Cycle
+- Pathways;Organelle biogenesis and maintenance
+- Pathways;Gene expression (Transcription)
+- Pathways;Cell-Cell communication
+- Molecular function;Ribonucleoprotein
+- Molecular function;Protease
+- Molecular function;Isomerase
+- Molecular function;Nuclease
+- Molecular function;G-protein coupled receptor
+- Molecular function;Calmodulin-binding
+- Molecular function;Chromatin regulator
+- Molecular function;Serine/threonine-protein kinase
+- Molecular function;RNA-binding
+- Molecular function;Metalloprotease
+- Molecular function;Serine protease
+- Molecular function;Motor protein
+- Molecular function;DNA-binding
+- Molecular function;Transferase
+- Molecular function;Receptor
+- Molecular function;Chaperone
+- Molecular function;Guanine-nucleotide releasing factor
+- Molecular function;Methyltransferase
+- Molecular function;Transducer
+- Molecular function;Repressor
+- Molecular function;Protein phosphatase
+- Molecular function;Thiol protease
+- Molecular function;Helicase
+- Molecular function;Lyase
+- Molecular function;Glycosyltransferase
+- Molecular function;Oxidoreductase
+- Molecular function;Protease inhibitor
+- Molecular function;Kinase
+- Molecular function;Acyltransferase
+- Molecular function;Voltage-gated channel
+- Molecular function;Growth factor
+- Molecular function;Activator
+- Molecular function;Ion channel
+- Molecular function;Hydrolase
+- Molecular function;Cytokine
+- Molecular function;Actin-binding
+- Molecular function;GTPase activation
+- Molecular function;Developmental protein
+- Molecular function;Ligase
+- Molecular function;Ribosomal protein
+- Molecular function;Tyrosine-protein kinase
+- Protein class;FDA approved drug targets
+- Protein class;Predicted membrane proteins
+- Protein class;Human disease related genes
+- Protein class;Transcription factors
+- Protein class;Predicted intracellular proteins
+- Protein class;Cancer-related genes
+- Protein class;CD markers
+- Protein class;Plasma proteins
+- Protein class;Ribosomal proteins
+- Protein class;Predicted secreted proteins
+- Protein class;Disease related genes
+- Protein class;Metabolic proteins
+- Protein class;Potential drug targets
+- Protein class;RAS pathway related proteins
+- Protein class;G-protein coupled receptors
+- Protein class;Transporters
+- Protein class;Enzymes
+- Subcellular location;Focal adhesion sites
+- Subcellular location;Golgi apparatus
+- Subcellular location;Nucleoli fibrillar center
+- Subcellular location;Centriolar satellite
+- Subcellular location;Nucleoli
+- Subcellular location;Actin filaments
+- Subcellular location;Intermediate filaments
+- Subcellular location;Cytokinetic bridge
+- Subcellular location;Centrosome
+- Subcellular location;Endoplasmic reticulum
+- Subcellular location;Nucleoplasm
+- Subcellular location;Microtubules
+- Subcellular location;Vesicles
+- Subcellular location;Mitochondria
+- Subcellular location;Nuclear membrane
+- Subcellular location;Plasma membrane
+- Subcellular location;Nucleoli rim
+- Subcellular location;Cytosol
+- Subcellular location;Nuclear speckles
+- Subcellular location;Cell Junctions
+- Subcellular location;Nuclear bodies
+- Biological process;Innate immunity
+- Biological process;Antiviral defense
+- Biological process;DNA repair
+- Biological process;Wnt signaling pathway
+- Biological process;Transcription regulation
+- Biological process;Biological rhythms
+- Biological process;Host-virus interaction
+- Biological process;mRNA transport
+- Biological process;Lipid metabolism
+- Biological process;Cilium biogenesis/degradation
+- Biological process;DNA damage
+- Biological process;Cell cycle
+- Biological process;Olfaction
+- Biological process;Autophagy
+- Biological process;Translation regulation
+- Biological process;Lipid biosynthesis
+- Biological process;Symport
+- Biological process;Neurogenesis
+- Biological process;Lipid transport
+- Biological process;Inflammatory response
+- Biological process;Sensory transduction
+- Biological process;Transcription
+- Biological process;Fatty acid metabolism
+- Biological process;Ion transport
+- Biological process;Spermatogenesis
+- Biological process;Potassium transport
+- Biological process;Apoptosis
+- Biological process;Ubl conjugation pathway
+- Biological process;Sodium transport
+- Biological process;Mitosis
+- Biological process;Protein transport
+- Biological process;Protein biosynthesis
+- Biological process;Cell division
+- Biological process;Steroid metabolism
+- Biological process;Endocytosis
+- Biological process;mRNA splicing
+- Biological process;Vision
+- Biological process;Angiogenesis
+- Biological process;Differentiation
+- Biological process;mRNA processing
+- Biological process;Immunity
+- Biological process;Cell adhesion
+- Biological process;Adaptive immunity
+- Biological process;Transport
+- Disease involvement;FDA approved drug targets
+- Disease involvement;Neuropathy
+- Disease involvement;Hereditary spastic paraplegia
+- Disease involvement;Disease variant
+- Disease involvement;Deafness
+- Disease involvement;Proto-oncogene
+- Disease involvement;Non-syndromic deafness
+- Disease involvement;Obesity
+- Disease involvement;Primary mitochondrial disease
+- Disease involvement;Epilepsy
+- Disease involvement;Ciliopathy
+- Disease involvement;Charcot-Marie-Tooth disease
+- Disease involvement;Neurodegeneration
+- Disease involvement;Intellectual disability
+- Disease involvement;Cancer-related genes
+- Disease involvement;Cardiomyopathy
+- Disease involvement;Tumor suppressor
+- Disease involvement;Autism spectrum disorder
+- Disease involvement;Cataract
+- Disease involvement;Retinitis pigmentosa
+- Disease involvement;Diabetes mellitus
+- Disease involvement;Dwarfism
+- RNA tissue cell type enrichment;Prostate - Fibroblasts
+- RNA tissue cell type enrichment;Stomach - Gastric mucous cells
+- RNA tissue cell type enrichment;Heart muscle - Fibroblasts
+- RNA tissue cell type enrichment;Prostate - Smooth muscle cells
+- RNA tissue cell type enrichment;Liver - Hepatocytes
+- RNA tissue cell type enrichment;Skeletal muscle - Macrophages
+- RNA tissue cell type enrichment;Skin - Mitotic cells (Skin)
+- RNA tissue cell type enrichment;Testis - Late spermatids
+- RNA tissue cell type enrichment;Breast - Breast glandular cells
+- RNA tissue cell type enrichment;Stomach - Fibroblasts
+- RNA tissue cell type enrichment;Adipose visceral - Adipose progenitor cells
+- RNA tissue cell type enrichment;Stomach - Macrophages
+- RNA tissue cell type enrichment;Skin - Eccrine sweat gland cells
+- RNA tissue cell type enrichment;Adipose visceral - Macrophages
+- RNA tissue cell type enrichment;Prostate - T-cells
+- RNA tissue cell type enrichment;Adipose visceral - T-cells
+- RNA tissue cell type enrichment;Thyroid - Thyroid glandular cells
+- RNA tissue cell type enrichment;Heart muscle - Macrophages
+- RNA tissue cell type enrichment;Breast - T-cells
+- RNA tissue cell type enrichment;Adipose visceral - Endothelial cells
+- RNA tissue cell type enrichment;Colon - Smooth muscle cells
+- RNA tissue cell type enrichment;Skin - Fibroblast_2
+- RNA tissue cell type enrichment;Skin - Keratinocyte (granular)
+- RNA tissue cell type enrichment;Testis - Sertoli cells
+- RNA tissue cell type enrichment;Thyroid - T-cells
+- RNA tissue cell type enrichment;Skin - Sebaceous gland cells
+- RNA tissue cell type enrichment;Kidney - Fibroblasts
+- RNA tissue cell type enrichment;Lung - Macrophages
+- RNA tissue cell type enrichment;Adipose subcutaneous - Adipocytes (Subcutaneous)
+- RNA tissue cell type enrichment;Colon - Enteric glia cells
+- RNA tissue cell type enrichment;Adipose subcutaneous - Macrophages
+- RNA tissue cell type enrichment;Colon - Endothelial cells
+- RNA tissue cell type enrichment;Adipose visceral - Mesothelial cells
+- RNA tissue cell type enrichment;Breast - Adipocytes (Breast)
+- RNA tissue cell type enrichment;Skeletal muscle - Fibroblasts
+- RNA tissue cell type enrichment;Liver - Vascular Endothelial cells
+- RNA tissue cell type enrichment;Testis - Spermatocytes
+- RNA tissue cell type enrichment;Adipose subcutaneous - Adipose progenitor cells
+- RNA tissue cell type enrichment;Adipose visceral - Adipocytes (Visceral)
+- RNA tissue cell type enrichment;Lung - Alveolar cells type 2
+- RNA tissue cell type enrichment;Lung - Fibroblast_2
+- RNA tissue cell type enrichment;Lung - Mitotic cells (Lung)
+- RNA tissue cell type enrichment;Heart muscle - Endothelial cells
+- RNA tissue cell type enrichment;Adipose subcutaneous - T-cells
+- RNA tissue cell type enrichment;Thyroid - Fibroblasts
+- RNA tissue cell type enrichment;Skeletal muscle - Skeletal myocytes
+- RNA tissue cell type enrichment;Liver - Hepatic stellate cells
+- RNA tissue cell type enrichment;Testis - Spermatogonia
+- RNA tissue cell type enrichment;Prostate - Urothelial cells
+- RNA tissue cell type enrichment;Stomach - Mitotic cells (Stomach)
+- RNA tissue cell type enrichment;Colon - Colon enteroendocrine cells
+- RNA tissue cell type enrichment;Prostate - Prostate glandular cells
+- RNA tissue cell type enrichment;Skin - Keratinocyte (other)
+- RNA tissue cell type enrichment;Pancreas - Beta cells
+- RNA tissue cell type enrichment;Testis - Early spermatids
+- RNA tissue cell type enrichment;Skin - Endothelial cells
+- RNA tissue cell type enrichment;Colon - Colon enterocytes
+- RNA tissue cell type enrichment;Skeletal muscle - Endothelial cells
+- RNA tissue cell type enrichment;Kidney - Endothelial cells
+- RNA tissue cell type enrichment;Pancreas - Alpha cells
+- RNA tissue cell type enrichment;Breast - Macrophages
+- RNA tissue cell type enrichment;Breast - Fibroblasts
+- RNA tissue cell type enrichment;Adipose subcutaneous - Smooth muscle cells
+- RNA tissue cell type enrichment;Heart muscle - Cardiomyocytes
+- RNA tissue cell type enrichment;Lung - Respiratory ciliated cells
+- RNA tissue cell type enrichment;Kidney - Proximal tubular cells
+- RNA tissue cell type enrichment;Colon - Macrophages
+- RNA tissue cell type enrichment;Prostate - Endothelial cells
+- RNA tissue cell type enrichment;Breast - Endothelial cells
+- RNA tissue cell type enrichment;Adipose subcutaneous - Endothelial cells
+- UniProt keyword Domain;ANK repeat
+- UniProt keyword Domain;Coiled coil
+- UniProt keyword Domain;EGF-like domain
+- UniProt keyword Domain;Homeobox
+- UniProt keyword Domain;Immunoglobulin domain
+- UniProt keyword Domain;Leucine-rich repeat
+- UniProt keyword Domain;Repeat
+- UniProt keyword Domain;SH3 domain
+- UniProt keyword Domain;Signal
+- UniProt keyword Domain;Signal-anchor
+- UniProt keyword Domain;TPR repeat
+- UniProt keyword Domain;Transit peptide
+- UniProt keyword Domain;Transmembrane
+- UniProt keyword Domain;Transmembrane helix
+- UniProt keyword Domain;WD repeat
+- UniProt keyword Domain;Zinc-finger
+- UniProt keyword Ligand;ATP-binding
+- UniProt keyword Ligand;Calcium
+- UniProt keyword Ligand;Chloride
+- UniProt keyword Ligand;Copper
+- UniProt keyword Ligand;FAD
+- UniProt keyword Ligand;Flavoprotein
+- UniProt keyword Ligand;GTP-binding
+- UniProt keyword Ligand;Heme
+- UniProt keyword Ligand;Iron
+- UniProt keyword Ligand;Iron-sulfur
+- UniProt keyword Ligand;Lectin
+- UniProt keyword Ligand;Lipid-binding
+- UniProt keyword Ligand;Magnesium
+- UniProt keyword Ligand;Manganese
+- UniProt keyword Ligand;Metal-binding
+- UniProt keyword Ligand;NAD
+- UniProt keyword Ligand;NADP
+- UniProt keyword Ligand;Nucleotide-binding
+- UniProt keyword Ligand;Potassium
+- UniProt keyword Ligand;S-adenosyl-L-methionine
+- UniProt keyword Ligand;Sodium
+- UniProt keyword Ligand;Zinc
+- UniProt keyword PTM;Acetylation
+- UniProt keyword PTM;Cleavage on pair of basic residues
+- UniProt keyword PTM;Disulfide bond
+- UniProt keyword PTM;GPI-anchor
+- UniProt keyword PTM;Glycoprotein
+- UniProt keyword PTM;Hydroxylation
+- UniProt keyword PTM;Isopeptide bond
+- UniProt keyword PTM;Lipoprotein
+- UniProt keyword PTM;Methylation
+- UniProt keyword PTM;Myristate
+- UniProt keyword PTM;Palmitate
+- UniProt keyword PTM;Phosphoprotein
+- UniProt keyword PTM;Prenylation
+- UniProt keyword PTM;Ubl conjugation
+- UniProt keyword PTM;Zymogen
