@@ -110,11 +110,12 @@ Note that the script expects the embedding csv file to have a 'symbol' column wi
 Each task type (binary, categorical or multi-label) will be run separately.
 For example, for running the binary tasks the command is:
 
-sh```
+```sh
 python scripts/run_task.py -t /path/to/task/yaml/base_binary.yaml -tf /tasks -m /path/to/model/config/model.yaml --output-file-name binary_tasks.csv
 ```
+Note:
 * For the other task types (categorical, regression or multi labe) you need to add `-s category/regression/multi`
 
 * When you are running the tasks on multiple models, and you would like them to be comparable, you can add a `excluded-symbols-file` input. This needs to be a path to a yaml file containing a list of gene names you would like to exclude.
 
-* To avoid getting errors during the cross validation due to class imbalance, you can add a threshold for the classes "-th" (for multi label)or "-cth" (for categorical)
+* To avoid getting errors during the cross validation due to class imbalance, you can add a threshold for the classes `"-th"` (for multi label)or `"-cth"` (for categorical)
