@@ -2,6 +2,8 @@
 
 A package to benchmark pre-trained models on downstream gene-related tasks.
 
+The package adopts a framework that allows comparison of models using multiple input types by focusing on the learned embeddings the model provides for each entity. This allows comparing models trained on text, proteins, transcriptomics, or any other modality.
+
 The repository is divided into the following sections:
 
 * [gene_benchmark](./gene_benchmark/): The package itself, containing the scripts for extracting textual descriptions from NCBI, encoding textual descriptions and evaluation of model performance.
