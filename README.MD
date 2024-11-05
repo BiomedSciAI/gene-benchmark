@@ -1,6 +1,6 @@
 # Gene Benchmark
 
-A benchmark for gene downstream tasks.
+A package to benchmark pre-trained models on downstream gene-related tasks.
 
 The repository is divided into the following sections:
 
