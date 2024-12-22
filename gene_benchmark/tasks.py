@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pathvalidate import sanitize_filepath, validate_filepath
+from pathvalidate import ValidationError, sanitize_filepath, validate_filepath
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
@@ -59,13 +59,15 @@ def dump_task_definitions(
     """
     main_task_directory = Path(main_task_directory)
     task_dir_name = main_task_directory / task_name
-    task_dir_name.mkdir(exist_ok=True)
-    if not validate_filepath(task_dir_name):
+    try:
+        validate_filepath(task_dir_name)
+    except ValidationError as e:
         task_dir_name = sanitize_filepath(task_dir_name)
         warnings.warn(
-            f"Task folder has been sanitized from {task_dir_name} to \
-                      {sanitize_filepath(task_dir_name)}"
+            f"Task folder required sanitization  {e}\
+                      new name is: {sanitize_filepath(task_dir_name)}"
         )
+    task_dir_name.mkdir(exist_ok=True)
     entities.to_csv(task_dir_name / "entities.csv", index=False)
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
 
