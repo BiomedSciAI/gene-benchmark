@@ -1,15 +1,15 @@
+import warnings
 from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
-import warnings
 
 import numpy as np
 import pandas as pd
+from pathvalidate import sanitize_filepath, validate_filepath
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
-from pathvalidate import sanitize_filepath,validate_filepath
 
 from gene_benchmark.descriptor import (
     SingleEntityTypeDescriptor,
@@ -46,8 +46,8 @@ def dump_task_definitions(
 ):
     """
     Save the entities and outcomes into main_task_directory under task_name
-    in the format suitable for task definitions. The method sanitize the folder 
-    and task names. 
+    in the format suitable for task definitions. The method sanitize the folder
+    and task names.
 
     Args:
     ----
@@ -62,8 +62,10 @@ def dump_task_definitions(
     task_dir_name.mkdir(exist_ok=True)
     if not validate_filepath(task_dir_name):
         task_dir_name = sanitize_filepath(task_dir_name)
-        warnings.warn(f"Task folder has been sanitized from {task_dir_name} to
-                      {sanitize_filepath(task_dir_name)}")
+        warnings.warn(
+            f"Task folder has been sanitized from {task_dir_name} to \
+                      {sanitize_filepath(task_dir_name)}"
+        )
     entities.to_csv(task_dir_name / "entities.csv", index=False)
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
 
