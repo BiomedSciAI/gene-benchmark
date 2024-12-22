@@ -52,14 +52,14 @@ def sanitize_folder_name(filepath: str) -> str:
 
     """
     if is_valid_filepath(filepath):
+        return filepath
+    else:
         filepath_after_sanitization = sanitize_filepath(filepath)
         warnings.warn(
             f"Task folder has been sanitized from {filepath} \n \
                       to {filepath_after_sanitization}"
         )
         return filepath_after_sanitization
-    else:
-        return filepath
 
 
 def dump_task_definitions(

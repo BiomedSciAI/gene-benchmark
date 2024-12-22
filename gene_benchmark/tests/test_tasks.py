@@ -23,6 +23,7 @@ from gene_benchmark.tasks import (
     filter_exclusion,
     get_tasks_definition_names,
     load_task_definition,
+    sanitize_folder_name,
     sub_sample_task_frames,
 )
 
@@ -572,3 +573,9 @@ class TestTasks(unittest.TestCase):
         test_scores = this_run_df["test_roc_auc_ovr_weighted"].split(",")
         test_scores = list(map(float, test_scores))
         assert np.nan not in test_scores
+
+    def test_sanitization(self):
+        to_be_sanitized_path = "|hello world"
+        with self.assertWarns(Warning):
+            sanitized_str = sanitize_folder_name(to_be_sanitized_path)
+        assert sanitized_str == "hello world"
