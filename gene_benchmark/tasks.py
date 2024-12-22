@@ -38,6 +38,31 @@ def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
         return False
 
 
+def sanitize_folder_name(folder_path: str) -> str:
+    """
+    Check the path if sanitization is required is so raises a
+    warning and returns the sanitized string.
+
+    Args:
+    ----
+        folder_path (str): Path to be sanitized.
+
+    Returns:
+    -------
+        str: A sanitized path.
+
+    """
+    try:
+        validate_filepath(folder_path)
+    except ValidationError as e:
+        sanitized_path = sanitize_filepath(folder_path)
+        warnings.warn(
+            f"Task folder required sanitization  {e} \n \
+                      new name is: {sanitized_path}"
+        )
+    return sanitized_path
+
+
 def dump_task_definitions(
     entities: pd.DataFrame,
     outcomes: pd.DataFrame | pd.Series,
@@ -58,15 +83,8 @@ def dump_task_definitions(
 
     """
     main_task_directory = Path(main_task_directory)
-    task_dir_name = main_task_directory / task_name
-    try:
-        validate_filepath(task_dir_name)
-    except ValidationError as e:
-        task_dir_name = sanitize_filepath(task_dir_name)
-        warnings.warn(
-            f"Task folder required sanitization  {e}\
-                      new name is: {sanitize_filepath(task_dir_name)}"
-        )
+    task_dir_name = sanitize_folder_name(main_task_directory / task_name)
+
     task_dir_name.mkdir(exist_ok=True)
     entities.to_csv(task_dir_name / "entities.csv", index=False)
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
