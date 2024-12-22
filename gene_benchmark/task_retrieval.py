@@ -10,6 +10,8 @@ import pandas as pd
 import requests
 from yaml import safe_load
 
+from gene_benchmark.tasks import sanitize_folder_name
+
 
 def verify_source_of_data(
     input_file: str | None, url: str | None, allow_downloads: bool = False
@@ -62,7 +64,7 @@ def report_task_single_col(
         task_name (str): the name of the task
 
     """
-    print(f"Task {task_name} saved to {task_dir_name}/ \n")
+    print(f"Task {task_name} saved to {sanitize_folder_name(task_dir_name)}/ \n")
     print(outcome_series.value_counts().to_string())
 
 
