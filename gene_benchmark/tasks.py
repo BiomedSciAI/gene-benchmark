@@ -38,14 +38,14 @@ def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
         return False
 
 
-def sanitize_folder_name(folder_path: str) -> str:
+def sanitize_folder_name(filepath: str) -> str:
     """
     Check the path if sanitization is required is so raises a
     warning and returns the sanitized string.
 
     Args:
     ----
-        folder_path (str): Path to be sanitized.
+        filepath (str): Path to be sanitized.
 
     Returns:
     -------
@@ -53,9 +53,9 @@ def sanitize_folder_name(folder_path: str) -> str:
 
     """
     try:
-        validate_filepath(folder_path)
+        validate_filepath(filepath)
     except ValidationError as e:
-        sanitized_path = sanitize_filepath(folder_path)
+        sanitized_path = sanitize_filepath(filepath)
         warnings.warn(
             f"Task folder required sanitization  {e} \n \
                       new name is: {sanitized_path}"
