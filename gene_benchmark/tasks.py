@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pathvalidate import ValidationError, sanitize_filepath, validate_filepath
+from pathvalidate import is_valid_filepath, sanitize_filepath
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
@@ -40,27 +40,26 @@ def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
 
 def sanitize_folder_name(filepath: str) -> str:
     """
-    Check the path if sanitization is required is so raises a
-    warning and returns the sanitized string.
+    Sanitize filepath if needed and warn about the changes.
 
     Args:
     ----
-        filepath (str): Path to be sanitized.
+        filepath (str): Path to be sanitized if needed.
 
     Returns:
     -------
         str: A sanitized path.
 
     """
-    try:
-        validate_filepath(filepath)
-    except ValidationError as e:
-        sanitized_path = sanitize_filepath(filepath)
+    if is_valid_filepath(filepath):
+        filepath_after_sanitization = sanitize_filepath(filepath)
         warnings.warn(
-            f"Task folder required sanitization  {e} \n \
-                      new name is: {sanitized_path}"
+            f"Task folder has been sanitized from {filepath} \n \
+                      to {filepath_after_sanitization}"
         )
-    return sanitized_path
+        return filepath_after_sanitization
+    else:
+        return filepath
 
 
 def dump_task_definitions(
