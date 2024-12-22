@@ -26,7 +26,8 @@ dependencies = [
 "scikit-learn",
 "click",
 "einops",
-"tqdm"
+"tqdm",
+"pathvalidate"
 ]
 
 [project.optional-dependencies]
