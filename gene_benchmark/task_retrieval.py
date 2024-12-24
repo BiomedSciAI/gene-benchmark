@@ -1,4 +1,5 @@
 import pickle
+import warnings
 from io import BytesIO
 from itertools import chain
 from pathlib import Path
@@ -8,9 +9,8 @@ import mygene
 import numpy as np
 import pandas as pd
 import requests
+from pathvalidate import is_valid_filepath, sanitize_filepath
 from yaml import safe_load
-
-from gene_benchmark.tasks import sanitize_folder_name
 
 
 def verify_source_of_data(
@@ -51,6 +51,30 @@ def verify_source_of_data(
     return input_file
 
 
+def sanitize_folder_name(filepath: str) -> str:
+    """
+    Sanitize filepath if needed and warn about the changes.
+
+    Args:
+    ----
+        filepath (str): Path to be sanitized if needed.
+
+    Returns:
+    -------
+        str: A sanitized path.
+
+    """
+    if is_valid_filepath(filepath):
+        return filepath
+    else:
+        filepath_after_sanitization = sanitize_filepath(filepath)
+        warnings.warn(
+            f"Task folder has been sanitized from {filepath} \n \
+                      to {filepath_after_sanitization}"
+        )
+        return filepath_after_sanitization
+
+
 def report_task_single_col(
     outcome_series: pd.Series, task_dir_name: str | Path, task_name: str
 ):
@@ -64,7 +88,7 @@ def report_task_single_col(
         task_name (str): the name of the task
 
     """
-    print(f"Task {task_name} saved to {sanitize_folder_name(task_dir_name)}/ \n")
+    print(f"Task {task_name} saved to {task_dir_name}/ \n")
     print(outcome_series.value_counts().to_string())
 
 
