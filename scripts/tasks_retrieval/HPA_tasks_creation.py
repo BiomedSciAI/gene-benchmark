@@ -44,6 +44,7 @@ def create_tasks(data, main_task_directory, verbose=False):
             current_col_data[current_col_data.index.str.contains("ENSG")].index
         )
         data_type = check_data_type(current_col_data)
+        col = col.replace("/", "")
         task_name = sanitize_folder_name(col)
         if data_type == "multi_class":
             entities, outcomes = tag_list_to_multi_label(current_col_data)
