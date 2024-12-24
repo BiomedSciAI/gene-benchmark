@@ -7,6 +7,7 @@ from gene_benchmark.task_retrieval import (
     load_yaml_file,
     print_numerical_task_report,
     report_task_single_col,
+    sanitize_folder_name,
     tag_list_to_multi_label,
 )
 from gene_benchmark.tasks import dump_task_definitions
@@ -43,7 +44,7 @@ def create_tasks(data, main_task_directory, verbose=False):
             current_col_data[current_col_data.index.str.contains("ENSG")].index
         )
         data_type = check_data_type(current_col_data)
-        task_name = col.replace("/", "|")
+        task_name = sanitize_folder_name(col)
         if data_type == "multi_class":
             entities, outcomes = tag_list_to_multi_label(current_col_data)
             if verbose:
