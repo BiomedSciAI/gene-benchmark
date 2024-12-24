@@ -1,4 +1,3 @@
-import warnings
 from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
@@ -6,7 +5,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from pathvalidate import is_valid_filepath, sanitize_filepath
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
@@ -38,30 +36,6 @@ def is_binary_outcomes(outcomes: pd.Series | pd.DataFrame) -> bool:
         return False
 
 
-def sanitize_folder_name(filepath: str) -> str:
-    """
-    Sanitize filepath if needed and warn about the changes.
-
-    Args:
-    ----
-        filepath (str): Path to be sanitized if needed.
-
-    Returns:
-    -------
-        str: A sanitized path.
-
-    """
-    if is_valid_filepath(filepath):
-        return filepath
-    else:
-        filepath_after_sanitization = sanitize_filepath(filepath)
-        warnings.warn(
-            f"Task folder has been sanitized from {filepath} \n \
-                      to {filepath_after_sanitization}"
-        )
-        return filepath_after_sanitization
-
-
 def dump_task_definitions(
     entities: pd.DataFrame,
     outcomes: pd.DataFrame | pd.Series,
@@ -70,8 +44,7 @@ def dump_task_definitions(
 ):
     """
     Save the entities and outcomes into main_task_directory under task_name
-    in the format suitable for task definitions. The method sanitize the folder
-    and task names.
+    in the format suitable for task definitions.
 
     Args:
     ----
@@ -82,8 +55,7 @@ def dump_task_definitions(
 
     """
     main_task_directory = Path(main_task_directory)
-    task_dir_name = sanitize_folder_name(main_task_directory / task_name)
-
+    task_dir_name = main_task_directory / task_name
     task_dir_name.mkdir(exist_ok=True)
     entities.to_csv(task_dir_name / "entities.csv", index=False)
     outcomes.to_csv(task_dir_name / "outcomes.csv", index=False)
