@@ -27,10 +27,10 @@ dependencies = [
 "click",
 "einops",
 "tqdm",
-"pathvalidate"
 ]
 
 [project.optional-dependencies]
+tasks = ["pathvalidate"]
 test = ["pytest", "pytest-cov"]
 
 [project.urls]
