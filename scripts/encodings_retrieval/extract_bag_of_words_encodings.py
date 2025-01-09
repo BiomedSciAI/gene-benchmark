@@ -7,7 +7,7 @@ import yaml
 from sklearn.feature_extraction.text import CountVectorizer
 
 from gene_benchmark.descriptor import NCBIDescriptor
-from gene_benchmark.task_retrieval import GENE_SYMBOL_URL, get_symbol_list
+from scripts.tasks_retrieval.task_retrieval import GENE_SYMBOL_URL, get_symbol_list
 
 
 def get_descriptions(gene_symbols: list):

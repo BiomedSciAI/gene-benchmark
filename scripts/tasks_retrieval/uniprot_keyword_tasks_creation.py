@@ -8,8 +8,8 @@ import click
 import pandas as pd
 import requests
 
-from gene_benchmark.task_retrieval import GENE_SYMBOL_URL
 from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrieval.task_retrieval import GENE_SYMBOL_URL
 
 
 def get_gene_protein_keyword_dfs(gene_proteins: list[dict]) -> dict[str, pd.DataFrame]:
