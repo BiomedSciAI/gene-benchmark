@@ -23,7 +23,8 @@ import click
 import pandas as pd
 
 from gene_benchmark.tasks import dump_task_definitions
-from scripts.tasks_retrieval.task_retrieval import (
+
+from .task_retrieval import (
     read_table,
     report_task_single_col,
     verify_source_of_data,
