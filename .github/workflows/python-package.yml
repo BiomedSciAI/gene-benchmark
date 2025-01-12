@@ -27,7 +27,6 @@ jobs:
     - name: Install packagge
       run: |
         python -m pip install --upgrade pip pytest pytest-cov
-        python -m pip install -e .
         python -m pip install -e .[task_scripts]
 
     - name: Create tasks needed for testing
