@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tasks = ["pathvalidate"]
+task_scripts = ["pathvalidate"]
 test = ["pytest", "pytest-cov"]
 
 [project.urls]
