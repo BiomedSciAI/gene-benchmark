@@ -2,12 +2,12 @@ import click
 import pandas as pd
 import requests
 
-from gene_benchmark.task_retrieval import (
+from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrieval.task_retrieval import (
     get_symbol_list,
     list_form_to_onehot_form,
     verify_source_of_data,
 )
-from gene_benchmark.tasks import dump_task_definitions
 
 TOP_PATHWAYS_URL = "https://reactome.org/download/current/ReactomePathwaysRelation.txt"
 

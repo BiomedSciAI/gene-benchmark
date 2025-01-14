@@ -1,4 +1,5 @@
 import pickle
+import warnings
 from io import BytesIO
 from itertools import chain
 from pathlib import Path
@@ -8,6 +9,7 @@ import mygene
 import numpy as np
 import pandas as pd
 import requests
+from pathvalidate import is_valid_filepath, sanitize_filepath
 from yaml import safe_load
 
 
@@ -47,6 +49,32 @@ def verify_source_of_data(
             f'Input path "{input_file}" is not a local file.  Please enter pre-downloaded file path or allow download'
         )
     return input_file
+
+
+def sanitize_folder_name(filepath: str) -> str:
+    """
+    Sanitize filepath if needed and warn about the changes.
+
+    Args:
+    ----
+        filepath (str): Path to be sanitized if needed.
+
+    Returns:
+    -------
+        str: A sanitized path.
+
+    """
+    if is_valid_filepath(filepath):
+        return filepath
+    else:
+        filepath_after_sanitization = sanitize_filepath(filepath)
+        warnings.warn(
+            f"Task folder has been sanitized\n \
+            requested path: {filepath} \n \
+            sanitized path: {filepath_after_sanitization} \
+                      to {filepath_after_sanitization}"
+        )
+        return filepath_after_sanitization
 
 
 def report_task_single_col(

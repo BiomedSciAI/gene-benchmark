@@ -21,12 +21,12 @@ https://doi.org/10.1186/s12864-018-5370-x
 
 import click
 import pandas as pd
-
-from gene_benchmark.task_retrieval import (
+from task_retrieval import (
     read_table,
     report_task_single_col,
     verify_source_of_data,
 )
+
 from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = (
