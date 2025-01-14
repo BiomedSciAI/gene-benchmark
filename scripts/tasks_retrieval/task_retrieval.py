@@ -71,7 +71,7 @@ def sanitize_folder_name(filepath: str) -> str:
         warnings.warn(
             f"Task folder has been sanitized\n \
             requested path: {filepath} \n \
-            sanitized path: {filepath_after_sanitization}"
+            sanitized path: {filepath_after_sanitization} \
                       to {filepath_after_sanitization}"
         )
         return filepath_after_sanitization
