@@ -7,8 +7,8 @@ import pandas as pd
 import requests
 import torch
 
-GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/pytorch_model.bin?download=true"
-TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/geneformer/token_dictionary.pkl?download=true"
+GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/ec19834345a43617abfd51669c7c3cc7e0aecaba/pytorch_model.bin?download=true"
+TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/ec19834345a43617abfd51669c7c3cc7e0aecaba/geneformer/token_dictionary.pkl?download=true"
 
 
 def download_file_from_url(url, file_name, dir_path, chunk_size=8192):
