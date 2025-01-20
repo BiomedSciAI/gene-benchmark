@@ -377,7 +377,7 @@ class PreComputedEncoder(SingleEncoder):
                 summary_dict["missing_entities"] = ",".join(
                     [str(v) for v in self.missing_entities]
                 )
-            summary_dict["num_of_missing_entities"] = len(self.missing_entities)
+            summary_dict["num_missing_entities"] = len(self.missing_entities)
             summary_dict["allow_missing"] = self.allow_missing
             summary_dict["randomize_missing"] = self.randomize_missing
         return summary_dict

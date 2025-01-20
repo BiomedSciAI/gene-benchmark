@@ -32,16 +32,14 @@ doi: 10.1016/j.cell.2018.01.029. Review.
 
 import click
 
-from gene_benchmark.task_retrieval import (
+from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrieval.task_retrieval import (
     read_table,
     report_task_single_col,
     verify_source_of_data,
 )
-from gene_benchmark.tasks import dump_task_definitions
 
-DATA_URL = (
-    "http://humantfs2.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
-)
+DATA_URL = "http://humantfs.ccbr.utoronto.ca/download/v_1.01/DatabaseExtract_v_1.01.csv"
 ENTITIES_COL = "HGNC symbol"
 
 

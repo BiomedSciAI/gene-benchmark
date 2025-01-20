@@ -3,32 +3,11 @@ from pathlib import Path
 
 import click
 import pandas as pd
-import requests
 import yaml
 from sklearn.feature_extraction.text import CountVectorizer
 
 from gene_benchmark.descriptor import NCBIDescriptor
-
-GENE_SYMBOL_URL = "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json"
-
-
-def get_symbol_list(url: str = GENE_SYMBOL_URL):
-    """
-    Get gene symbol list, default from : "https://g-a8b222.dd271.03c0.data.globus.org/pub/databases/genenames/hgnc/json/hgnc_complete_set.json".
-
-    Args:
-    ----
-        url (str): the url
-
-    Returns:
-    -------
-        A list og gene names [str]
-
-    """
-    with requests.get(url) as response:
-        response.raise_for_status()
-        reactome_res = response.json()
-    return [v["symbol"] for v in reactome_res["response"]["docs"]]
+from scripts.tasks_retrieval.task_retrieval import GENE_SYMBOL_URL, get_symbol_list
 
 
 def get_descriptions(gene_symbols: list):

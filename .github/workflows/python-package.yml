@@ -24,10 +24,10 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install packagge
+    - name: Install package
       run: |
         python -m pip install --upgrade pip pytest pytest-cov
-        python -m pip install -e .
+        python -m pip install -e .[task_scripts]
 
     - name: Create tasks needed for testing
       run: |
@@ -37,6 +37,7 @@ jobs:
           python scripts/tasks_retrieval/HPA_tasks_creation.py --allow-downloads True
           python scripts/tasks_retrieval/humantfs_task_creation.py --allow-downloads True
           python scripts/tasks_retrieval/Reactome_tasks_creation.py  --allow-downloads True
+          python scripts/tasks_retrieval/uniprot_keyword_tasks_creation.py  --allow-downloads True
 
     - name: Test with pytest
       run: |

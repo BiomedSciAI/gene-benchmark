@@ -1,15 +1,16 @@
 import click
 import pandas as pd
 
-from gene_benchmark.task_retrieval import (
+from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrieval.task_retrieval import (
     check_data_type,
     create_single_label_task,
     load_yaml_file,
     print_numerical_task_report,
     report_task_single_col,
+    sanitize_folder_name,
     tag_list_to_multi_label,
 )
-from gene_benchmark.tasks import dump_task_definitions
 
 COLUMN_TO_CLEAR_SEMICOLON = "Cell line expression cluster"
 DATA_URL = "https://v23.proteinatlas.org/download/proteinatlas.tsv.zip"
@@ -25,7 +26,7 @@ def format_hpa_columns(data, clear_semicolon=None):
         filter(lambda x: "Pathology prognostics" in x, data.columns)
     )
     data[pathology_columns] = data[pathology_columns].replace(
-        r"\s*\(\d+\.?\d*e?-?\d*\)", "", regex=True
+        r"\s*\(\d+\.?\d*e[+-]?\d*\)", "", regex=True
     )
     if not clear_semicolon is None and COLUMN_TO_CLEAR_SEMICOLON in data.columns:
         data[clear_semicolon] = (
@@ -43,7 +44,8 @@ def create_tasks(data, main_task_directory, verbose=False):
             current_col_data[current_col_data.index.str.contains("ENSG")].index
         )
         data_type = check_data_type(current_col_data)
-        task_name = col.replace("/", "|")
+        col = col.replace("/", "")
+        task_name = sanitize_folder_name(col)
         if data_type == "multi_class":
             entities, outcomes = tag_list_to_multi_label(current_col_data)
             if verbose:

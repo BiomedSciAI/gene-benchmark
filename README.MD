@@ -1,211 +1,136 @@
-# gene-benchmark
+# Gene Benchmark
 
-A benchmark for gene embeddings from pretrained models.
+A package to benchmark pre-trained models on downstream gene-related tasks.
 
-The package includes three main sections:
+The package adopts a framework that allows comparison of models using multiple input types by focusing on the learned embeddings the model provides for each entity. This allows comparing models trained on text, proteins, transcriptomics, or any other modality.
 
-1. Descriptions - Retrieval of textual descriptions from pre existing files or database.
-2. Encode  the textual data
-3. Tasks - Evaluation of the efficacy of these encodings in downstream tasks.
+To learn more about the benchmark, check out the preprint "Does your model understand genes? A benchmark of gene properties for biological and text models" at <https://arxiv.org/abs/2412.04075> .
 
-## Description
+The repository is divided into the following sections:
 
-Retrieval of textual descriptions from pre existing files or NCBI. Currently, the package can extract description for a single entity type (for example, gene symbols ..) or for multiple entity types (for example, gene symbols and disease...)
+* [gene_benchmark](./gene_benchmark/): The package itself, containing the scripts for extracting textual descriptions from NCBI, encoding textual descriptions and evaluation of model performance.
 
-### Single entity type descriptions
+* [notebooks](./notebooks/): Notebooks for creating the results figures and package usage examples.
 
-Currently, the descriptions can be retrieved from the NCBI database and from a pre existing CSV with the text descriptions.
+* [scripts](./scripts/): Scripts for description extraction, encoding, task creation and execution.
 
-1. ```NCBIDescriptor```:
-    Creates descriptions for gene symbol based on data from the NCBI. The descriptions are build as follows:
-    "Gene symbol {symbol} full name {name} with the summary {summary}.
-    The user can also decide if he would like partial descriptions (missing gene name or summary), if not, None will be returned for that gene.
-2. ```CSVDescriptions```:
-    Retrieves any entity description (gene, disease...) from a CSV file. The csv file needs to include a column with the entity names (default is 'id').
+* [tasks](./tasks/): The default directory that will be populated with all the tasks after running the task creation script.
 
-### Multi entity type descriptions
+In depth explanation on each of the packages components can be found in the `gene_benchmark` directory.
 
-```MultiEntityTypeDescriptor```: This class needs a ```description_dict``` with the keys as the entity type and the value the wanted Single entity type descriptions class.
+## Environment
 
-### Generating descriptions
+Using a virtual environment for all commands in this guide is strongly recommended.
+The package works with `conda`, `uv` and vanilla `venv` environments.
 
-After creating an instance of your desired class, use the method '''describe''' to generate the descriptions. For all classes, input a pandas series or dataframe with the entity names and set '''allow_missing''' to True if you don't mind to have missing entity descriptions, or to false if you would like the extraction the stop if some entities are missing.
-The result will be the corresponding dataframe/series with the descriptions replacing the entities imputed.
+```sh
+# create a conda enviornment "gene_benchmark" with Python version 3.11
+conda create -n gene_benchmark python=3.11
 
-### Summary
-
-All methods have a summary attribute that will print a short summary of the description retrieval, it includes:
-
-- If partial description were allowed
-- If missing entities were allowed
-- Number of missing entities
-- List of missing entities
-
-### Examples
-
-#### extraction of single entity type descriptions from NCBI
-
-```python
-descriptor = NCBIDescriptor(allow_partial=False)
-descriptions = descriptor.describe(
-            pd.DataFrame(
-                columns=["symbol"], index=[1, 2, 3], data=["BRCA1", "FOXP2", "BRCA1"]
-            )
-        )
+# activate the enviornment before installing new packages
+conda activate gene_benchmark
 ```
 
-#### extraction of single entity type descriptions from a CSV
+## Installation
 
-```python
-descriptor = CSVDescriptions(csv_file_path=csv_path, index_col="id")
-descriptions = descriptor.describe(
-            pd.Series(["BRCA1", "FOXP2", "NOTAGENENAME", "PLAC4"]), allow_missing=True
-            )
+The package is not yet available on pypi. It can be installed directly from GitHub
+The following command will install the repository as a Python package, and also attempt to install dependencies specified in the setup.py file or the pyproject.toml.
+
+```sh
+# Note that the command does not clone the repository.
+pip install "git+https://github.com/BiomedSciAI/gene-benchmark.git"
 ```
 
-#### extraction of multi entity types descriptions
+or the repo can be cloned and installed manually.
 
-```python
-description_dict = {
-            "symbol": NCBIDescriptor(allow_partial=False),
-            "disease": CSVDescriptions(csv_file_path=csv_path, index_col="id"),
-        }
-descriptor = MultiEntityTypeDescriptor(description_dict=description_dict)
-descriptions = descriptor.describe(
-            pd.DataFrame(
-                columns=["symbol", "disease", "symbol"],
-                data=[("BRCA1", "cancer", "FOXP2"), ("PLAC4", "als", "IAMNOTAGENE")],
-            )
-        )
+```sh
+git clone https://github.com/BiomedSciAI/gene-benchmark.git
+# Change directory to the root of the cloned repository
+cd gene-benchmark
+
+# install from the local directory
+pip install -e .
 ```
 
-## Encoding
+## Usage
 
-### PreComputedEncoder
+To evaluate your model on the tasks a few basic steps need to be done:
 
-This class enable to work with dataframe that contain index for the encoded elements (usually symbols) and the encoding themselves as the columns.
-The following is a way to load the Gene2Vec csv of encoding as an encoder:
+### Set up
 
-```python
-enc = PreComputedEncoder(encoder_model_name: "/path/to/gene2vec.csv")
+1. Create the tasks: This repo does not contain gene task data. Instead, we provide scripts to download and populate the tasks from diverse sources. To download the files containing the tasks, run the following commands in your terminal from the root directory. Note that each task dataset has its own license, which is separate from the license of this package.
+
+```sh
+python scripts/tasks_retrieval/gene2gene_task_creation.py --allow-downloads True
+python scripts/tasks_retrieval/Genecorpus_tasks_creation.py --allow-downloads True
+python scripts/tasks_retrieval/HLA_task_creation.py --allow-downloads True
+python scripts/tasks_retrieval/HPA_tasks_creation.py --allow-downloads True
+python scripts/tasks_retrieval/humantfs_task_creation.py --allow-downloads True
+python scripts/tasks_retrieval/Reactome_tasks_creation.py  --allow-downloads True
+python scripts/tasks_retrieval/uniprot_keyword_tasks_creation.py  --allow-downloads True
 ```
 
-The precomputed encoder actually maps specific strings to specific encoding. Hence it is limited in it's encoding scope and usually will work with gene symbols or disease id's .
+Now your [tasks](./tasks/) directory should be populated with subdirectories with the tasks names. Each subdirectory holds two .csv files, one with the gene symbols (`entities.csv`) and one with the labels (`outcomes.csv`). The shape of these csv files will be determined based on the task type. For example, for the multi class tasks, the outcomes will be a 2d matrix.
 
-### SentenceTransformerEncoder
+2. Create your task yaml: The script for running the tasks can receive either the task names themselves or a .yaml file containing the list of task names you wish to run. If you choose to create a .yaml file with the task names, create a separate file for each task type. For example for the binary tasks:
 
-In addition we enable encoding using the HuggingFace sentence encoders [see](https://huggingface.co/sentence-transformers)
-
-```python
-enc = SentenceTransformerEncoder(encoder_model_name: "BAAI/bge-large-en-v1.5")
+```sh
+- TF vs non-TF
+- long vs short range TF
+- bivalent vs non-methylated
+- Lys4-only-methylated vs non-methylated
+- dosage sensitive vs insensitive TF
+- Gene2Gene
+- CCD Transcript
+- CCD Protein
+- N1 network
+- N1 targets
+- HLA class I vs class II
 ```
 
-Note that the models are downloaded and might need a lot of storage space.
-You can make use of the environment variable `SENTENCE_TRANSFORMERS_HOME` to control where the models are downloaded to.
-SentenceTransformerEncoder can encode any string and is not limited and is very useful when coupled with descriptions.
+The example task configs can be found in [task_configs](./scripts/task_configs/)
 
-## Tasks
+3. Create the model config file: This config file will hold the path to your models embeddings and the name you wish to use for your model. The structure of the file:
 
-The package has the means to create, load and manipulate task definitions.
-The list of available tasks is provided [here]( gene-benchmark/gene_benchmark/tasks/task_descriptions.xlsx)
-For each task we provided python scripts that enable to create the tasks either from a local file
-or to download them directly.
-
-### Creation of the tasks
-
-
-#### How to load tasks definitions
-
-One can easily load the task definitions using the `load_task_definition` method and the task name (according to the list above)
-
-```python
-from gene_benchmark.tasks import TaskDefinition
-tasks = load_task_definition(task_name='TF vs non-TF')
-```
-
-If the user wants to use a task but wishes to exclude certain symbols he can easily do so using `exclude_symbols`
-
-```python
-tasks = load_task_definition(task_name='TF vs non-TF',exclude_symbols=['BRCA1'])
-```
-
-If the user wants to use one of the labels of a multi-label task, it can be done by:
-```python
-tasks = load_task_definition(task_name='Pathways',sub_task='Diseases')
-```
-
-Or the user wishes to load a multi-label task but only the labels with a certain label rate
-```python
-tasks = load_task_definition(task_name='Pathways',multi_label_th=0.1)
-```
-
-When running tasks that are not inside the main task repository, they can be loaded from a different data dir by setting 'data_dir' to the alternative task directory.
-
-#### How to run a task
-
-The package includes a pipeline object that given a task, prompt maker and encoder can preform the entire task from load to predictions.
-
-```python
-from gene_benchmark.tasks import EntitiesTask
-from gene_benchmark.descriptor import NCBIDescriptor
-from gene_benchmark.encoder import SentenceTransformerEncoder,
-
-
-task = EntitiesTask(task_name='TF vs non-TF', encoder=SentenceTransformerEncoder(), prompt_builder=NCBIPromptsMaker())
-_ = task.run()
-print(task.summary())
-```
-
-### The `run_task.py` script
-
-The script enables the performance of multiple tasks on multiple models.
-Each model is defined by an encoder and an prompt maker. The script uses yaml files to define each model. The model_name field is used for the report
-
-#### NCBI gene descriptions
-
-Following is a model that uses NCBI prompts and hugginface sentence encoder.
-
-```yaml
-descriptor:
-  class_name: NCBIPromptsMaker
-encoder:
-  class_name: SentenceTransformerEncoder
-  class_args:
-    encoder: "sentence-transformers/all-mpnet-base-v2"
-model_name: mpnet
-```
-
-#### gene symbols
-
-We can create a model that encodes only the symbols:
-
-```yaml
-encoder:
-  class_name: SentenceTransformerEncoder
-  class_args:
-    encoder: "sentence-transformers/all-mpnet-base-v2"
-```
-
-#### Gene2Vec precomputed encoders
-
-We also support Gene2Vec using the precomputed encoders:
-
-```yaml
+```sh
 encoder:
   class_name: PreComputedEncoder
   class_args:
-    encoder_model_name: "/path/to/gene2vec.csv"
+    encoder_model_name: "/path/to/your/embeddings/my_models_embeddings.csv"
+model_name: my_model_name
 ```
 
-#### scGPT precomputed encoding
+Note that the script expects the embedding csv file to have a 'symbol' column with the gene symbols, this will be set as the index.
 
-See [scGPT](https://github.com/bowang-lab/scGPT)
-The encoding was extracted from the pre-trained "blood" model.
-Weights file can be generated using the [extraction script](scripts/data_retrieval/scGPT_embedding_extractor.py)
+### Run task
 
-```yaml
-encoder:
-  class_name: PreComputedEncoder
-  class_args:
-    encoder_model_name: "/path/to/ScGPT_weights/blood_model_embedding.csv"
+Each task type (binary, categorical or multi-label) will be run separately.
+For example, for running the binary tasks the command is:
+
+```sh
+python scripts/run_task.py -t /path/to/task/yaml/base_binary.yaml -tf /tasks -m /path/to/model/config/model.yaml --output-file-name binary_tasks.csv
+```
+
+Note:
+
+* For the other task types (categorical, regression or multi labe) you need to add `-s category/regression/multi`
+
+* When you are running the tasks on multiple models, and you would like them to be comparable, you can add a `excluded-symbols-file` input. This needs to be a path to a yaml file containing a list of gene names you would like to exclude.
+
+* To avoid getting errors during the cross validation due to class imbalance, you can add a threshold for the classes `"-th"` (for multi label)or `"-cth"` (for categorical)
+
+## Citation
+
+If you make use of this package, please cite our manuscript:
+
+```tex
+@misc{kantor2024doesmodelunderstandgenes,
+      title={Does your model understand genes? A benchmark of gene properties for biological and text models},
+      author={Yoav Kan-Tor and Michael Morris Danziger and Eden Zohar and Matan Ninio and Yishai Shimoni},
+      year={2024},
+      eprint={2412.04075},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2412.04075},
+}
 ```

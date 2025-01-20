@@ -37,12 +37,12 @@ doi: 10.1093/nar/gkac888. PMID: 36243972; PMCID: PMC9825485.
 
 import click
 
-from gene_benchmark.task_retrieval import (
+from gene_benchmark.tasks import dump_task_definitions
+from scripts.tasks_retrieval.task_retrieval import (
     read_table,
     report_task_single_col,
     verify_source_of_data,
 )
-from gene_benchmark.tasks import dump_task_definitions
 
 DATA_URL = "https://www.genenames.org/cgi-bin/genegroup/download?id=588&type=node"
 
