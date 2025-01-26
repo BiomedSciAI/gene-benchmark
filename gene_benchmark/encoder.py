@@ -3,12 +3,29 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 import torch
-import tqdm
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 from transformers.models.bert.configuration_bert import BertConfig
 
 from .descriptor import add_prefix_to_dict
+
+
+def _break_string(string: str, max_length: int) -> list[str]:
+    """
+    given a string returns a list where each element is at most max_length
+        where the last element can be shorter.
+
+    Args:
+    ----
+        string (str): the string to break into list
+        max_length (int): the maximal size of each piece
+
+    Returns:
+    -------
+        list[str]: list with the string where each element is at most max_length and the last is shorter
+
+    """
+    return [string[i : i + max_length] for i in range(0, len(string), max_length)]
 
 
 class randNone_dict(dict):
@@ -427,6 +444,7 @@ class BERTEncoder(SingleEncoder):
         encoder_model_name: str = None,
         tokenizer_name: str = None,
         trust_remote_code: bool = False,
+        maximal_context_size: int = None,
     ):
         config = BertConfig.from_pretrained(encoder_model_name)
         self.encoder = AutoModel.from_pretrained(
@@ -439,19 +457,68 @@ class BERTEncoder(SingleEncoder):
         self.encoder_model_name = encoder_model_name
         self.tokenizer_name = tokenizer_name
         self.trust_remote_code = trust_remote_code
+        self.maximal_context_size = maximal_context_size
         super().__init__(encoder_model_name)
 
     def _get_encoding(self, entities, **kwargs):
-        vec_list = []
-        for ent in tqdm.tqdm(entities):
-            inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
-            hidden_states = self.encoder(inputs)[0]
-            vec_list.append(torch.mean(hidden_states[0], dim=0).detach())
-        return np.array(vec_list)
+        if self.maximal_context_size is None:
+            return list(map(self._encode_single_context, entities))
+        else:
+            return list(map(self._encode_multiple_contexts, entities))
+
+    def _encode_multiple_contexts(self, ent: str):
+        """
+        Breaks the string into context size chunks and returns the mean encoding.
+
+        Args:
+        ----
+            ent (str): The string to be broken into contexts and encoded
+
+        Returns:
+        -------
+            mp.array: The mean encoding
+
+        """
+        return np.mean(
+            self._get_encoding_list(_break_string(ent, self.maximal_context_size)),
+            axis=0,
+        )
+
+    def _get_encoding_list(self, ent_list: list[str]) -> list:
+        """
+        Applies the _encode_single_context on the ent_list.
+
+        Args:
+        ----
+            ent_list (list[str]): list of elements to encode
+
+        Returns:
+        -------
+            list: list of encodings
+
+        """
+        return list(map(self._encode_single_context, ent_list))
+
+    def _encode_single_context(self, ent: str):
+        """
+        Encodes a single string.
+
+        Args:
+        ----
+            ent (str): A string to encodes
+
+        Returns:
+        -------
+            np.array: An encoding of the string
+
+        .
+
+        """
+        inputs = self.tokenizer(ent, return_tensors="pt")["input_ids"]
+        hidden_states = self.encoder(inputs)[0]
+        return torch.mean(hidden_states[0], dim=0).detach()
 
     def summary(self):
         summary_dict = super().summary()
-        if self.num_of_missing:
-            summary_dict["num_of_missing"] = self.num_of_missing
         summary_dict["tokenizer_name"] = self.tokenizer_name
         return summary_dict

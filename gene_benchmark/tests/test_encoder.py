@@ -12,6 +12,7 @@ from gene_benchmark.encoder import (
     MultiEntityEncoder,
     PreComputedEncoder,
     SentenceTransformerEncoder,
+    _break_string,
     create_random_embedding_matrix,
     randNone_dict,
 )
@@ -426,3 +427,42 @@ class TestEncoder(unittest.TestCase):
         encoded = encoder.encode(pd.Series([gene1, gene2]))
         assert encoded.shape[0] == 2
         assert encoded.sum()[0] > 0.00001
+
+    def test_break_string(self):
+        breaked = _break_string("AAAABBBBCCCC", 4)
+        res = ["AAAA", "BBBB", "CCCC"]
+        assert len(breaked) == 3
+        assert all(vb == vt for vb, vt in zip(breaked, res))
+
+    def test_break_string_short(self):
+        breaked = _break_string("AAAABBBBCCC", 4)
+        res = ["AAAA", "BBBB", "CCC"]
+        assert len(breaked) == 3
+        assert all(vb == vt for vb, vt in zip(breaked, res))
+
+    @unittest.skip(
+        "Following fails when gpu is activated but there is a issue with  triton flash attention "
+    )
+    def test_TransformerEncoder_max_context_each(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = BERTEncoder(
+            model, model, trust_remote_code=True, maximal_context_size=6
+        )
+        gene2 = ["GATTAC", "GGGTTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"]
+        by_list = encoder._get_encoding_list(gene2)
+        for gene_bp, enc in zip(gene2, by_list):
+            indiv = encoder._encode_single_context(gene_bp)
+            assert all(indiv == enc)
+
+    @unittest.skip(
+        "Following fails when gpu is activated but there is a issue with  triton flash attention "
+    )
+    def test_TransformerEncoder_max_context_mean_describe(self):
+        model = "zhihan1996/DNABERT-2-117M"
+        encoder = BERTEncoder(
+            model, model, trust_remote_code=True, maximal_context_size=6
+        )
+        gene = "".join(["GATTAC", "GGGTTT", "AAACCC", "GGGAAA", "GATGAT", "GTC"])
+        by_list = encoder._get_encoding_list(_break_string(gene, 6))
+        total = encoder.encode(pd.Series(gene))
+        assert all(np.mean(by_list, axis=0) == total[0])
