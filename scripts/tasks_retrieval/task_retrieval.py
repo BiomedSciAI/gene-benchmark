@@ -161,7 +161,7 @@ def load_pickle_from_url(url):
         print(f"Error loading the pickle file: {e}")
 
 
-def get_symbols(gene_targetId_list):
+def get_symbols(gene_targetId_list, dropna=True):
     """
         given s list of gene id's (names Like ENSG00000006468) this method
         uses the MyGenInfo package to retrieve the gene symbol (name like PLAC4).
@@ -181,7 +181,10 @@ def get_symbols(gene_targetId_list):
     )
     gene_metadata_df = get_id_to_symbol_df(list_of_gene_metadata)
     symblist = [gene_metadata_df.loc[x, "symbol"] for x in gene_targetId_list]
-    return [v for v in symblist if not pd.isna(v)]
+    if dropna:
+        return [v for v in symblist if not pd.isna(v)]
+    else:
+        return symblist
 
 
 def get_id_to_symbol_df(list_of_gene_metadata):

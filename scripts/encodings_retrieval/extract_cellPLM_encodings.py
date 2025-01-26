@@ -8,11 +8,17 @@
 
 
 import json
+
+# from ..tasks_retrieval.task_retrieval import get_symbols
+import sys
 from pathlib import Path
 
 import click
 import pandas as pd
 import torch
+
+sys.path.append("./scripts/tasks_retrieval")
+from task_retrieval import get_symbols
 
 
 def load_files(input_file_dir):
@@ -92,13 +98,21 @@ def save_encodings(encodings, output_file_dir):
     help="output files path",
     default="./encodings",
 )
-def main(input_file_dir, output_file_dir):
+@click.option(
+    "--as-symbols",
+    type=click.STRING,
+    help="Returns a CSV with gene symbols as identifiers (missing ensembles will be removed)",
+    default=True,
+)
+def main(input_file_dir, output_file_dir, as_symbols):
 
     model_configs, model = load_files(input_file_dir)
     embedding_layer = find_gene_embedding_layer(model_configs, model)
     encodings = model["model_state_dict"][embedding_layer].numpy()
     encodings_df = pd.DataFrame(encodings, index=model_configs["gene_list"])
-
+    if as_symbols:
+        encodings_df.index = get_symbols(encodings_df.index, dropna=False)
+        encodings_df = encodings_df.loc[~encodings_df.index.isna(), :]
     save_encodings(encodings_df, output_file_dir)
 
 
