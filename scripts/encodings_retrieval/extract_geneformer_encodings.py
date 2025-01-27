@@ -107,7 +107,13 @@ def save_encodings(
     help="If true sets the index to be symbols when duplicates are merged via mean values",
     default=True,
 )
-def main(allow_downloads, input_file_dir, output_file_dir, as_symbols):
+@click.option(
+    "--mean-duplicates",
+    type=click.STRING,
+    help="If true sets the index to be symbols when duplicates are merged via mean values",
+    default=True,
+)
+def main(allow_downloads, input_file_dir, output_file_dir, as_symbols, mean_duplicates):
 
     if allow_downloads:
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -132,6 +138,8 @@ def main(allow_downloads, input_file_dir, output_file_dir, as_symbols):
     if as_symbols:
         encodings.index = get_symbols(encodings.index, dropna=False)
         encodings = encodings.loc[~encodings.index.isna(), :]
+    if mean_duplicates:
+        encodings = encodings.groupby(level=0).mean()
     save_encodings(encodings, output_file_dir)
 
 

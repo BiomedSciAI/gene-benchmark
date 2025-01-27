@@ -2,7 +2,6 @@ import pickle
 import warnings
 from io import BytesIO
 from itertools import chain
-from pathlib import Path
 from urllib.parse import urlparse
 
 import mygene
@@ -13,9 +12,7 @@ from pathvalidate import is_valid_filepath, sanitize_filepath
 from yaml import safe_load
 
 
-def verify_source_of_data(
-    input_file: str | None, url: str | None, allow_downloads: bool = False
-) -> str:
+def verify_source_of_data(input_file, url, allow_downloads: bool = False) -> str:
     """
     verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
     the DATA_URL.
@@ -77,9 +74,7 @@ def sanitize_folder_name(filepath: str) -> str:
         return filepath_after_sanitization
 
 
-def report_task_single_col(
-    outcome_series: pd.Series, task_dir_name: str | Path, task_name: str
-):
+def report_task_single_col(outcome_series: pd.Series, task_dir_name, task_name: str):
     """
     Reporting the class distribution for a single class prediction task.
 
@@ -95,7 +90,7 @@ def report_task_single_col(
 
 
 def read_table(
-    input_file: str | Path,
+    input_file,
     strip_values: bool = True,
     filter_na: bool = False,
     **kwargs,
