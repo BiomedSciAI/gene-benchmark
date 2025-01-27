@@ -3,7 +3,6 @@ import warnings
 from io import BytesIO
 from itertools import chain
 from pathlib import Path
-from typing import Union
 from urllib.parse import urlparse
 
 import mygene
@@ -15,7 +14,7 @@ from yaml import safe_load
 
 
 def verify_source_of_data(
-    input_file: Union(str, None), url: str | None, allow_downloads: bool = False
+    input_file: str | None, url: str | None, allow_downloads: bool = False
 ) -> str:
     """
     verify or provide source for data.  Data may be a local file, or if --allow-downloads is on, it will be
@@ -79,7 +78,7 @@ def sanitize_folder_name(filepath: str) -> str:
 
 
 def report_task_single_col(
-    outcome_series: pd.Series, task_dir_name: Union(str, Path), task_name: str
+    outcome_series: pd.Series, task_dir_name: str | Path, task_name: str
 ):
     """
     Reporting the class distribution for a single class prediction task.
@@ -96,7 +95,7 @@ def report_task_single_col(
 
 
 def read_table(
-    input_file: Union(str, Path),
+    input_file: str | Path,
     strip_values: bool = True,
     filter_na: bool = False,
     **kwargs,
