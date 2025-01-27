@@ -1,4 +1,5 @@
 import pickle
+import sys
 import tempfile
 from pathlib import Path
 
@@ -6,6 +7,9 @@ import click
 import pandas as pd
 import requests
 import torch
+
+sys.path.append("./scripts/tasks_retrieval")
+from task_retrieval import get_symbols
 
 GENEFORMER_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/pytorch_model.bin?download=true"
 TOKEN_DICT_URL = "https://huggingface.co/ctheodoris/Geneformer/resolve/main/geneformer/token_dictionary.pkl?download=true"
@@ -97,7 +101,13 @@ def save_encodings(
     help="output files path",
     default="./encodings",
 )
-def main(allow_downloads, input_file_dir, output_file_dir):
+@click.option(
+    "--as-symbols",
+    type=click.STRING,
+    help="If true sets the index to be symbols when duplicates are merged via mean values",
+    default=True,
+)
+def main(allow_downloads, input_file_dir, output_file_dir, as_symbols):
 
     if allow_downloads:
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -119,6 +129,9 @@ def main(allow_downloads, input_file_dir, output_file_dir):
             token_dict = pickle.load(file)
 
     encodings = add_tokens_as_index(encodings, token_dict)
+    if as_symbols:
+        encodings.index = get_symbols(encodings.index, dropna=False)
+        encodings = encodings.loc[~encodings.index.isna(), :]
     save_encodings(encodings, output_file_dir)
 
 
