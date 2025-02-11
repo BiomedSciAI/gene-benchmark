@@ -125,5 +125,3 @@ Following that we could run the script
 ```
 python scripts/encodings_retrieval/extract_cellPLM_encodings.py  --output-file-dir $EMBEDDING_FOLDER --input-file-dir $MODEL_FILES_FOLDER
 ```
-
-pip install pandas click mygene pathvalidate requests pyyaml
