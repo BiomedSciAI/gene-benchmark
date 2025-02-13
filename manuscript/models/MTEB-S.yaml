@@ -1,0 +1,7 @@
+descriptor:
+  class_name: NCBIDescriptor
+encoder:
+  class_name: SentenceTransformerEncoder
+  class_args:
+    encoder_model_name: "mixedbread-ai/mxbai-embed-large-v1"
+model_name: MTEB-S
