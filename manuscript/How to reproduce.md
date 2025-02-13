@@ -4,7 +4,7 @@ In the paper ["Does your model understand genes? A benchmark of gene properties 
 
 
 ## How to reproduce the performance tables
-The following lines scripts will retrieve the embeddings per model, preform the tasks and save the results.
+The following lines scripts will retrieve the embeddings per model, preform the tasks and save the results. Note that for Gene2Vec, Geneformer, ScGPT blood\human, CellPLM, DNABERT2, ESM2 and Bag of Words models we need to extract the embeddings and set the files to their locations (How to extract the embeddings follows).
 
 ```
 
@@ -72,7 +72,9 @@ python scripts/encodings_retrieval/extract_cellPLM_encodings.py  --output-file-d
  ### ESM2
  for instruction on how to extract ESM2 embeddings see this [link](https://github.com/snap-stanford/SATURN/blob/main/protein_embeddings/Generate%20Protein%20Embeddings.ipynb)
 
-### advanced, How to extract text models embeddings encodings
+
+## Advanced topics
+### How to extract text models embeddings encodings
 To improve run time of the text models we can also save their embeddings using the following script.
 
 ```
@@ -81,7 +83,7 @@ python scripts/extract_gene_text_embeddings.py -e /manuscript/models/MTEB-S.yaml
 Once extracted the user can define a precomputed encoder using those files as well.
 
 
-### advanced, How to extract base pair descriptions
+### How to extract base pair descriptions
 Downloading the base pair descriptions can be time consuming to optimize this process the user can download the description using the following script
 
 ```
