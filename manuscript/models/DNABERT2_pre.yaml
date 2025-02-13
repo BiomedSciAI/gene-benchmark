@@ -1,0 +1,14 @@
+descriptor:
+  class_name: CSVDescriptions
+  class_args:
+    csv_file_path: "embeddings/descriptions_overlap_list_dnabert2.csv"
+    index_col: 0
+    description_col: "0"
+encoder:
+  class_name: BERTEncoder
+  class_args:
+    encoder_model_name: "zhihan1996/DNABERT-2-117M"
+    trust_remote_code: True
+    tokenizer_name: "zhihan1996/DNABERT-2-117M"
+    maximal_context_size: 8192
+model_name: DNABERT2
