@@ -1,82 +1,25 @@
 # How to reproduce the manuscript
-In the paper ["Does your model understand genes? A benchmark of gene properties for biological and text models"](https://arxiv.org/html/2412.04075) we applied the benchmark to a set of models from various sources. In this guide we will present how to duplicate the results.
-The reproduction is computationally intensive so we separated it into several steps:
-1. Embedding extraction
-2. Running the tasks
-3. Creation of figures
 
-For simplicity in the paper we used a fix set of genes available [gene list](overlap_list.yaml). The scripts in this guide used the following environment variables:
-```
-export MODEL_FILES_FOLDER=""
-export EMBEDDING_FOLDER=""
-```
-
-## Step 1: Embedding extraction
-### How to extract textual embeddings
-Here we extract the embeddings of the textual representations of the model (
-    we recommend creating a fresh gene-benchmark virtual environment with `numpy 1.26`. We noted that with some `hugginface` models (specifically `DNABert2`) `numpy 1.26` works better). Following is the yaml file defining the model:
-```
-descriptor:
-  class_name: NCBIDescriptor
-encoder:
-  class_name: SentenceTransformerEncoder
-  class_args:
-    encoder_model_name: "Salesforce/SFR-Embedding-Mistral"
-model_name: MTEB-L
-```
-
-This is the file content for the MTEB-L ([`Salesforce/SFR-Embedding-Mistral`](https://huggingface.co/Salesforce/SFR-Embedding-Mistral)) In the manuscript we applied a similar file for two mode encoders: MTEB-S ([`mixedbread-ai/mxbai-embed-large-v1`](https://huggingface.co/mixedbread-ai/mxbai-embed-large-v1)) and MPNet ([`sentence-transformers/all-mpnet-base-v2`](https://huggingface.co/sentence-transformers/all-mpnet-base-v2)).
-After setting the Once the files are in place the following script should be applied:
-
-```
-python scripts/extract_gene_text_embeddings.py -e $MODEL_FILES_FOLDER/encoding_extraction/MTEB-S.yaml -e $MODEL_FILES_FOLDER/encoding_extraction/MTEB-L.yaml -e $MODEL_FILES_FOLDER/encoding_extraction/MPNet.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
-```
+In the paper ["Does your model understand genes? A benchmark of gene properties for biological and text models"](https://arxiv.org/html/2412.04075).
 
 
-### How to extract base pair embeddings
-Here we decided to separate the process into two parts because the textual extraction might a long time. so we are going to use the following model to save the descriptions in another .csv file:
+## How to reproduce the performance tables
+The following lines scripts will retrieve the embeddings per model, preform the tasks and save the results.
 
 ```
-descriptor:
-  class_name: BasePairDescriptor
-encoder:
-  class_name: BERTEncoder
-  class_args:
-    encoder_model_name: "zhihan1996/DNABERT-2-117M"
-    trust_remote_code: True
-    tokenizer_name: "zhihan1996/DNABERT-2-117M"
-model_name: DNABERT2
+
+python scripts/run_task.py -t scripts/task_configs/binary_tasks.yaml --output-file-name ~/reports/binary.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml
+
+python scripts/run_task.py -t scripts/task_configs/categorical_tasks.yaml --output-file-name ~/reports/multi.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml -s category
+
+python scripts/run_task.py -t scripts/task_configs/multi_label_tasks.yaml --output-file-name ~/reports/multi.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml  -s multi --multi-label-th 0.05
+
+python scripts/run_task.py -t scripts/task_configs/derived_binary_tasks.yaml --output-file-name ~/reports/multi.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml
 ```
 
-The extraction can use the following script:
+## How to save the embeddings
+The biological models and the bag of words models require to save the embeddings as a `.csv` files before hand this can easily done by the following:
 
-```
-python scripts/extract_gene_text_descriptions.py -e $MODEL_FILES_FOLDER/encoding_extraction/dnabert2.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml --allow-missing False
-```
-
-Now we will define an encoder model that uses the pre computed descriptions put the following in a DNABERT2_pre.yaml file:
-
-```
-descriptor:
-  class_name: CSVDescriptions
-  class_args:
-    csv_file_path: "____/embeddings/descriptions_overlap_list_dnabert2.csv"
-    index_col: 0
-    description_col: "0"
-encoder:
-  class_name: BERTEncoder
-  class_args:
-    encoder_model_name: "zhihan1996/DNABERT-2-117M"
-    trust_remote_code: True
-    tokenizer_name: "zhihan1996/DNABERT-2-117M"
-    maximal_context_size: 8192
-model_name: DNABERT2
-```
-
-and now we can use the same script as before:
-```
-python scripts/extract_gene_text_embeddings.py -e $MODEL_FILES_FOLDER/encoding_extraction/DNABERT2_pre.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
-```
 
 ### How to extract Bag of words encodings
 The following script creates embedding for the gene symbols using the descriptions from NCBI and the bag of words algorithm.
@@ -124,4 +67,28 @@ Following that we could run the script
 
 ```
 python scripts/encodings_retrieval/extract_cellPLM_encodings.py  --output-file-dir $EMBEDDING_FOLDER --input-file-dir $MODEL_FILES_FOLDER
+```
+
+ ### ESM2
+ for instruction on how to extract ESM2 embeddings see this [link](https://github.com/snap-stanford/SATURN/blob/main/protein_embeddings/Generate%20Protein%20Embeddings.ipynb)
+
+### advanced, How to extract text models embeddings encodings
+To improve run time of the text models we can also save their embeddings using the following script.
+
+```
+python scripts/extract_gene_text_embeddings.py -e /manuscript/models/MTEB-S.yaml -e /manuscript/models/MTEB-L.yaml -e /manuscript/models/MPNet.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
+```
+Once extracted the user can define a precomputed encoder using those files as well.
+
+
+### advanced, How to extract base pair descriptions
+Downloading the base pair descriptions can be time consuming to optimize this process the user can download the description using the following script
+
+```
+python scripts/extract_gene_text_descriptions.py -e /manuscript/models/nabert2.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml --allow-missing False
+```
+Following the user can use the downloaded descriptions for the DNABert model see the
+Now we will define an encoder model that uses the pre computed descriptions put the following in a 'DNABERT2_pre.yaml' model file. This can be used to save the embeddings as well just like the text models.
+```
+python scripts/extract_gene_text_embeddings.py -e /manuscript/models/DANBERT2_pre.yaml  --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
 ```
