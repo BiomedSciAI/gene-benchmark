@@ -97,9 +97,6 @@ def main(
 
     downloaded_df = read_table(input_file=input_path_or_url)
     symbols = downloaded_df[ENTITIES_COL]
-    downloaded_df[outcome_column] = downloaded_df[outcome_column].apply(
-        lambda x: "Transcription factor" if x == "Yes" else "Not a transcription factor"
-    )
     outcomes = downloaded_df[outcome_column]
     dump_task_definitions(symbols, outcomes, main_task_directory, task_name)
 
