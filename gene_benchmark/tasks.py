@@ -1,7 +1,6 @@
 from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
-from os import environ
 from pathlib import Path
 
 import numpy as np
@@ -395,7 +394,7 @@ def filter_low_threshold_features(outcomes, threshold=0.1):
 
 def load_task_definition(
     task_name: str,
-    tasks_folder: str | Path = None,
+    tasks_folder: str | Path,
     exclude_symbols=None,
     include_symbols=None,
     frac=1,
@@ -426,12 +425,6 @@ def load_task_definition(
         task_definition: a task definition data class
 
     """
-    if tasks_folder is None:
-        tasks_folder = Path(environ["GENE_BENCHMARK_TASKS_FOLDER"])
-        if tasks_folder is None:
-            raise OSError(
-                "Environment variable GENE_BENCHMARK_TASKS_FOLDER is not set and a tasks_folder is not given "
-            )
     _check_valid_task_name(task_name, tasks_folder=tasks_folder)
     entities, outcomes = _load_task_definitions_from_folder(
         task_name, tasks_folder, exclude_symbols, include_symbols
