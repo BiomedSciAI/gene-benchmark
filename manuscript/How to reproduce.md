@@ -27,7 +27,7 @@ python scripts/run_task.py -t scripts/task_configs/multi_label_tasks.yaml --outp
 python scripts/run_task.py -t scripts/task_configs/derived_binary_tasks.yaml --output-file-name ~/reports/multi.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml
 ```
 
-## How to save the embeddings
+## Saving gene embeddings to use in `gene-benchmark`
 The biological models and the bag of words models require to save the embeddings as a `.csv` files before hand this can easily done by the following:
 
 
