@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import chain
@@ -414,7 +415,7 @@ def load_task_definition(
         exclude_symbols (list[str]|None): a list of symbols to exclude
         include_symbols (list[str]|None): a list of symbols to include
         frac (float): load a unique fraction of the rows in the task, default 1
-        tasks_folder(str|None): Use an alternative task repository (default repository if None)
+        tasks_folder(str|None): Use an alternative task repository (if None it uses the GENE_BENCHMARK_TASKS_FOLDER system variable)
         sub_task(str|None): Use only one of the columns of the outcome as a binary task
         multi_label_th (float): Threshold for multi label tasks outcomes
         cat_label_th (float): Threshold for categorical tasks outcomes, only categories that have rates above the threshold will be included.
@@ -425,6 +426,8 @@ def load_task_definition(
         task_definition: a task definition data class
 
     """
+    if tasks_folder is None:
+        tasks_folder = Path(os.environ["GENE_BENCHMARK_TASKS_FOLDER"])
     _check_valid_task_name(task_name, tasks_folder=tasks_folder)
     entities, outcomes = _load_task_definitions_from_folder(
         task_name, tasks_folder, exclude_symbols, include_symbols
