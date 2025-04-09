@@ -97,7 +97,7 @@ Once extracted the user can define a precomputed encoder using those files as we
 Downloading the base pair descriptions can be time consuming to optimize this process the user can download the description using the following script
 
 ```
-python scripts/extract_gene_text_descriptions.py -e /manuscript/models/nabert2.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml --allow-missing False
+python scripts/extract_gene_text_descriptions.py -e /manuscript/models/dnabert2.yaml --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml --allow-missing False
 ```
 Following the user can use the downloaded descriptions for the DNABert model see the
 Now we will define an encoder model that uses the pre computed descriptions put the following in a 'DNABERT2_pre.yaml' model file. This can be used to save the embeddings as well just like the text models.
