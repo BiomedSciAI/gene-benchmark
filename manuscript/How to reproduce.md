@@ -1,6 +1,6 @@
 # How to reproduce the manuscript
 
-In the paper ["Does your model understand genes? A benchmark of gene properties for biological and text models"](https://arxiv.org/html/2412.04075).
+Below are instructions to reproduce the benchmark as executed in the paper ["Does your model understand genes? A benchmark of gene properties for biological and text models"](https://arxiv.org/html/2412.04075).
 
 
 ## How to reproduce the performance tables
