@@ -1,7 +1,17 @@
 # How to reproduce the manuscript
 
 Below are instructions to reproduce the benchmark as executed in the paper ["Does your model understand genes? A benchmark of gene properties for biological and text models"](https://arxiv.org/html/2412.04075).
+## Benchmark flow
 
+1. Obtain embeddings from a biological or text model. 
+2. Run tasks on embeddings based on the tasks defined in [tasks], which can be populated by running the task download scripts [here]()
+
+These steps can be run all at once, for the text models, though it is recommended to save the embeddings to csv in a separate step because they may be slow.
+
+The main script for reproducing the benchmark is `run_task`. It expects a yaml with fields `descriptor` and `decoder`. The `descriptor` translates the gene symbol into a gene description based on its DNA sequence for the DNA models, or NCBI description for the text models.
+The Encoder describes the foundation model to use for encoding the gene symbols to vectors.
+
+Note: the embeddings that are extracted from the biological models are not part of the same flow. They must be prepared in advance, as described below in the section [Embeddings](#Embeddings). Once prepared, they can be accessed as `PreComputedEncoder` encoders as shown in the sample files.
 
 ## How to reproduce the performance tables
 The following lines scripts will retrieve the embeddings per model, preform the tasks and save the results. Note that for Gene2Vec, Geneformer, ScGPT blood\human, CellPLM, DNABERT2, ESM2 and Bag of Words models we need to extract the embeddings and set the files to their locations (How to extract the embeddings follows).
