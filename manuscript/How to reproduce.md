@@ -102,5 +102,5 @@ python scripts/extract_gene_text_descriptions.py -e /manuscript/models/dnabert2.
 Following the user can use the downloaded descriptions for the DNABert model see the
 Now we will define an encoder model that uses the pre computed descriptions put the following in a 'DNABERT2_pre.yaml' model file. This can be used to save the embeddings as well just like the text models.
 ```
-python scripts/extract_gene_text_embeddings.py -e /manuscript/models/DANBERT2_pre.yaml  --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
+python scripts/extract_gene_text_embeddings.py -e /manuscript/models/DNABERT2_pre.yaml  --output-folder $EMBEDDING_FOLDER --gene-symbols $MODEL_FILES_FOLDER/overlap_list.yaml
 ```
