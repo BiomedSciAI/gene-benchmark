@@ -43,9 +43,11 @@ class TestEncoder(unittest.TestCase):
         index_of_missing = (
             [unique_entities.index(None)] if None in unique_entities else []
         )
-        unique_encodings_before_random = encoder.encoder.encode(unique_entities)
-        unique_encodings_with_random = encoder._get_encoding(
-            unique_entities, randomize_missing=True
+        unique_encodings_before_random = encoder.encode(
+            pd.Series(unique_entities), randomize_missing=False
+        )
+        unique_encodings_with_random = encoder.encode(
+            pd.Series(unique_entities), randomize_missing=True
         )
         for missing_ind in index_of_missing:
             assert not np.array_equal(
