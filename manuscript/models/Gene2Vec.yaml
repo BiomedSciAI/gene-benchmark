@@ -1,0 +1,5 @@
+encoder:
+  class_name: PreComputedEncoder
+  class_args:
+    encoder_model_name: "/Gene2Vec/encodings.csv"
+model_name: Gene2Vec

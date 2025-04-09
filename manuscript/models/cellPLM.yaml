@@ -1,0 +1,5 @@
+encoder:
+  class_name: PreComputedEncoder
+  class_args:
+    encoder_model_name: "/cellPLM/encodings.csv"
+model_name: cellPLM
