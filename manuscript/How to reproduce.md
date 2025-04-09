@@ -17,7 +17,7 @@ Note: the embeddings that are extracted from the biological models are not part 
 The following lines scripts will retrieve the embeddings per model, preform the tasks and save the results. Note that for Gene2Vec, Geneformer, ScGPT blood\human, CellPLM, DNABERT2, ESM2 and Bag of Words models we need to extract the embeddings and set the files to their locations (How to extract the embeddings follows).
 
 ```
-
+# run the binary tasks
 python scripts/run_task.py -t scripts/task_configs/binary_tasks.yaml --output-file-name ~/reports/binary.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml
 
 python scripts/run_task.py -t scripts/task_configs/categorical_tasks.yaml --output-file-name ~/reports/multi.csv -i /manuscript/gene_set.yaml -m ~/manuscript/models/BGW.yaml -m /manuscript/models/cellPLM_pre.yaml -m /manuscript/models/esm2_pre.yaml -m /manuscript/models/Gene2Vec_pre.yaml -m /manuscript/models/Geneformer.yaml -m /manuscript/models/MPNet.yaml -m /manuscript/models/MTEB-L.yaml -m /manuscript/models/MTEB-S.yaml -m /manuscript/models/ScGPT-H.yaml -m /manuscript/models/ScGPT-B.yaml -s category
