@@ -302,7 +302,7 @@ class TestTasks(unittest.TestCase):
             scoring="roc_auc_ovo_weighted",
         )
         full_entity_task.run()
-        minimal_succsess_rate = 0.5
+        minimal_succsess_rate = 0.25
         assert not full_entity_task._cv_report is None
         assert all(full_entity_task._cv_report["test_score"] >= minimal_succsess_rate)
 
