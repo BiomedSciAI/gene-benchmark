@@ -31,7 +31,7 @@ python scripts/run_task.py -t scripts/task_configs/derived_binary_tasks.yaml --o
 The biological models and the bag of words models require to save the embeddings as a `.csv` files before hand this can easily done by the following:
 
 
-### How to extract Bag of words encodings
+### Bag of words
 The following script creates embedding for the gene symbols using the descriptions from NCBI and the bag of words algorithm.
 
 ```
