@@ -1,0 +1,7 @@
+descriptor:
+  class_name: NCBIDescriptor
+encoder:
+  class_name: SentenceTransformerEncoder
+  class_args:
+    encoder_model_name: "ibm-granite/granite-3.1-2b-base"
+model_name: Granite2b
