@@ -395,7 +395,7 @@ def filter_low_threshold_features(outcomes, threshold=0.1):
 
 def load_task_definition(
     task_name: str,
-    tasks_folder: str | Path,
+    tasks_folder: str | Path = None,
     exclude_symbols=None,
     include_symbols=None,
     frac=1,
@@ -467,7 +467,7 @@ def load_task_definition(
 
 def _load_task_definitions_from_folder(
     task_name: str,
-    tasks_folder: str,
+    tasks_folder: str = None,
     exclude_symbols: list[str] | None = None,
     include_symbols: list[str] | None = None,
     keep_default_na=False,
@@ -480,7 +480,7 @@ def _load_task_definitions_from_folder(
     Args:
     ----
         task_name (str): the task name
-        tasks_folder (str): the folder in which the text description is located
+        tasks_folder (str): the folder in which the text description is located is None it will use GENE_BENCHMARK_TASKS_FOLDER
         exclude_symbols (list[str]|None): a list of symbols to exclude
         include_symbols (list[str]|None): a list of symbols to include
         keep_default_na(bool): "NA" in the input file is translated into NaN by pd,
@@ -493,6 +493,8 @@ def _load_task_definitions_from_folder(
         outcomes(pd.Series): outcomes for the task
 
     """
+    if tasks_folder is None:
+        tasks_folder = Path(os.environ["GENE_BENCHMARK_TASKS_FOLDER"])
     entities_file = get_lowest_entities_file(tasks_folder, task_name)
     if not entities_file:
         raise ValueError(
